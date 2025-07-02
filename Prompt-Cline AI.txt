@@ -3,3 +3,24 @@ Berdasarkan product requirement document yang ada pada file prd.md, tolong inisi
 iya, dan juga tolong perhatikan juga folder ui-design yang merupakan rancangan awal dari UI yang akan di pakai di aplikasi, dan ui-design.md untuk brief descriptionnya.
 
 pastikan kamu membuat memory bank sesuai dengan requirement yang diberikan
+=======================================
+Oke, saya melihat sementara cukup oke untuk semua dokumen yang kamu sudah buat, sekarang tolong buatkan dulu UI untuk halaman login register biasa, sampai bisa login register dulu aja.
+
+UInya dulu aja ya, dan juga sesuaikan berdasarkan UI yang ada di folder ui-design yang sudah saya siapkan
+
+sampai halaman home kosong juga gapapa
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
