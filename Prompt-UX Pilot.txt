@@ -1,0 +1,280 @@
+1. Login Page
+Tujuan: Autentikasi user/admin.
+
+Komponen:
+
+Input email + password
+
+Login sebagai admin / customer
+Bisa alternatif login dengan google juga ya
+Ada bagian forgot password juga
+
+Oke sekarang dengan color yang sama seperti yang tadi kamu buat,
+
+------------------------------
+
+1. Landing Page / Homepage
+Tujuan: Menyambut user dengan promosi, highlight produk, dan akses cepat ke kategori.
+
+Komponen:
+
+Banner promo
+
+Produk unggulan / terbaru
+
+Kategori produk
+
+Tombol login / register
+
+Tombol akses ke Live Auction (jika sedang berlangsung)
+
+bikin halaman ini
+
+------------------------------
+
+Oke sekarang coba tolong bikin page ini
+
+8. Wishlist Page
+Tujuan: Melihat dan mengelola wishlist.
+
+Komponen:
+
+List produk yang disimpan
+
+Tombol pindahkan ke cart / hapus
+
+------------------------------
+
+2. Register Page
+Tujuan: Registrasi customer baru.
+
+Komponen:
+
+Nama lengkap, email, password, konfirmasi password
+Bisa alternatif register dengan google juga ya
+
+------------------------------
+1.b Forgot Password,
+Tujuan: reset password pengguna by email, lalu sistem akan mengirimkan email
+berisi link reset password ke email pengguna.
+
+Pake warna biru yang tadi kamu bikin buat login page aja
+------------------------------
+1.c Reset Password,
+Reset password pengguna: berdasarkan link yang sudah di klik pengguna yang telah
+dikirimkan oleh sistem ke email mereka
+
+oke sekarang bikin halaman ini, warnanya juga samain aja
+------------------------------
+2. Product Listing Page
+Tujuan: Menampilkan daftar produk berdasarkan kategori.
+
+Komponen:
+
+Filter (kategori, harga, rating, stok, brand)
+
+Sortir (termurah, terbaru, terpopuler)
+
+List card produk (gambar, nama, harga, tombol lihat detail)
+
+Interaksi:
+
+Tambahkan ke cart
+
+Tambahkan ke wishlist
+
+Navigasi ke halaman detail produk
+
+Dengan color yang sama, buatkan page ini
+------------------------------
+Oke sekarang dengan color yang sama seperti yang tadi kamu buat,
+
+1. Landing Page / Homepage
+Tujuan: Menyambut user dengan promosi, highlight produk, dan akses cepat ke kategori.
+
+Komponen:
+
+Banner promo
+
+Produk unggulan / terbaru
+
+Kategori produk
+
+Tombol login / register
+
+Tombol akses ke Live Auction (jika sedang berlangsung)
+
+bikin halaman ini
+------------------------------
+5. Checkout Page
+Tujuan: Menyelesaikan pembelian.
+
+Komponen:
+
+Ringkasan produk
+
+Input alamat pengiriman
+
+Opsi pengiriman (instant, reguler, dll)
+
+Tombol “Place Order”
+
+------------------------------
+4. Shopping Cart Page
+Tujuan: Menampilkan produk yang akan dibeli.
+
+Komponen:
+
+Daftar item dalam cart (nama, kuantitas, harga)
+
+Total harga
+
+Tombol “Checkout”
+
+Opsi edit kuantitas / hapus item
+
+Oke sekarang insert ini deh, tolong adakan juga opsi with coupon
+
+------------------------------
+Tujuan: Melihat riwayat dan status pesanan.
+
+Komponen:
+
+Tabel order: no. pesanan, tanggal, status, total
+
+Status order: Pending → Diproses → Dikirim → Selesai
+
+Tombol “Lihat Detail”
+
+Dengan mempertahankan kekonsistenan style kamu sebelumnya, tolong create page ini
+------------------------------
+7. Order Detail Page
+Tujuan: Menampilkan detail satu pesanan.
+
+Komponen:
+
+Produk yang dibeli
+
+Status pengiriman (stepper UI)
+
+Info pembayaran
+
+Tombol “Tulis Review” (jika selesai)
+
+tolong create halaman ini sekarang berdasarkan page sebelumnya
+------------------------------
+10. User Profile Page
+Tujuan: Mengelola informasi user.
+
+Komponen:
+
+Data pribadi (nama, nomor telepon, email, alamat)
+
+Ubah password
+
+Logout
+------------------------------
+9. Live Auction Page
+Tujuan: Menampilkan lelang yang sedang berlangsung.
+
+Komponen:
+
+Countdown timer
+
+Gambar dan detail produk yang dilelang
+
+Bid history (realtime)
+
+Form untuk submit penawaran
+
+Harga saat ini
+
+Pemenang terakhir (jika sudah selesai)
+
+Interaksi:
+
+Submit bid
+
+Lihat histori penawaran
+------------------------------
+Tolong buatkan master list of auctionnya, soalnya kamu belom bikin sebelumnya
+------------------------------
+Coba tolong buatkan halaman riwayat bids
+------------------------------
+Coba dong tolong tampilkan UI kalau misalnya orangnya menang bid, dan disuruh bayar.
+------------------------------
+Oke sekarang, tolong buatkan halaman dashboard untuk admin
+
+🧑‍🏭 ADMIN PAGES
+1. Admin Dashboard
+Tujuan: Ringkasan sistem dan statistik.
+
+Komponen:
+
+Total order, produk, stok rendah, lelang aktif
+
+Grafik penjualan
+
+Link ke manajemen produk, lelang, pesanan
+------------------------------
+2. Product Management Page
+Tujuan: CRUD produk.
+
+Komponen:
+
+Tabel produk: nama, kategori, harga, stok, status
+
+Tombol tambah / edit / hapus produk
+
+Upload gambar (Firebase)
+
+Filter dan pencarian
+------------------------------
+3. Product Form Page (Create/Edit)
+Tujuan: Form untuk tambah/edit produk.
+
+Komponen:
+
+Nama produk, kategori, spesifikasi, harga
+
+Upload gambar
+
+Checkbox: tersedia untuk lelang atau tidak
+------------------------------
+5. Auction Management Page
+Tujuan: Kelola sesi lelang.
+
+Komponen:
+
+Tabel lelang: produk, status, waktu mulai/selesai
+
+Tombol mulai lelang, tutup lelang
+
+Akses ke histori bidding
+------------------------------
+Tolong buatkan halaman create new auction
+------------------------------
+6. Order Management Page
+Tujuan: Admin dapat Pantau dan proses order.
+
+Komponen:
+
+Tabel order: customer, status, total, tanggal
+
+Detail order
+
+Tombol ubah status (diproses, dikirim)
+------------------------------
+Boleh tolong buatkan saya halaman untuk order detailnya
+------------------------------
+Bisa ga tolong tambahin screen untuk category management
+------------------------------
+Add screen untuk tambah kategori baru
+------------------------------
+Tolong generate halaman notification untuk admin
+------------------------------
+Tolong generate halaman untuk chat dengan customer yang ada, nanti tolong tambahkan tombol close chat juga jika sudah selesai atau marked as done
+------------------------------
+Tolong generate halaman notification
+------------------------------
+Tolong tambahkan halaman chat customer service, yang sederhana aja

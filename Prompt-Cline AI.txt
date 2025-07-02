@@ -1,0 +1,5 @@
+Berdasarkan product requirement document yang ada pada file prd.md, tolong inisialisasikan memory bank pada folder memory-bank
+=======================================
+iya, dan juga tolong perhatikan juga folder ui-design yang merupakan rancangan awal dari UI yang akan di pakai di aplikasi, dan ui-design.md untuk brief descriptionnya.
+
+pastikan kamu membuat memory bank sesuai dengan requirement yang diberikan

@@ -1,0 +1,26 @@
+Tolong bantu saya buatkan product requirement document untuk sebuah system "Autowarehouse" untuk toko computer (VGA, CPU, Ram) bahkan aksesoris computer seperti mouse keyboard, monitor, dll.
+
+Untuk actornya harusnya ada beberapa.
+- Customer yang membeli barang di toko
+- Admin toko yang senantiasa memproses pesanan, mengupdate stok barang, melakukan managemen barang, mengeksekusi lelang, dll.
+
+Jadi, di sini keperluannya adalah 
+- toko bisa menjual barang pada customer lewat website mereka, 
+- toko bisa lelang secara live dengan timer
+- admin bisa mengupdate stok dan produk yang ada di toko
+- Customer bisa memasukkan barang ke wishlist dan juga cart
+- Customer bisa checkout dari shopping cart
+- customer bisa Input review untuk produk yang mereka beli
+- Customer bisa lihat proses barang yang mereka checkout,
+- Dan keperluan lain yang mungkin kamu kepikiran
+
+Nah teknologinya, tolong pakai
+Java Quarkus, PostgreSQL, Kafka kalau ada event, frontend pakai web vue js aja, kalo vuejs pake typescript bisa ga ya, lalu tolong pastikan semua codingan juga rapih sesuai dengan kaidah yang terbaik.
+Untuk live auction saya gatau sih teknologinya pake apa, coba sekalian tolong bantu pikirin.
+Storagenya kayanya pake firebase bisa deh.
+
+Tolong buat dalam bentuk markdown .md
+
+------------------------------------------------------------------------------------------------------------------
+
+Oke berdasarkan requirement yang ada, tolong dong elaborasikan semua halaman yang kira" diperlukan di sistem tersebut
