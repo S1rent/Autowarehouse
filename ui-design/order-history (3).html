@@ -1,0 +1,315 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#1E40AF",
+        "accent": "#F59E0B",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444",
+        "light": "#F8FAFC",
+        "dark": "#1E293B"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header id="header" class="bg-white shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-shopping-bag text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-xl font-semibold text-gray-900">OrderTrack</h1>
+                </div>
+                
+                <nav class="hidden md:flex space-x-6">
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Dashboard</span>
+                    <span class="text-primary font-medium cursor-pointer">Riwayat Pesanan</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Profil</span>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Profile" class="w-8 h-8 rounded-full">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumb -->
+        <section id="breadcrumb" class="mb-6">
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <span class="hover:text-primary cursor-pointer">Riwayat Pesanan</span>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span class="text-gray-900 font-medium">Detail Pesanan #ORD-2024-001</span>
+            </div>
+        </section>
+
+        <!-- Order Header -->
+        <section id="order-header" class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Pesanan #ORD-2024-001</h1>
+                    <div class="flex items-center space-x-4 text-sm text-gray-600">
+                        <span>Tanggal: 15 Januari 2024</span>
+                        <span>•</span>
+                        <span>Total: Rp 750.000</span>
+                    </div>
+                </div>
+                <div class="mt-4 lg:mt-0">
+                    <span class="inline-flex px-4 py-2 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                        <i class="fa-solid fa-check-circle mr-2"></i>
+                        Selesai
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Order Items -->
+                <section id="order-items" class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-900">Produk yang Dibeli</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div id="item-1" class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg">
+                            <img class="w-16 h-16 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/9e580a234a-193908f119d1c6c24a8e.png" alt="modern laptop computer on desk">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-900">Laptop Gaming ASUS ROG</h3>
+                                <p class="text-sm text-gray-600">Intel Core i7, RTX 3060, 16GB RAM</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-sm text-gray-600">Qty: 1</span>
+                                    <span class="font-semibold text-gray-900">Rp 450.000</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="item-2" class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg">
+                            <img class="w-16 h-16 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/1b3142ccff-acca053c6711ef9f1a2d.png" alt="wireless mouse gaming accessories">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-900">Mouse Gaming Logitech G Pro</h3>
+                                <p class="text-sm text-gray-600">Wireless, RGB, 25K DPI</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-sm text-gray-600">Qty: 1</span>
+                                    <span class="font-semibold text-gray-900">Rp 150.000</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="item-3" class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg">
+                            <img class="w-16 h-16 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/1fc68bb28a-bb88ff05e30f1d92af43.png" alt="mechanical keyboard gaming setup">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-900">Keyboard Mechanical RGB</h3>
+                                <p class="text-sm text-gray-600">Cherry MX Blue, Backlit</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-sm text-gray-600">Qty: 1</span>
+                                    <span class="font-semibold text-gray-900">Rp 150.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shipping Status -->
+                <section id="shipping-status" class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-900">Status Pengiriman</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="relative">
+                            <div class="absolute left-4 top-8 bottom-0 w-0.5 bg-gray-200"></div>
+                            
+                            <div id="status-1" class="relative flex items-start space-x-4 pb-8">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">Pesanan Dikonfirmasi</h3>
+                                    <p class="text-sm text-gray-600">15 Jan 2024, 10:30</p>
+                                    <p class="text-sm text-gray-500 mt-1">Pesanan Anda telah dikonfirmasi dan akan segera diproses</p>
+                                </div>
+                            </div>
+                            
+                            <div id="status-2" class="relative flex items-start space-x-4 pb-8">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">Sedang Diproses</h3>
+                                    <p class="text-sm text-gray-600">15 Jan 2024, 14:20</p>
+                                    <p class="text-sm text-gray-500 mt-1">Pesanan sedang disiapkan oleh penjual</p>
+                                </div>
+                            </div>
+                            
+                            <div id="status-3" class="relative flex items-start space-x-4 pb-8">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">Dikirim</h3>
+                                    <p class="text-sm text-gray-600">16 Jan 2024, 09:15</p>
+                                    <p class="text-sm text-gray-500 mt-1">Paket telah dikirim dengan kurir JNE - Resi: JNE12345678</p>
+                                </div>
+                            </div>
+                            
+                            <div id="status-4" class="relative flex items-start space-x-4">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-white text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">Pesanan Selesai</h3>
+                                    <p class="text-sm text-gray-600">18 Jan 2024, 16:45</p>
+                                    <p class="text-sm text-gray-500 mt-1">Paket telah diterima oleh penerima</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Payment Info -->
+                <section id="payment-info" class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-900">Informasi Pembayaran</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="font-medium">Rp 750.000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Ongkos Kirim</span>
+                            <span class="font-medium">Rp 15.000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Diskon</span>
+                            <span class="font-medium text-green-600">-Rp 15.000</span>
+                        </div>
+                        <hr class="border-gray-200">
+                        <div class="flex justify-between items-center text-lg font-semibold">
+                            <span>Total</span>
+                            <span>Rp 750.000</span>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center space-x-2 text-sm">
+                                <i class="fa-solid fa-credit-card text-gray-400"></i>
+                                <span class="text-gray-600">Metode: Transfer Bank BCA</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm mt-1">
+                                <i class="fa-solid fa-check-circle text-green-500"></i>
+                                <span class="text-green-600">Pembayaran Berhasil</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shipping Info -->
+                <section id="shipping-info" class="bg-white rounded-xl shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-900">Alamat Pengiriman</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-2">
+                            <p class="font-medium text-gray-900">Sarah Johnson</p>
+                            <p class="text-gray-600">+62 812-3456-7890</p>
+                            <p class="text-gray-600">
+                                Jl. Sudirman No. 123, RT/RW 01/02<br>
+                                Kelurahan Menteng, Jakarta Pusat<br>
+                                DKI Jakarta 10310
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <div class="flex items-center space-x-2 text-sm">
+                                <i class="fa-solid fa-truck text-gray-400"></i>
+                                <span class="text-gray-600">JNE Regular (2-3 hari)</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm mt-1">
+                                <i class="fa-solid fa-barcode text-gray-400"></i>
+                                <span class="text-gray-600">Resi: JNE12345678</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Actions -->
+                <section id="order-actions" class="bg-white rounded-xl shadow-sm">
+                    <div class="p-6 space-y-3">
+                        <button class="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-secondary transition-colors">
+                            <i class="fa-solid fa-star mr-2"></i>
+                            Tulis Review
+                        </button>
+                        <button class="w-full border border-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            <i class="fa-solid fa-download mr-2"></i>
+                            Download Invoice
+                        </button>
+                        <button class="w-full border border-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            <i class="fa-solid fa-headset mr-2"></i>
+                            Hubungi Customer Service
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-white border-t border-gray-100 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-600">
+                <p>© 2024 OrderTrack. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+</body></html>

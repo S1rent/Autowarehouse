@@ -1,0 +1,393 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#1e40af",
+        "secondary": "#3b82f6",
+        "accent": "#f59e0b",
+        "dark": "#1f2937",
+        "light": "#f8fafc"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-light">
+
+<!-- Header -->
+<header id="header" class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-8">
+                <div class="text-2xl font-bold text-primary">TechMart</div>
+                <nav class="hidden md:flex space-x-6">
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Beranda</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Produk</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Auction</span>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex relative">
+                    <input type="text" placeholder="Cari hardware, RAM, aksesoris..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-80">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="relative">
+                    <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
+                    <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </button>
+                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Masuk</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Banner -->
+<section id="hero-banner" class="bg-gradient-to-br from-primary via-secondary to-indigo-600 text-white h-[600px] flex items-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-block bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    🔥 Flash Sale Hari Ini
+                </div>
+                <h1 class="text-6xl font-bold mb-6 leading-tight">Hardware &amp; Elektronik Terlengkap</h1>
+                <p class="text-xl mb-8 opacity-90 leading-relaxed">Dapatkan komponen PC, RAM, SSD, dan aksesoris gaming terbaik dengan harga terjangkau. Plus fitur auction untuk deals eksklusif!</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="bg-accent text-white px-8 py-4 rounded-xl font-semibold hover:bg-yellow-600 transition-all transform hover:scale-105 shadow-lg">
+                        <i class="fa-solid fa-shopping-bag mr-2"></i>Belanja Sekarang
+                    </button>
+                    <button class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all">
+                        <i class="fa-solid fa-gavel mr-2"></i>Cek Auction
+                    </button>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+                    <img class="w-full h-80 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/695dd0fa53-753e5ef2063f2496d9c8.png" alt="modern gaming setup with RGB lighting, multiple monitors, mechanical keyboard, gaming mouse, professional photography">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section id="stats" class="py-12 bg-white border-b">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-3xl font-bold text-primary mb-2">50K+</div>
+                <div class="text-gray-600">Produk Tersedia</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-primary mb-2">24/7</div>
+                <div class="text-gray-600">Customer Support</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-primary mb-2">1 Hari</div>
+                <div class="text-gray-600">Pengiriman Express</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-primary mb-2">100%</div>
+                <div class="text-gray-600">Garansi Resmi</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Kategori Produk -->
+<section id="categories" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-dark mb-4">Kategori Produk</h2>
+            <p class="text-xl text-gray-600">Temukan komponen dan aksesoris PC terbaik</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-microchip text-2xl text-primary group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">Processor</h3>
+                <p class="text-sm text-gray-500 text-center">Intel &amp; AMD</p>
+            </div>
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-memory text-2xl text-green-600 group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">RAM</h3>
+                <p class="text-sm text-gray-500 text-center">DDR4 &amp; DDR5</p>
+            </div>
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-purple-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-hard-drive text-2xl text-purple-600 group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">Storage</h3>
+                <p class="text-sm text-gray-500 text-center">SSD &amp; HDD</p>
+            </div>
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-red-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-display text-2xl text-red-600 group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">VGA Card</h3>
+                <p class="text-sm text-gray-500 text-center">NVIDIA &amp; AMD</p>
+            </div>
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-yellow-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-keyboard text-2xl text-yellow-600 group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">Gaming</h3>
+                <p class="text-sm text-gray-500 text-center">Keyboard &amp; Mouse</p>
+            </div>
+            <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+                <div class="bg-indigo-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+                    <i class="fa-solid fa-headset text-2xl text-indigo-600 group-hover:text-white"></i>
+                </div>
+                <h3 class="font-bold text-dark text-center mb-2">Audio</h3>
+                <p class="text-sm text-gray-500 text-center">Headset &amp; Speaker</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Flash Sale -->
+<section id="flash-sale" class="py-16 bg-gradient-to-r from-red-500 to-pink-500 text-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold mb-4">⚡ Flash Sale</h2>
+            <p class="text-xl opacity-90">Penawaran terbatas, buruan sebelum kehabisan!</p>
+            <div class="inline-flex items-center space-x-4 mt-4 bg-white/20 rounded-xl px-6 py-3">
+                <span class="text-lg font-semibold">Berakhir dalam:</span>
+                <div class="flex space-x-2">
+                    <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">23</div>
+                    <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">45</div>
+                    <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">12</div>
+                </div>
+            </div>
+        </div>
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0aba0c7dd1-1bf4d75a148ba27cac20.png" alt="high-end gaming RAM memory sticks with RGB lighting, product photography">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-40%</div>
+                </div>
+                <h3 class="font-bold mb-2">Corsair Vengeance RGB Pro 32GB</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 2.400.000</span>
+                    <span class="text-gray-500 line-through">Rp 4.000.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/2f7d1972e1-4253eeb78bbefa50ead2.png" alt="modern SSD solid state drive, sleek design, product photography">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-35%</div>
+                </div>
+                <h3 class="font-bold mb-2">Samsung 980 PRO SSD 1TB</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 1.950.000</span>
+                    <span class="text-gray-500 line-through">Rp 3.000.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/eedbbf064e-c3614cb3f3190d1ed4e2.png" alt="mechanical gaming keyboard with RGB backlighting, modern design">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-50%</div>
+                </div>
+                <h3 class="font-bold mb-2">Razer BlackWidow V3</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 1.200.000</span>
+                    <span class="text-gray-500 line-through">Rp 2.400.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/03ec82b471-2cb3d237abb158444926.png" alt="modern gaming mouse with RGB lighting, sleek design, product photography">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-30%</div>
+                </div>
+                <h3 class="font-bold mb-2">Logitech G502 Hero</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 1.000.000</span>
+                    <span class="text-gray-500 line-through">Rp 1.500.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/e8a0f017df-ea4ff93312779e019b39.png" alt="modern gaming headset with RGB lighting, sleek design, product photography">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-25%</div>
+                </div>
+                <h3 class="font-bold mb-2">SteelSeries Arctis 7 Pro</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 1.500.000</span>
+                    <span class="text-gray-500 line-through">Rp 2.000.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+            <div class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+                <div class="relative mb-4">
+                    <img class="w-full h-40 object-cover rounded-xl" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0786498dea-b56ac78caa285b6b1d70.png" alt="modern gaming mousepad with RGB lighting, sleek design, product photography">
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">-20%</div>
+                </div>
+                <h3 class="font-bold mb-2">Logitech G290</h3>
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-2xl font-bold text-primary">Rp 500.000</span>
+                    <span class="text-gray-500 line-through">Rp 600.000</span>
+                </div>
+                <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    Beli Sekarang
+                </button>
+            </div>
+        </div>
+        <div class="text-center mt-8">
+            <button class="bg-secondary text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                Lihat Semua Produk
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Cara Kerja -->
+<section id="how-it-works" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-dark mb-4">Cara Kerja</h2>
+            <p class="text-gray-600">Proses lelang yang mudah dan aman</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-user-plus text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-dark mb-2">1. Daftar</h3>
+                <p class="text-gray-600">Buat akun dan verifikasi identitas Anda untuk mulai berpartisipasi</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-search text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-dark mb-2">2. Pilih Produk</h3>
+                <p class="text-gray-600">Jelajahi berbagai kategori dan temukan produk yang Anda inginkan</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-gavel text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-dark mb-2">3. Bid &amp; Menang</h3>
+                <p class="text-gray-600">Ajukan penawaran dan menangkan lelang dengan harga terbaik</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section id="cta" class="py-16 bg-gradient-to-r from-primary to-secondary text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-4">Siap Memulai Lelang?</h2>
+        <p class="text-xl mb-8 opacity-90">Bergabunglah dengan ribuan pengguna yang telah merasakan pengalaman lelang terbaik</p>
+        <div class="flex justify-center space-x-4">
+            <button class="bg-accent text-white px-8 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
+                Daftar Gratis
+            </button>
+            <button class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors">
+                Lihat Live Auction
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer id="footer" class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8">
+            <div>
+                <div class="text-2xl font-bold mb-4">TechMart</div>
+                <p class="text-gray-400 mb-4">Platform lelang online terpercaya dengan sistem keamanan tinggi dan transparansi penuh.</p>
+                <div class="flex space-x-4">
+                    <i class="fa-brands fa-facebook text-xl hover:text-accent cursor-pointer"></i>
+                    <i class="fa-brands fa-twitter text-xl hover:text-accent cursor-pointer"></i>
+                    <i class="fa-brands fa-instagram text-xl hover:text-accent cursor-pointer"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-4">Kategori</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><span class="hover:text-white cursor-pointer">Otomotif</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Properti</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Perhiasan</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Seni &amp; Antik</span></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-4">Bantuan</h3>
+                <ul class="space-y-2 text-gray-400">
+                    <li><span class="hover:text-white cursor-pointer">Cara Lelang</span></li>
+                    <li><span class="hover:text-white cursor-pointer">FAQ</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Kontak</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Syarat &amp; Ketentuan</span></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-4">Kontak</h3>
+                <div class="space-y-2 text-gray-400">
+                    <p><i class="fa-solid fa-phone mr-2"></i>+62 21 1234 5678</p>
+                    <p><i class="fa-solid fa-envelope mr-2"></i>info@auctionhub.id</p>
+                    <p><i class="fa-solid fa-location-dot mr-2"></i>Jakarta, Indonesia</p>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2024 TechMart. Semua hak dilindungi undang-undang.</p>
+        </div>
+    </div>
+</footer>
+
+
+</body></html>

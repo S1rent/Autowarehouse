@@ -1,0 +1,355 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script><script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif']
+            }
+          }
+        }
+      };
+    </script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+        .countdown-digit { 
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+        .bid-animation { animation: pulse 0.5s ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+
+<header id="header" class="bg-white shadow-lg border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-gavel text-2xl text-blue-600"></i>
+                <h1 class="text-xl font-bold text-gray-900">AuctionHub</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Live Auctions</span>
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">My Bids</span>
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Categories</span>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Auction
+                </button>
+                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" class="w-8 h-8 rounded-full">
+            </div>
+        </div>
+    </div>
+</header>
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div id="auction-details" class="lg:col-span-2 space-y-6">
+            <div id="auction-header" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <i class="fas fa-circle animate-pulse mr-1"></i>Live Auction
+                    </span>
+                    <div class="flex items-center space-x-2 text-gray-600">
+                        <i class="fas fa-eye"></i>
+                        <span>847 watching</span>
+                    </div>
+                </div>
+                
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Vintage Rolex Submariner 1965</h1>
+                <p class="text-gray-600 mb-4">Rare collector's piece in excellent condition with original box and papers</p>
+                
+                <div id="countdown-timer" class="flex items-center justify-center space-x-4 mb-6">
+                    <div class="text-center">
+                        <div class="countdown-digit text-white text-2xl font-bold w-16 h-16 rounded-lg flex items-center justify-center">
+                            <span id="hours">02</span>
+                        </div>
+                        <span class="text-sm text-gray-600 mt-1">Hours</span>
+                    </div>
+                    <div class="text-2xl text-gray-400">:</div>
+                    <div class="text-center">
+                        <div class="countdown-digit text-white text-2xl font-bold w-16 h-16 rounded-lg flex items-center justify-center">
+                            <span id="minutes">34</span>
+                        </div>
+                        <span class="text-sm text-gray-600 mt-1">Minutes</span>
+                    </div>
+                    <div class="text-2xl text-gray-400">:</div>
+                    <div class="text-center">
+                        <div class="countdown-digit text-white text-2xl font-bold w-16 h-16 rounded-lg flex items-center justify-center">
+                            <span id="seconds">18</span>
+                        </div>
+                        <span class="text-sm text-gray-600 mt-1">Seconds</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="product-gallery" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="mb-4">
+                    <img class="w-full h-96 object-cover rounded-lg" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/cbbe1b8df9-9630d7b4de2b7029d256.png" alt="vintage rolex submariner 1965 luxury watch close-up detailed product photography">
+                </div>
+                <div class="grid grid-cols-4 gap-3">
+                    <img class="w-full h-20 object-cover rounded-lg cursor-pointer border-2 border-blue-500" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/182ead7807-265ba881552a694c043a.png" alt="rolex watch face detail macro photography">
+                    <img class="w-full h-20 object-cover rounded-lg cursor-pointer hover:border-2 hover:border-blue-300" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/83ec4aa646-944ff9d8ff41d4c81883.png" alt="rolex watch side profile luxury timepiece">
+                    <img class="w-full h-20 object-cover rounded-lg cursor-pointer hover:border-2 hover:border-blue-300" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/e2453c8ba6-1c78109c05e888cb0dc5.png" alt="rolex watch back case serial number detail">
+                    <img class="w-full h-20 object-cover rounded-lg cursor-pointer hover:border-2 hover:border-blue-300" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/9f43440e59-1de0f323f6af271add1f.png" alt="rolex original box and papers documentation">
+                </div>
+            </div>
+
+            <div id="product-description" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Description</h3>
+                <div class="space-y-3 text-gray-600">
+                    <p>This exceptional 1965 Rolex Submariner represents one of the most sought-after vintage timepieces in the world. The watch features the iconic 5513 reference with no-date configuration.</p>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Reference:</span>
+                                <span>5513</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Year:</span>
+                                <span>1965</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Case Size:</span>
+                                <span>40mm</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Condition:</span>
+                                <span>Excellent</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Papers:</span>
+                                <span>Yes</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Box:</span>
+                                <span>Original</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bidding-section" class="space-y-6">
+            <div id="current-bid" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Current Bid</h3>
+                    <div class="text-4xl font-bold text-green-600 mb-2">$18,750</div>
+                    <div class="text-sm text-gray-500">Starting bid: $12,000</div>
+                </div>
+                
+                <div id="bid-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Bid Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" id="bid-amount" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="19000" min="18751">
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Minimum bid: $18,751</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors" onclick="quickBid(19000)">$19,000</button>
+                        <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors" onclick="quickBid(20000)">$20,000</button>
+                        <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium transition-colors" onclick="quickBid(22000)">$22,000</button>
+                    </div>
+                    
+                    <button id="submit-bid" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-gavel mr-2"></i>Place Bid
+                    </button>
+                </div>
+            </div>
+
+            <div id="bid-history" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Bid History</h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" class="w-8 h-8 rounded-full">
+                            <div>
+                                <div class="font-medium text-gray-900">Sarah M.</div>
+                                <div class="text-xs text-gray-500">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-600">$18,750</div>
+                            <div class="text-xs text-green-600">Current Winner</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" class="w-8 h-8 rounded-full">
+                            <div>
+                                <div class="font-medium text-gray-900">Mike R.</div>
+                                <div class="text-xs text-gray-500">5 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="font-semibold text-gray-700">$18,000</div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" class="w-8 h-8 rounded-full">
+                            <div>
+                                <div class="font-medium text-gray-900">John D.</div>
+                                <div class="text-xs text-gray-500">8 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="font-semibold text-gray-700">$17,500</div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" class="w-8 h-8 rounded-full">
+                            <div>
+                                <div class="font-medium text-gray-900">Emma W.</div>
+                                <div class="text-xs text-gray-500">12 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="font-semibold text-gray-700">$16,800</div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-9.jpg" class="w-8 h-8 rounded-full">
+                            <div>
+                                <div class="font-medium text-gray-900">Alex T.</div>
+                                <div class="text-xs text-gray-500">15 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="font-semibold text-gray-700">$15,500</div>
+                    </div>
+                </div>
+                
+                <button class="w-full mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    View Full History
+                </button>
+            </div>
+
+            <div id="auction-info" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Auction Information</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Bids:</span>
+                        <span class="font-medium">47</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Bidders:</span>
+                        <span class="font-medium">23</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Started:</span>
+                        <span class="font-medium">3 days ago</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Seller:</span>
+                        <span class="font-medium text-blue-600">WatchExpert_Pro</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Seller Rating:</span>
+                        <div class="flex items-center">
+                            <div class="flex text-yellow-400 mr-1">
+                                <i class="fas fa-star text-xs"></i>
+                                <i class="fas fa-star text-xs"></i>
+                                <i class="fas fa-star text-xs"></i>
+                                <i class="fas fa-star text-xs"></i>
+                                <i class="fas fa-star text-xs"></i>
+                            </div>
+                            <span class="text-xs text-gray-600">(4.9)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+function quickBid(amount) {
+    document.getElementById('bid-amount').value = amount;
+}
+
+function updateCountdown() {
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+    
+    let hours = parseInt(hoursEl.textContent);
+    let minutes = parseInt(minutesEl.textContent);
+    let seconds = parseInt(secondsEl.textContent);
+    
+    if (seconds > 0) {
+        seconds--;
+    } else {
+        seconds = 59;
+        if (minutes > 0) {
+            minutes--;
+        } else {
+            minutes = 59;
+            if (hours > 0) {
+                hours--;
+            }
+        }
+    }
+    
+    hoursEl.textContent = hours.toString().padStart(2, '0');
+    minutesEl.textContent = minutes.toString().padStart(2, '0');
+    secondsEl.textContent = seconds.toString().padStart(2, '0');
+}
+
+setInterval(updateCountdown, 1000);
+
+document.getElementById('submit-bid').addEventListener('click', function() {
+    const bidAmount = document.getElementById('bid-amount').value;
+    if (bidAmount && parseFloat(bidAmount) >= 18751) {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Placing Bid...';
+        this.disabled = true;
+        
+        setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-check mr-2"></i>Bid Placed!';
+            this.className = 'w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold';
+            
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-gavel mr-2"></i>Place Bid';
+                this.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors';
+                this.disabled = false;
+            }, 2000);
+        }, 1500);
+    }
+});
+</script>
+
+
+</body></html>

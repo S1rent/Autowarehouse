@@ -1,0 +1,292 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script><script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif']
+            }
+          }
+        }
+      };
+    </script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+        .winner-gradient { 
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+        .celebration-animation { 
+            animation: celebration 2s ease-in-out infinite;
+        }
+        @keyframes celebration { 
+            0%, 100% { transform: scale(1) rotate(0deg); } 
+            25% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fbbf24;
+            animation: confetti-fall 3s linear infinite;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+
+<header id="header" class="bg-white shadow-lg border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-gavel text-2xl text-blue-600"></i>
+                <h1 class="text-xl font-bold text-gray-900">AuctionHub</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Live Auctions</span>
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">My Bids</span>
+                <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Categories</span>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Auction
+                </button>
+                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" class="w-8 h-8 rounded-full">
+            </div>
+        </div>
+    </div>
+</header>
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div id="winner-announcement" class="winner-gradient rounded-2xl p-8 mb-8 text-white text-center relative overflow-hidden">
+        <div class="confetti" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="confetti" style="left: 20%; animation-delay: 0.5s; background: #ef4444;"></div>
+        <div class="confetti" style="left: 30%; animation-delay: 1s; background: #3b82f6;"></div>
+        <div class="confetti" style="left: 40%; animation-delay: 1.5s; background: #8b5cf6;"></div>
+        <div class="confetti" style="left: 50%; animation-delay: 2s;"></div>
+        <div class="confetti" style="left: 60%; animation-delay: 0.3s; background: #ef4444;"></div>
+        <div class="confetti" style="left: 70%; animation-delay: 0.8s; background: #3b82f6;"></div>
+        <div class="confetti" style="left: 80%; animation-delay: 1.3s; background: #8b5cf6;"></div>
+        <div class="confetti" style="left: 90%; animation-delay: 1.8s;"></div>
+        
+        <div class="celebration-animation inline-block mb-4">
+            <i class="fas fa-trophy text-6xl text-yellow-300"></i>
+        </div>
+        <h1 class="text-4xl font-bold mb-2">Congratulations!</h1>
+        <p class="text-xl mb-4">You won the auction for</p>
+        <h2 class="text-2xl font-semibold mb-4">Vintage Rolex Submariner 1965</h2>
+        <div class="text-3xl font-bold mb-2">Winning Bid: $22,500</div>
+        <p class="text-green-100">Auction ended 2 minutes ago</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div id="auction-summary" class="lg:col-span-2 space-y-6">
+            <div id="payment-required" class="bg-red-50 border border-red-200 rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl mr-3"></i>
+                    <h3 class="text-xl font-bold text-red-800">Payment Required</h3>
+                </div>
+                <p class="text-red-700 mb-4">Complete your payment within <span class="font-bold">48 hours</span> to secure your winning item.</p>
+                <div class="bg-white rounded-lg p-4 border border-red-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">Payment Deadline:</span>
+                        <span class="font-bold text-red-600">January 15, 2025 at 3:30 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="item-summary" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Item Summary</h3>
+                <div class="flex space-x-4">
+                    <img class="w-24 h-24 object-cover rounded-lg" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/cbbe1b8df9-9630d7b4de2b7029d256.png" alt="vintage rolex submariner 1965">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-900 mb-2">Vintage Rolex Submariner 1965</h4>
+                        <div class="space-y-1 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>Reference:</span>
+                                <span>5513</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Year:</span>
+                                <span>1965</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Condition:</span>
+                                <span>Excellent</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="shipping-info" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Shipping Information</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Address</label>
+                        <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Enter your complete shipping address..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Method</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>Insured Express ($45)</option>
+                                <option>Standard Shipping ($15)</option>
+                                <option>Pickup ($0)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>Full Coverage ($150)</option>
+                                <option>Basic Coverage ($50)</option>
+                                <option>No Insurance ($0)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="payment-section" class="space-y-6">
+            <div id="payment-summary" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Payment Summary</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Winning Bid:</span>
+                        <span class="font-semibold">$22,500.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Buyer's Premium (10%):</span>
+                        <span class="font-semibold">$2,250.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Shipping:</span>
+                        <span class="font-semibold">$45.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Insurance:</span>
+                        <span class="font-semibold">$150.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tax:</span>
+                        <span class="font-semibold">$1,847.50</span>
+                    </div>
+                    <hr class="my-3">
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>Total Amount:</span>
+                        <span class="text-green-600">$26,792.50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="payment-methods" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Methods</h3>
+                <div class="space-y-3">
+                    <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="payment" class="mr-3" checked="">
+                        <i class="fas fa-credit-card text-blue-600 mr-3"></i>
+                        <span>Credit/Debit Card</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="payment" class="mr-3">
+                        <i class="fab fa-paypal text-blue-600 mr-3"></i>
+                        <span>PayPal</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="payment" class="mr-3">
+                        <i class="fas fa-university text-blue-600 mr-3"></i>
+                        <span>Bank Transfer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="card-details" class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Card Details</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="MM/YY">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                            <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="123">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
+                        <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="John Doe">
+                    </div>
+                </div>
+            </div>
+
+            <button id="complete-payment" class="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-colors">
+                <i class="fas fa-lock mr-2"></i>Complete Payment - $26,792.50
+            </button>
+
+            <div id="security-info" class="bg-blue-50 rounded-lg p-4">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-shield-alt text-blue-600 mr-2"></i>
+                    <span class="font-medium text-blue-800">Secure Payment</span>
+                </div>
+                <p class="text-sm text-blue-700">Your payment is protected by 256-bit SSL encryption and our buyer protection guarantee.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.getElementById('complete-payment').addEventListener('click', function() {
+    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Payment...';
+    this.disabled = true;
+    this.className = 'w-full bg-gray-600 text-white py-4 px-6 rounded-xl font-bold text-lg cursor-not-allowed';
+    
+    setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-check mr-2"></i>Payment Successful!';
+        this.className = 'w-full bg-green-600 text-white py-4 px-6 rounded-xl font-bold text-lg';
+        
+        setTimeout(() => {
+            window.location.href = '#payment-confirmation';
+        }, 2000);
+    }, 3000);
+});
+</script>
+
+
+</body></html>

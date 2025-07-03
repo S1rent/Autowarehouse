@@ -1,0 +1,379 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "inter": [
+          "Inter",
+          "sans-serif"
+        ],
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      },
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#64748B",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444"
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50 font-inter">
+
+<!-- Header -->
+<header id="header" class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-900">AuctionPro</h1>
+                </div>
+                <nav class="hidden md:ml-8 md:flex md:space-x-8">
+                    <span class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium cursor-pointer">Dashboard</span>
+                    <span class="bg-primary text-white px-3 py-2 rounded-md text-sm font-medium cursor-pointer">Auction Management</span>
+                    <span class="text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium cursor-pointer">Products</span>
+                    <span class="text-gray-500 hover:text-primary px-3 py-2 text-sm font-medium cursor-pointer">Reports</span>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-400 hover:text-gray-500">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <img class="h-8 w-8 rounded-full" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Admin">
+                    <span class="text-sm font-medium text-gray-700">Admin</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Page Header -->
+    <section id="page-header" class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Auction Management</h2>
+                <p class="text-gray-600 mt-1">Kelola sesi lelang dan pantau aktivitas bidding</p>
+            </div>
+            <div class="flex space-x-3">
+                <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+                    <i class="fa-solid fa-download text-sm"></i>
+                    <span>Export</span>
+                </button>
+                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center space-x-2">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                    <span>Create Auction</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section id="stats-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                    <i class="fa-solid fa-gavel text-primary text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Active Auctions</p>
+                    <p class="text-2xl font-bold text-gray-900">24</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center">
+                <div class="p-2 bg-green-100 rounded-lg">
+                    <i class="fa-solid fa-clock text-success text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Scheduled</p>
+                    <p class="text-2xl font-bold text-gray-900">12</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center">
+                <div class="p-2 bg-yellow-100 rounded-lg">
+                    <i class="fa-solid fa-check-circle text-warning text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Completed</p>
+                    <p class="text-2xl font-bold text-gray-900">156</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center">
+                <div class="p-2 bg-purple-100 rounded-lg">
+                    <i class="fa-solid fa-dollar-sign text-purple-600 text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p class="text-2xl font-bold text-gray-900">$245K</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters and Search -->
+    <section id="filters-section" class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Search auctions..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent w-full sm:w-64">
+                </div>
+                <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Scheduled</option>
+                    <option>Completed</option>
+                    <option>Cancelled</option>
+                </select>
+                <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option>All Categories</option>
+                    <option>Electronics</option>
+                    <option>Art</option>
+                    <option>Collectibles</option>
+                    <option>Jewelry</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="p-2 text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+                <button class="p-2 text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auction Table -->
+    <section id="auction-table-section" class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Auction Sessions</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Bid</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bidders</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr id="auction-row-1" class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-12 w-12 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/fcb55106aa-0ffdc5ff6af0c82fa322.png" alt="vintage watch luxury timepiece">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">Vintage Rolex Submariner</div>
+                                    <div class="text-sm text-gray-500">ID: #AUC001</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                                Active
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 15, 2024<br>
+                            <span class="text-gray-500">10:00 AM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 15, 2024<br>
+                            <span class="text-gray-500">6:00 PM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$15,420</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">23</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-primary hover:text-blue-700" onclick="viewBiddingHistory('AUC001')">
+                                    <i class="fa-solid fa-history"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-800">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fa-solid fa-stop"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="auction-row-2" class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-12 w-12 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/ce91227571-81a0fc642b74d0c29cf3.png" alt="modern abstract painting artwork">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">Abstract Modern Art</div>
+                                    <div class="text-sm text-gray-500">ID: #AUC002</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5"></span>
+                                Scheduled
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 16, 2024<br>
+                            <span class="text-gray-500">2:00 PM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 16, 2024<br>
+                            <span class="text-gray-500">8:00 PM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$2,500</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">0</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
+                                    Start
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-800">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="auction-row-3" class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-12 w-12 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/bcd852fa37-ddb00ee9183bf59763f5.png" alt="antique jewelry diamond necklace">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">Diamond Necklace</div>
+                                    <div class="text-sm text-gray-500">ID: #AUC003</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-1.5"></span>
+                                Completed
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 14, 2024<br>
+                            <span class="text-gray-500">1:00 PM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Dec 14, 2024<br>
+                            <span class="text-gray-500">7:00 PM</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">$8,750</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-primary hover:text-blue-700" onclick="viewBiddingHistory('AUC003')">
+                                    <i class="fa-solid fa-history"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-800">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-800">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing 1 to 3 of 24 results
+            </div>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">Previous</button>
+                <button class="px-3 py-1 bg-primary text-white rounded text-sm">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">2</button>
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">3</button>
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">Next</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- Bidding History Modal -->
+<div id="bidding-history-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-96 overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">Bidding History</h3>
+                <button onclick="closeBiddingHistory()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="bidding-history-content">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <img class="h-8 w-8 rounded-full" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="Bidder">
+                                <div>
+                                    <p class="font-medium text-gray-900">John Smith</p>
+                                    <p class="text-sm text-gray-500">Dec 15, 2024 - 3:45 PM</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg text-gray-900">$15,420</p>
+                                <p class="text-sm text-green-600">Highest Bid</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <img class="h-8 w-8 rounded-full" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Bidder">
+                                <div>
+                                    <p class="font-medium text-gray-900">Sarah Johnson</p>
+                                    </div></div></div></div></div></div></div></div></div></body></html>

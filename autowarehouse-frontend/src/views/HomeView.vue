@@ -1,162 +1,380 @@
 <template>
-  <div class="home-view">
-    <div class="container">
-      <header class="header">
-        <div class="nav-container">
-          <div class="logo">
-            <h1>Autowarehouse</h1>
-            <span class="tagline">Computer E-commerce & Live Auction</span>
+  <div class="bg-light min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-8">
+            <div class="text-2xl font-bold text-primary">Autowarehouse</div>
+            <nav class="hidden md:flex space-x-6">
+              <router-link to="/" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Beranda</router-link>
+              <router-link to="/products" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Produk</router-link>
+              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
+              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Auction</span>
+            </nav>
           </div>
-          <nav class="nav-links">
-            <router-link to="/login" class="btn btn-secondary">Login</router-link>
-            <router-link to="/register" class="btn btn-primary">Register</router-link>
-          </nav>
+          <div class="flex items-center space-x-4">
+            <div class="hidden md:flex relative">
+              <input 
+                type="text" 
+                placeholder="Cari hardware, RAM, aksesoris..." 
+                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-80"
+              >
+              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <router-link to="/cart" class="relative">
+              <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
+              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+            </router-link>
+            <router-link to="/login" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              Masuk
+            </router-link>
+          </div>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <main class="main-content">
-        <div class="hero-section">
-          <h2>Welcome to Autowarehouse</h2>
-          <p class="hero-description">
-            Your ultimate destination for computer hardware with live auction features
-          </p>
-          <div class="hero-actions">
-            <router-link to="/register" class="btn btn-primary">Get Started</router-link>
-            <router-link to="/login" class="btn btn-secondary">Sign In</router-link>
+    <!-- Hero Banner -->
+    <section class="bg-gradient-to-br from-primary via-secondary to-indigo-600 text-white h-[600px] flex items-center relative overflow-hidden">
+      <div class="absolute inset-0 bg-black opacity-10"></div>
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-accent/20 text-accent px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              🔥 Flash Sale Hari Ini
+            </div>
+            <h1 class="text-6xl font-bold mb-6 leading-tight">Hardware & Elektronik Terlengkap</h1>
+            <p class="text-xl mb-8 opacity-90 leading-relaxed">
+              Dapatkan komponen PC, RAM, SSD, dan aksesoris gaming terbaik dengan harga terjangkau. Plus fitur auction untuk deals eksklusif!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <router-link 
+                to="/products" 
+                class="bg-accent text-white px-8 py-4 rounded-xl font-semibold hover:bg-yellow-600 transition-all transform hover:scale-105 shadow-lg inline-flex items-center justify-center"
+              >
+                <i class="fa-solid fa-shopping-bag mr-2"></i>Belanja Sekarang
+              </router-link>
+              <button class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all">
+                <i class="fa-solid fa-gavel mr-2"></i>Cek Auction
+              </button>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+              <img 
+                class="w-full h-80 object-cover rounded-xl" 
+                src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                alt="Gaming Setup"
+              >
+            </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="features-preview">
-          <div class="feature-card">
-            <h3>🛒 E-commerce</h3>
-            <p>Browse and purchase computer hardware</p>
+    <!-- Quick Stats -->
+    <section class="py-12 bg-white border-b">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <div class="text-3xl font-bold text-primary mb-2">50K+</div>
+            <div class="text-gray-600">Produk Tersedia</div>
           </div>
-          <div class="feature-card">
-            <h3>⚡ Live Auction</h3>
-            <p>Participate in real-time bidding</p>
+          <div>
+            <div class="text-3xl font-bold text-primary mb-2">24/7</div>
+            <div class="text-gray-600">Customer Support</div>
           </div>
-          <div class="feature-card">
-            <h3>🔧 Quality Products</h3>
-            <p>Premium computer components</p>
+          <div>
+            <div class="text-3xl font-bold text-primary mb-2">1 Hari</div>
+            <div class="text-gray-600">Pengiriman Express</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-primary mb-2">100%</div>
+            <div class="text-gray-600">Garansi Resmi</div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </section>
+
+    <!-- Kategori Produk -->
+    <section class="py-20 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl font-bold text-dark mb-4">Kategori Produk</h2>
+          <p class="text-xl text-gray-600">Temukan komponen dan aksesoris PC terbaik</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-microchip text-2xl text-primary group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">Processor</h3>
+            <p class="text-sm text-gray-500 text-center">Intel & AMD</p>
+          </div>
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-memory text-2xl text-green-600 group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">RAM</h3>
+            <p class="text-sm text-gray-500 text-center">DDR4 & DDR5</p>
+          </div>
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-purple-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-hard-drive text-2xl text-purple-600 group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">Storage</h3>
+            <p class="text-sm text-gray-500 text-center">SSD & HDD</p>
+          </div>
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-red-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-display text-2xl text-red-600 group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">VGA Card</h3>
+            <p class="text-sm text-gray-500 text-center">NVIDIA & AMD</p>
+          </div>
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-yellow-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-keyboard text-2xl text-yellow-600 group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">Gaming</h3>
+            <p class="text-sm text-gray-500 text-center">Keyboard & Mouse</p>
+          </div>
+          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
+            <div class="bg-indigo-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
+              <i class="fa-solid fa-headset text-2xl text-indigo-600 group-hover:text-white"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">Audio</h3>
+            <p class="text-sm text-gray-500 text-center">Headset & Speaker</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flash Sale -->
+    <section class="py-16 bg-gradient-to-r from-red-500 to-pink-500 text-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold mb-4">⚡ Flash Sale</h2>
+          <p class="text-xl opacity-90">Penawaran terbatas, buruan sebelum kehabisan!</p>
+          <div class="inline-flex items-center space-x-4 mt-4 bg-white/20 rounded-xl px-6 py-3">
+            <span class="text-lg font-semibold">Berakhir dalam:</span>
+            <div class="flex space-x-2">
+              <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.hours }}</div>
+              <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.minutes }}</div>
+              <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.seconds }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div v-for="product in flashSaleProducts" :key="product.id" class="bg-white rounded-2xl p-6 text-dark shadow-xl">
+            <div class="relative mb-4">
+              <img :src="product.image" :alt="product.name" class="w-full h-40 object-cover rounded-xl">
+              <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
+                -{{ product.discount }}%
+              </div>
+            </div>
+            <h3 class="font-bold mb-2">{{ product.name }}</h3>
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-2xl font-bold text-primary">{{ formatPrice(product.salePrice) }}</span>
+              <span class="text-gray-500 line-through">{{ formatPrice(product.originalPrice) }}</span>
+            </div>
+            <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
+              Beli Sekarang
+            </button>
+          </div>
+        </div>
+        <div class="text-center mt-8">
+          <router-link to="/products" class="bg-secondary text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors inline-block">
+            Lihat Semua Produk
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cara Kerja -->
+    <section class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-dark mb-4">Cara Kerja</h2>
+          <p class="text-gray-600">Proses belanja yang mudah dan aman</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-user-plus text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-dark mb-2">1. Daftar</h3>
+            <p class="text-gray-600">Buat akun dan verifikasi identitas Anda untuk mulai berbelanja</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-search text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-dark mb-2">2. Pilih Produk</h3>
+            <p class="text-gray-600">Jelajahi berbagai kategori dan temukan produk yang Anda inginkan</p>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-shopping-cart text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-dark mb-2">3. Beli & Nikmati</h3>
+            <p class="text-gray-600">Checkout dengan mudah dan nikmati produk berkualitas tinggi</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-gradient-to-r from-primary to-secondary text-white">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-4">Siap Memulai Belanja?</h2>
+        <p class="text-xl mb-8 opacity-90">Bergabunglah dengan ribuan pengguna yang telah merasakan pengalaman belanja terbaik</p>
+        <div class="flex justify-center space-x-4">
+          <router-link to="/login" class="bg-accent text-white px-8 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
+            Daftar Gratis
+          </router-link>
+          <router-link to="/products" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors">
+            Mulai Belanja
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-12">
+      <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8">
+          <div>
+            <div class="text-2xl font-bold mb-4">Autowarehouse</div>
+            <p class="text-gray-400 mb-4">Platform e-commerce terpercaya untuk kebutuhan hardware dan elektronik dengan sistem keamanan tinggi.</p>
+            <div class="flex space-x-4">
+              <i class="fa-brands fa-facebook text-xl hover:text-accent cursor-pointer"></i>
+              <i class="fa-brands fa-twitter text-xl hover:text-accent cursor-pointer"></i>
+              <i class="fa-brands fa-instagram text-xl hover:text-accent cursor-pointer"></i>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-4">Kategori</h3>
+            <ul class="space-y-2 text-gray-400">
+              <li><span class="hover:text-white cursor-pointer">Processor</span></li>
+              <li><span class="hover:text-white cursor-pointer">RAM & Memory</span></li>
+              <li><span class="hover:text-white cursor-pointer">Storage</span></li>
+              <li><span class="hover:text-white cursor-pointer">VGA Card</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-4">Bantuan</h3>
+            <ul class="space-y-2 text-gray-400">
+              <li><span class="hover:text-white cursor-pointer">Cara Belanja</span></li>
+              <li><span class="hover:text-white cursor-pointer">FAQ</span></li>
+              <li><span class="hover:text-white cursor-pointer">Kontak</span></li>
+              <li><span class="hover:text-white cursor-pointer">Syarat & Ketentuan</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-4">Kontak</h3>
+            <div class="space-y-2 text-gray-400">
+              <p><i class="fa-solid fa-phone mr-2"></i>+62 21 1234 5678</p>
+              <p><i class="fa-solid fa-envelope mr-2"></i>info@autowarehouse.id</p>
+              <p><i class="fa-solid fa-location-dot mr-2"></i>Jakarta, Indonesia</p>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+          <p>© 2024 Autowarehouse. Semua hak dilindungi undang-undang.</p>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-// Empty home page - will be expanded later
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+
+// Countdown timer
+const countdown = reactive({
+  hours: 23,
+  minutes: 45,
+  seconds: 12
+})
+
+// Flash sale products
+const flashSaleProducts = reactive([
+  {
+    id: 1,
+    name: 'Corsair Vengeance RGB Pro 32GB',
+    image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    originalPrice: 4000000,
+    salePrice: 2400000,
+    discount: 40
+  },
+  {
+    id: 2,
+    name: 'Samsung 980 PRO SSD 1TB',
+    image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    originalPrice: 3000000,
+    salePrice: 1950000,
+    discount: 35
+  },
+  {
+    id: 3,
+    name: 'Razer BlackWidow V3',
+    image: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    originalPrice: 2400000,
+    salePrice: 1200000,
+    discount: 50
+  }
+])
+
+// Timer interval
+let timerInterval: NodeJS.Timeout
+
+// Format price to Indonesian Rupiah
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(price)
+}
+
+// Update countdown timer
+const updateCountdown = () => {
+  countdown.seconds--
+  if (countdown.seconds < 0) {
+    countdown.seconds = 59
+    countdown.minutes--
+    if (countdown.minutes < 0) {
+      countdown.minutes = 59
+      countdown.hours--
+      if (countdown.hours < 0) {
+        countdown.hours = 23
+      }
+    }
+  }
+}
+
+onMounted(() => {
+  timerInterval = setInterval(updateCountdown, 1000)
+})
+
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+  }
+})
 </script>
 
 <style scoped>
-.home-view {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.container {
+  max-width: 1200px;
+}
+
+.category-card:hover .group-hover\:bg-primary {
+  background-color: #1e40af;
+}
+
+.category-card:hover .group-hover\:text-white {
   color: white;
-}
-
-.header {
-  padding: 2rem 0;
-}
-
-.nav-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.logo h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.tagline {
-  font-size: 0.875rem;
-  opacity: 0.9;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.main-content {
-  padding: 4rem 0;
-  text-align: center;
-}
-
-.hero-section {
-  margin-bottom: 4rem;
-}
-
-.hero-section h2 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.hero-description {
-  font-size: 1.25rem;
-  opacity: 0.9;
-  margin-bottom: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.features-preview {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.feature-card p {
-  opacity: 0.9;
-}
-
-@media (max-width: 768px) {
-  .nav-container {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .hero-section h2 {
-    font-size: 2rem;
-  }
-  
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .hero-actions .btn {
-    width: 200px;
-  }
 }
 </style>

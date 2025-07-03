@@ -1,0 +1,365 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#1E40AF",
+        "accent": "#F59E0B",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+    <div id="admin-layout" class="flex min-h-screen">
+        <aside id="sidebar" class="w-64 bg-white shadow-lg">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+            </div>
+            <nav class="mt-6">
+                <span class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <i class="fa-solid fa-chart-line mr-3"></i>
+                    Dashboard
+                </span>
+                <span class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-2 border-blue-600 cursor-pointer">
+                    <i class="fa-solid fa-shopping-cart mr-3"></i>
+                    Order Management
+                </span>
+                <span class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <i class="fa-solid fa-box mr-3"></i>
+                    Products
+                </span>
+                <span class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <i class="fa-solid fa-users mr-3"></i>
+                    Customers
+                </span>
+                <span class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">
+                    <i class="fa-solid fa-cog mr-3"></i>
+                    Settings
+                </span>
+            </nav>
+        </aside>
+
+        <main id="main-content" class="flex-1">
+            <header id="header" class="bg-white shadow-sm border-b px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold text-gray-800">Order Management</h2>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-bell"></i>
+                        </button>
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Admin" class="w-8 h-8 rounded-full">
+                    </div>
+                </div>
+            </header>
+
+            <div id="order-stats" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <i class="fa-solid fa-shopping-cart text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Total Orders</p>
+                                <p class="text-2xl font-semibold text-gray-800">1,247</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <i class="fa-solid fa-clock text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Pending</p>
+                                <p class="text-2xl font-semibold text-gray-800">23</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <i class="fa-solid fa-truck text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Shipped</p>
+                                <p class="text-2xl font-semibold text-gray-800">156</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-purple-100 rounded-lg">
+                                <i class="fa-solid fa-dollar-sign text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-gray-600">Revenue</p>
+                                <p class="text-2xl font-semibold text-gray-800">$45,230</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="orders-table-section" class="bg-white rounded-lg shadow-sm">
+                    <div class="p-6 border-b">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+                            <div class="flex items-center space-x-3">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                    <option>All Status</option>
+                                    <option>Pending</option>
+                                    <option>Processing</option>
+                                    <option>Shipped</option>
+                                    <option>Delivered</option>
+                                </select>
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                                    <i class="fa-solid fa-download mr-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="" class="w-8 h-8 rounded-full mr-3">
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">Sarah Johnson</p>
+                                                <p class="text-sm text-gray-500">sarah@email.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$299.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Dec 15, 2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="viewOrder('ORD-001')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button onclick="updateStatus('ORD-001', 'processing')" class="text-green-600 hover:text-green-900">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-002</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="" class="w-8 h-8 rounded-full mr-3">
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">Mike Chen</p>
+                                                <p class="text-sm text-gray-500">mike@email.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Processing</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$450.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Dec 14, 2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="viewOrder('ORD-002')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button onclick="updateStatus('ORD-002', 'shipped')" class="text-green-600 hover:text-green-900">
+                                            <i class="fa-solid fa-truck"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-003</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="" class="w-8 h-8 rounded-full mr-3">
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">Emma Davis</p>
+                                                <p class="text-sm text-gray-500">emma@email.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Shipped</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$199.00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Dec 13, 2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="viewOrder('ORD-003')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button onclick="trackOrder('ORD-003')" class="text-purple-600 hover:text-purple-900">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="px-6 py-3 border-t bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-700">Showing 1 to 3 of 97 results</p>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm border rounded hover:bg-gray-100">Previous</button>
+                                <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded">1</button>
+                                <button class="px-3 py-1 text-sm border rounded hover:bg-gray-100">2</button>
+                                <button class="px-3 py-1 text-sm border rounded hover:bg-gray-100">3</button>
+                                <button class="px-3 py-1 text-sm border rounded hover:bg-gray-100">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6 border-b">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">Order Details</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="modal-content" class="p-6">
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Customer Information</h4>
+                            <p class="text-sm text-gray-600">Sarah Johnson</p>
+                            <p class="text-sm text-gray-600">sarah@email.com</p>
+                            <p class="text-sm text-gray-600">+1 (555) 123-4567</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Shipping Address</h4>
+                            <p class="text-sm text-gray-600">123 Main Street</p>
+                            <p class="text-sm text-gray-600">New York, NY 10001</p>
+                            <p class="text-sm text-gray-600">United States</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">Order Items</h4>
+                        <div class="border rounded-lg overflow-hidden">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 text-sm">Wireless Headphones</td>
+                                        <td class="px-4 py-3 text-sm">1</td>
+                                        <td class="px-4 py-3 text-sm">$299.00</td>
+                                        <td class="px-4 py-3 text-sm font-medium">$299.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">Update Status</h4>
+                        <div class="flex space-x-3">
+                            <button onclick="updateOrderStatus('processing')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Mark as Processing
+                            </button>
+                            <button onclick="updateOrderStatus('shipped')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                Mark as Shipped
+                            </button>
+                            <button onclick="updateOrderStatus('delivered')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                Mark as Delivered
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viewOrder(orderId) {
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+        
+        function updateStatus(orderId, status) {
+            alert(`Order ${orderId} status updated to ${status}`);
+        }
+        
+        function updateOrderStatus(status) {
+            alert(`Order status updated to ${status}`);
+            closeModal();
+        }
+        
+        function trackOrder(orderId) {
+            alert(`Tracking order ${orderId}`);
+        }
+    </script>
+
+</body></html>

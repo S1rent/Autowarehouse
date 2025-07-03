@@ -1,0 +1,372 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#1E40AF",
+        "accent": "#F59E0B",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+    <div id="dashboard-container" class="flex">
+        <aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 z-30">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-store text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">AdminPanel</h1>
+                        <p class="text-sm text-gray-500">Management System</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav id="sidebar-nav" class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <span onclick="showSection('dashboard')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-chart-line w-5"></i>
+                            <span>Dashboard</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('products')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-box w-5"></i>
+                            <span>Products</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('categories')" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white cursor-pointer">
+                            <i class="fa-solid fa-tags w-5"></i>
+                            <span>Categories</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('orders')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-shopping-cart w-5"></i>
+                            <span>Orders</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('customers')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-users w-5"></i>
+                            <span>Customers</span>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main id="main-content" class="flex-1 ml-64">
+            <header id="header" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="page-title" class="text-2xl font-bold text-gray-800">Category Management</h2>
+                        <p id="page-subtitle" class="text-gray-600">Kelola kategori produk toko Anda</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-2 text-gray-600 hover:text-gray-800">
+                            <i class="fa-solid fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full"></span>
+                        </button>
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Admin" class="w-8 h-8 rounded-full">
+                            <span class="text-sm font-medium text-gray-700">Admin User</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="category-management-section" class="p-6">
+                <div id="category-stats" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Kategori</p>
+                                <p class="text-2xl font-bold text-gray-900">12</p>
+                            </div>
+                            <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-tags text-primary text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Kategori Aktif</p>
+                                <p class="text-2xl font-bold text-gray-900">10</p>
+                            </div>
+                            <div class="w-12 h-12 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-check-circle text-success text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Produk</p>
+                                <p class="text-2xl font-bold text-gray-900">245</p>
+                            </div>
+                            <div class="w-12 h-12 bg-accent bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-box text-accent text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Kategori Terpopuler</p>
+                                <p class="text-2xl font-bold text-gray-900">Elektronik</p>
+                            </div>
+                            <div class="w-12 h-12 bg-warning bg-opacity-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-star text-warning text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="category-filters-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                            <div class="relative">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" placeholder="Cari kategori..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary w-full sm:w-64">
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option>Semua Status</option>
+                                <option>Aktif</option>
+                                <option>Tidak Aktif</option>
+                            </select>
+                        </div>
+                        <button onclick="openAddCategoryModal()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center space-x-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tambah Kategori</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="categories-grid-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div id="category-card-1" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-mobile-alt text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(1)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(1)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Elektronik</h3>
+                            <p class="text-sm text-gray-600 mb-4">Smartphone, laptop, dan perangkat elektronik lainnya</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">85 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="category-card-2" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-tshirt text-pink-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(2)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(2)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Fashion</h3>
+                            <p class="text-sm text-gray-600 mb-4">Pakaian, sepatu, dan aksesoris fashion</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">62 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="category-card-3" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-utensils text-green-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(3)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(3)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Makanan &amp; Minuman</h3>
+                            <p class="text-sm text-gray-600 mb-4">Makanan olahan, minuman, dan camilan</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">43 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="category-card-4" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-book text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(4)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(4)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Buku &amp; Edukasi</h3>
+                            <p class="text-sm text-gray-600 mb-4">Buku, majalah, dan materi edukasi</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">28 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="category-card-5" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-home text-yellow-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(5)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(5)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Rumah Tangga</h3>
+                            <p class="text-sm text-gray-600 mb-4">Peralatan dan perlengkapan rumah tangga</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">15 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-warning text-white">Tidak Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="category-card-6" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-dumbbell text-red-600 text-xl"></i>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCategory(6)" class="text-primary hover:text-secondary">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCategory(6)" class="text-danger hover:text-red-700">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Olahraga</h3>
+                            <p class="text-sm text-gray-600 mb-4">Peralatan olahraga dan fitness</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">22 produk</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-lg w-full">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 id="category-modal-title" class="text-lg font-semibold text-gray-900">Tambah Kategori Baru</h3>
+                <button onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="category-form" class="p-6 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
+                    <input type="text" id="category-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Masukkan nama kategori">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                    <textarea id="category-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Masukkan deskripsi kategori"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
+                    <div class="grid grid-cols-6 gap-3">
+                        <button type="button" class="p-3 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-solid fa-mobile-alt"></i>
+                        </button>
+                        <button type="button" class="p-3 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-solid fa-tshirt"></i>
+                        </button>
+                        </div></div></form></div></div></body></html>

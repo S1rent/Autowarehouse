@@ -1,0 +1,365 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#1e40af",
+        "secondary": "#3b82f6",
+        "accent": "#f59e0b",
+        "dark": "#1f2937",
+        "light": "#f8fafc"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-light">
+
+<!-- Header -->
+<header id="header" class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-8">
+                <div class="text-2xl font-bold text-primary">AuctionHub</div>
+                <nav class="hidden md:flex space-x-6">
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Beranda</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Live Auction</span>
+                    <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Tentang</span>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex relative">
+                    <input type="text" placeholder="Cari produk..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="relative">
+                    <i class="fa-solid fa-heart text-2xl text-gray-600 hover:text-primary"></i>
+                    <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+                <button class="relative">
+                    <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
+                    <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">2</span>
+                </button>
+                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Masuk</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Breadcrumb -->
+<section id="breadcrumb" class="bg-gray-100 py-4">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center space-x-2 text-sm">
+            <span class="text-primary cursor-pointer hover:underline">Beranda</span>
+            <i class="fa-solid fa-chevron-right text-gray-400"></i>
+            <span class="text-primary cursor-pointer hover:underline">Kategori</span>
+            <i class="fa-solid fa-chevron-right text-gray-400"></i>
+            <span class="text-primary cursor-pointer hover:underline">Elektronik</span>
+            <i class="fa-solid fa-chevron-right text-gray-400"></i>
+            <span class="text-gray-600">MacBook Pro 14" M3</span>
+        </div>
+    </div>
+</section>
+
+<!-- Product Detail -->
+<div id="product-detail" class="container mx-auto px-4 py-8">
+    <div class="grid lg:grid-cols-2 gap-12">
+        
+        <!-- Product Images -->
+        <div id="product-images" class="space-y-4">
+            <div class="relative">
+                <img id="main-image" class="w-full h-96 object-cover rounded-lg" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0b4aca168b-3051e2edbefabbe3637c.png" alt="MacBook Pro 14 M3">
+                <button class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100">
+                    <i class="fa-solid fa-heart text-red-500"></i>
+                </button>
+                <span class="absolute top-4 left-4 bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold">Populer</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+                <img class="w-full h-20 object-cover rounded-lg border-2 border-primary cursor-pointer" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0b4aca168b-3051e2edbefabbe3637c.png" alt="MacBook Pro angle 1">
+                <img class="w-full h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-primary" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0b4aca168b-3051e2edbefabbe3637c.png" alt="MacBook Pro angle 2">
+                <img class="w-full h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-primary" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0b4aca168b-3051e2edbefabbe3637c.png" alt="MacBook Pro angle 3">
+                <img class="w-full h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-primary" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0b4aca168b-3051e2edbefabbe3637c.png" alt="MacBook Pro angle 4">
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div id="product-info" class="space-y-6">
+            <div>
+                <h1 class="text-3xl font-bold text-dark mb-2">MacBook Pro 14" M3</h1>
+                <p class="text-gray-600 mb-4">Apple - 512GB SSD, 16GB RAM, Space Gray</p>
+                
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="flex items-center">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-600">(4.8)</span>
+                    </div>
+                    <span class="text-sm text-gray-600">124 ulasan</span>
+                    <span class="text-sm text-gray-600">|</span>
+                    <span class="text-sm text-green-600">Terjual 89</span>
+                </div>
+                
+                <div class="flex items-center space-x-4 mb-6">
+                    <span class="text-3xl font-bold text-primary">Rp 32.000.000</span>
+                    <span class="text-xl text-gray-500 line-through">Rp 35.000.000</span>
+                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">-9%</span>
+                </div>
+            </div>
+            
+            <!-- Stock & Auction Info -->
+            <div id="stock-auction" class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-700">Stok tersedia:</span>
+                    <span class="font-semibold text-green-600">5 unit</span>
+                </div>
+                <div class="flex items-center space-x-2 mb-3">
+                    <i class="fa-solid fa-gavel text-accent"></i>
+                    <span class="text-gray-700">Sedang dalam lelang</span>
+                    <span class="bg-red-500 text-white px-2 py-1 rounded text-xs animate-pulse">LIVE</span>
+                </div>
+                <div class="text-sm text-gray-600">
+                    <span>Bid tertinggi: </span>
+                    <span class="font-semibold text-accent">Rp 31.500.000</span>
+                    <span class="ml-2">Berakhir dalam: 2j 45m</span>
+                </div>
+            </div>
+            
+            <!-- Variant Selection -->
+            <div id="variants" class="space-y-4">
+                <div>
+                    <span class="block text-gray-700 font-semibold mb-2">Warna:</span>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 border-2 border-primary bg-primary text-white rounded-lg">Space Gray</button>
+                        <button class="px-4 py-2 border-2 border-gray-300 hover:border-primary rounded-lg">Silver</button>
+                    </div>
+                </div>
+                <div>
+                    <span class="block text-gray-700 font-semibold mb-2">Storage:</span>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 border-2 border-primary bg-primary text-white rounded-lg">512GB</button>
+                        <button class="px-4 py-2 border-2 border-gray-300 hover:border-primary rounded-lg">1TB (+Rp 5.000.000)</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="space-y-4">
+                <div class="flex space-x-4">
+                    <button class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        <i class="fa-solid fa-shopping-cart mr-2"></i>Tambah ke Keranjang
+                    </button>
+                    <button class="px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                </div>
+                <button class="w-full bg-accent text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                    <i class="fa-solid fa-gavel mr-2"></i>Ikuti Lelang
+                </button>
+                <button class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                    Beli Sekarang
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Details Tabs -->
+    <div id="product-tabs" class="mt-16">
+        <div class="border-b border-gray-200">
+            <nav class="flex space-x-8">
+                <button class="py-4 px-1 border-b-2 border-primary text-primary font-semibold">Deskripsi</button>
+                <button class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">Spesifikasi</button>
+                <button class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">Ulasan (124)</button>
+            </nav>
+        </div>
+        
+        <!-- Tab Content -->
+        <div id="tab-content" class="py-8">
+            <div class="bg-white rounded-lg p-6">
+                <h3 class="text-xl font-bold text-dark mb-4">Deskripsi Produk</h3>
+                <div class="prose max-w-none text-gray-700">
+                    <p class="mb-4">MacBook Pro 14" dengan chip M3 memberikan performa luar biasa untuk profesional kreatif. Dengan layar Liquid Retina XDR yang menakjubkan dan kualitas build premium, laptop ini sempurna untuk editing video, desain grafis, dan pengembangan software.</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>Chip Apple M3 dengan CPU 8-core dan GPU 10-core</li>
+                        <li>16GB unified memory untuk multitasking lancar</li>
+                        <li>512GB SSD storage super cepat</li>
+                        <li>Layar Liquid Retina XDR 14.2" dengan ProMotion</li>
+                        <li>Kamera FaceTime HD 1080p</li>
+                        <li>Studio-quality three-mic array</li>
+                        <li>Six-speaker sound system dengan force-cancelling woofers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews Section -->
+    <div id="reviews-section" class="mt-12">
+        <div class="bg-white rounded-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-dark">Ulasan Pembeli</h3>
+                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Tulis Ulasan
+                </button>
+            </div>
+            
+            <!-- Review Summary -->
+            <div id="review-summary" class="bg-gray-50 p-6 rounded-lg mb-6">
+                <div class="flex items-center space-x-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-primary">4.8</div>
+                        <div class="flex text-yellow-400 justify-center mb-1">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div class="text-sm text-gray-600">124 ulasan</div>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm">5 ★</span>
+                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-3">
+                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">105</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm">4 ★</span>
+                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-3">
+                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 12%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">15</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm">3 ★</span>
+                            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-3">
+                                <div class="bg-yellow-400 h-2 rounded-full" style="width: 2%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Individual Reviews -->
+            <div id="individual-reviews" class="space-y-6">
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-start space-x-4">
+                        <img class="w-12 h-12 rounded-full" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="User Avatar">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="font-semibold">Sarah M.</span>
+                                <div class="flex text-yellow-400 text-sm">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <span class="text-sm text-gray-500">2 hari yang lalu</span>
+                            </div>
+                            <p class="text-gray-700 mb-2">Performa luar biasa! M3 chip benar-benar powerful untuk editing video 4K. Build quality premium dan layar yang sangat tajam. Sangat puas dengan pembelian ini.</p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <button class="hover:text-primary">👍 Membantu (12)</button>
+                                <button class="hover:text-primary">Balas</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-b border-gray-200 pb-6">
+                    <div class="flex items-start space-x-4">
+                        <img class="w-12 h-12 rounded-full" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="User Avatar">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="font-semibold">Ahmad R.</span>
+                                <div class="flex text-yellow-400 text-sm">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-regular fa-star"></i>
+                                </div>
+                                <span class="text-sm text-gray-500">1 minggu yang lalu</span>
+                            </div>
+                            <p class="text-gray-700 mb-2">Laptop yang sangat bagus untuk developer. Kompilasi code sangat cepat dan multitasking lancar. Hanya saja harga agak mahal, tapi worth it untuk performa yang didapat.</p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <button class="hover:text-primary">👍 Membantu (8)</button>
+                                <button class="hover:text-primary">Balas</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-6">
+                <button class="border border-primary text-primary px-6 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors">
+                    Lihat Semua Ulasan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer id="footer" class="bg-dark text-white mt-16">
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-4 gap-8">
+            <div>
+                <div class="text-2xl font-bold mb-4">AuctionHub</div>
+                <p class="text-gray-300 mb-4">Platform jual beli dan lelang online terpercaya di Indonesia.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Layanan</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li><span class="hover:text-white cursor-pointer">Jual Beli</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Live Auction</span></li>
+                    <li><span class="hover:text-white cursor-pointer">Bantuan</span></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Perusahaan</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li><span class="hover:text-white cursor-pointer">Tentang Kami</span></li></ul></div></div></div></footer></body></html>

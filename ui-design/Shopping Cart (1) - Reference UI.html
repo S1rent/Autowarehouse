@@ -1,0 +1,393 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "inter": [
+          "Inter",
+          "sans-serif"
+        ],
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50 font-inter">
+    <!-- Header -->
+    <header id="header" class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-store text-blue-600 text-xl"></i>
+                        <span class="text-xl font-bold text-gray-900">ShopHub</span>
+                    </div>
+                    <nav class="hidden md:flex space-x-6">
+                        <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Home</span>
+                        <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Categories</span>
+                        <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Deals</span>
+                        <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Wishlist</span>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search products..." class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <button class="relative p-2 text-blue-600 hover:text-blue-700">
+                        <i class="fa-solid fa-shopping-cart text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Profile" class="w-8 h-8 rounded-full">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Breadcrumb -->
+        <nav id="breadcrumb" class="mb-6">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <span class="hover:text-blue-600 cursor-pointer">Home</span>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+                <span class="text-gray-900">Shopping Cart</span>
+            </div>
+        </nav>
+
+        <!-- Page Header -->
+        <div id="page-header" class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+            <p class="text-gray-600">Review your items before checkout</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items -->
+            <div id="cart-items" class="lg:col-span-2 space-y-6">
+                <!-- Cart Item 1 -->
+                <div id="cart-item-1" class="bg-white rounded-xl shadow-sm border p-6">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0">
+                            <img class="w-20 h-20 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/36855b96dd-ae28c5887673cafe0d99.png" alt="wireless headphones">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">Sony WH-1000XM4 Wireless Headphones</h3>
+                            <p class="text-gray-500 text-sm mb-2">Noise Cancelling, Bluetooth</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-lg font-bold text-gray-900">$349.99</span>
+                                <span class="text-sm text-gray-500 line-through">$399.99</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border rounded-lg">
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="decrease">
+                                    <i class="fa-solid fa-minus text-sm"></i>
+                                </button>
+                                <span class="px-4 py-2 border-x quantity-value">1</span>
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="increase">
+                                    <i class="fa-solid fa-plus text-sm"></i>
+                                </button>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700 p-2 remove-item">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Item 2 -->
+                <div id="cart-item-2" class="bg-white rounded-xl shadow-sm border p-6">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0">
+                            <img class="w-20 h-20 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/e23d5bb128-fd4d65427ac8ef76a7ca.png" alt="smartphone">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">iPhone 15 Pro Max</h3>
+                            <p class="text-gray-500 text-sm mb-2">256GB, Titanium Blue</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-lg font-bold text-gray-900">$1,199.00</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border rounded-lg">
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="decrease">
+                                    <i class="fa-solid fa-minus text-sm"></i>
+                                </button>
+                                <span class="px-4 py-2 border-x quantity-value">1</span>
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="increase">
+                                    <i class="fa-solid fa-plus text-sm"></i>
+                                </button>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700 p-2 remove-item">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Item 3 -->
+                <div id="cart-item-3" class="bg-white rounded-xl shadow-sm border p-6">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0">
+                            <img class="w-20 h-20 rounded-lg object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/1b46fe7421-5d50f86546f5df4cf4d1.png" alt="wireless earbuds">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">AirPods Pro (2nd Generation)</h3>
+                            <p class="text-gray-500 text-sm mb-2">Active Noise Cancellation</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-lg font-bold text-gray-900">$249.00</span>
+                                <span class="text-sm text-gray-500 line-through">$279.00</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border rounded-lg">
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="decrease">
+                                    <i class="fa-solid fa-minus text-sm"></i>
+                                </button>
+                                <span class="px-4 py-2 border-x quantity-value">2</span>
+                                <button class="p-2 hover:bg-gray-100 quantity-btn" data-action="increase">
+                                    <i class="fa-solid fa-plus text-sm"></i>
+                                </button>
+                            </div>
+                            <button class="text-red-500 hover:text-red-700 p-2 remove-item">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div id="order-summary" class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Order Summary</h3>
+                    
+                    <!-- Coupon Section -->
+                    <div id="coupon-section" class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium text-gray-700">Have a coupon?</span>
+                            <button id="toggle-coupon" class="text-blue-600 text-sm hover:text-blue-700">
+                                <i class="fa-solid fa-tag mr-1"></i>Apply
+                            </button>
+                        </div>
+                        <div id="coupon-input" class="hidden">
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Enter coupon code" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Apply</button>
+                            </div>
+                        </div>
+                        <div id="coupon-applied" class="hidden flex items-center justify-between text-sm">
+                            <span class="text-green-600">SAVE20 applied</span>
+                            <button class="text-red-500 hover:text-red-700">Remove</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Breakdown -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Subtotal (4 items)</span>
+                            <span class="text-gray-900">$2,046.99</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Shipping</span>
+                            <span class="text-gray-900">$9.99</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Tax</span>
+                            <span class="text-gray-900">$163.76</span>
+                        </div>
+                        <div id="coupon-discount" class="hidden flex justify-between text-sm">
+                            <span class="text-green-600">Coupon Discount</span>
+                            <span class="text-green-600">-$409.40</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <div class="flex justify-between">
+                                <span class="text-lg font-semibold text-gray-900">Total</span>
+                                <span id="total-price" class="text-lg font-bold text-gray-900">$2,220.74</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkout Button -->
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4">
+                        <i class="fa-solid fa-lock mr-2"></i>
+                        Proceed to Checkout
+                    </button>
+                    
+                    <!-- Continue Shopping -->
+                    <button class="w-full text-blue-600 py-2 text-sm hover:text-blue-700 transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>
+                        Continue Shopping
+                    </button>
+                    
+                    <!-- Security Badge -->
+                    <div class="mt-6 text-center">
+                        <div class="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                            <i class="fa-solid fa-shield-halved text-green-500"></i>
+                            <span>Secure checkout with 256-bit SSL encryption</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Cart State -->
+        <div id="empty-cart" class="hidden text-center py-16">
+            <i class="fa-solid fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+            <p class="text-gray-500 mb-6">Add some products to get started!</p>
+            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-search mr-2"></i>
+                Browse Products
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-store text-blue-400 text-xl"></i>
+                        <span class="text-xl font-bold">ShopHub</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Your trusted online shopping destination with quality products and excellent service.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><span class="hover:text-white cursor-pointer">About Us</span></li>
+                        <li><span class="hover:text-white cursor-pointer">Contact</span></li>
+                        <li><span class="hover:text-white cursor-pointer">FAQ</span></li>
+                        <li><span class="hover:text-white cursor-pointer">Shipping Info</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><span class="hover:text-white cursor-pointer">Electronics</span></li>
+                        <li><span class="hover:text-white cursor-pointer">Fashion</span></li>
+                        <li><span class="hover:text-white cursor-pointer">Home &amp; Garden</span></li>
+                        <li><span class="hover:text-white cursor-pointer">Sports</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex space-x-4">
+                        <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-facebook text-xl"></i></span>
+                        <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-twitter text-xl"></i></span>
+                        <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-instagram text-xl"></i></span>
+                        <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-youtube text-xl"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>© 2024 ShopHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Quantity controls
+        document.querySelectorAll('.quantity-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.dataset.action;
+                const quantitySpan = this.parentElement.querySelector('.quantity-value');
+                let quantity = parseInt(quantitySpan.textContent);
+                
+                if (action === 'increase') {
+                    quantity++;
+                } else if (action === 'decrease' && quantity > 1) {
+                    quantity--;
+                }
+                
+                quantitySpan.textContent = quantity;
+                updateTotal();
+            });
+        });
+
+        // Remove item functionality
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                const item = this.closest('[id^="cart-item-"]');
+                item.style.opacity = '0.5';
+                item.style.transform = 'translateX(-100%)';
+                setTimeout(() => {
+                    item.remove();
+                    updateTotal();
+                }, 300);
+            });
+        });
+
+        // Coupon functionality
+        document.getElementById('toggle-coupon').addEventListener('click', function() {
+            const couponInput = document.getElementById('coupon-input');
+            couponInput.classList.toggle('hidden');
+        });
+
+        // Apply coupon
+        document.querySelector('#coupon-input button').addEventListener('click', function() {
+            const couponCode = document.querySelector('#coupon-input input').value;
+            if (couponCode.toLowerCase() === 'save20') {
+                document.getElementById('coupon-input').classList.add('hidden');
+                document.getElementById('coupon-applied').classList.remove('hidden');
+                document.getElementById('coupon-discount').classList.remove('hidden');
+                updateTotal(true);
+            }
+        });
+
+        // Remove coupon
+        document.querySelector('#coupon-applied button').addEventListener('click', function() {
+            document.getElementById('coupon-applied').classList.add('hidden');
+            document.getElementById('coupon-discount').classList.add('hidden');
+            document.getElementById('toggle-coupon').parentElement.classList.remove('hidden');
+            updateTotal(false);
+        });
+
+        function updateTotal(hasCoupon = false) {
+            const totalElement = document.getElementById('total-price');
+            let baseTotal = 2220.74;
+            
+            if (hasCoupon) {
+                totalElement.textContent = '$1,811.34';
+            } else {
+                totalElement.textContent = '$2,220.74';
+            }
+        }
+    </script>
+
+</body></html>

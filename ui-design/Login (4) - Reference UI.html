@@ -1,0 +1,339 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "inter": [
+          "Inter",
+          "sans-serif"
+        ],
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+<main id="reset-password-main" class="flex items-center justify-center min-h-screen p-4">
+    <div id="reset-password-container" class="w-full max-w-md">
+        
+        <div id="reset-password-card" class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            
+            <div id="reset-password-header" class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <i class="fa-solid fa-lock-open text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Reset Password</h1>
+                <p class="text-gray-600">Enter your new password below</p>
+            </div>
+
+            <div id="reset-password-content">
+                
+                <div id="form-section">
+                    <form id="reset-password-form" class="space-y-6">
+                        
+                        <div id="new-password-field">
+                            <label for="new-password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="new-password" name="new-password" required="" class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="Enter new password">
+                                <button type="button" id="toggle-new-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <i class="fa-solid fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                            <div id="password-strength" class="mt-2">
+                                <div class="flex space-x-1">
+                                    <div class="h-1 flex-1 bg-gray-200 rounded"></div>
+                                    <div class="h-1 flex-1 bg-gray-200 rounded"></div>
+                                    <div class="h-1 flex-1 bg-gray-200 rounded"></div>
+                                    <div class="h-1 flex-1 bg-gray-200 rounded"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Password strength: <span id="strength-text">Weak</span></p>
+                            </div>
+                        </div>
+
+                        <div id="confirm-password-field">
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="confirm-password" name="confirm-password" required="" class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="Confirm new password">
+                                <button type="button" id="toggle-confirm-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <i class="fa-solid fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                            <div id="password-match" class="mt-2 hidden">
+                                <p class="text-xs text-red-600 flex items-center">
+                                    <i class="fa-solid fa-exclamation-circle mr-1"></i>
+                                    Passwords do not match
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="password-requirements" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Password requirements:</p>
+                            <ul class="space-y-1 text-xs text-gray-600">
+                                <li id="req-length" class="flex items-center">
+                                    <i class="fa-solid fa-circle-xmark text-red-400 mr-2"></i>
+                                    At least 8 characters
+                                </li>
+                                <li id="req-uppercase" class="flex items-center">
+                                    <i class="fa-solid fa-circle-xmark text-red-400 mr-2"></i>
+                                    One uppercase letter
+                                </li>
+                                <li id="req-lowercase" class="flex items-center">
+                                    <i class="fa-solid fa-circle-xmark text-red-400 mr-2"></i>
+                                    One lowercase letter
+                                </li>
+                                <li id="req-number" class="flex items-center">
+                                    <i class="fa-solid fa-circle-xmark text-red-400 mr-2"></i>
+                                    One number
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button type="submit" id="reset-button" disabled="" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <span id="button-text">Reset Password</span>
+                            <i class="fa-solid fa-spinner fa-spin ml-2 hidden" id="loading-spinner"></i>
+                        </button>
+
+                    </form>
+                </div>
+
+                <div id="success-section" class="hidden text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Password Reset Successfully</h3>
+                    <p class="text-gray-600 mb-6">Your password has been updated. You can now sign in with your new password.</p>
+                    <button id="go-to-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
+                        Go to Sign In
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="help-section" class="mt-6 text-center">
+            <p class="text-xs text-gray-500">
+                Having trouble? 
+                <span class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">Contact Support</span>
+            </p>
+        </div>
+
+    </div>
+</main>
+
+<script>
+// Password visibility toggles
+document.getElementById('toggle-new-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('new-password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('confirm-password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+// Password strength checker
+document.getElementById('new-password').addEventListener('input', function(e) {
+    const password = e.target.value;
+    checkPasswordStrength(password);
+    checkPasswordRequirements(password);
+    validateForm();
+});
+
+document.getElementById('confirm-password').addEventListener('input', function(e) {
+    checkPasswordMatch();
+    validateForm();
+});
+
+function checkPasswordStrength(password) {
+    const strengthBars = document.querySelectorAll('#password-strength .h-1');
+    const strengthText = document.getElementById('strength-text');
+    
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // Reset all bars
+    strengthBars.forEach(bar => {
+        bar.classList.remove('bg-red-400', 'bg-yellow-400', 'bg-green-400');
+        bar.classList.add('bg-gray-200');
+    });
+    
+    // Fill bars based on strength
+    for (let i = 0; i < Math.min(strength, 4); i++) {
+        strengthBars[i].classList.remove('bg-gray-200');
+        if (strength <= 2) {
+            strengthBars[i].classList.add('bg-red-400');
+            strengthText.textContent = 'Weak';
+            strengthText.className = 'text-xs text-red-600 mt-1';
+        } else if (strength <= 3) {
+            strengthBars[i].classList.add('bg-yellow-400');
+            strengthText.textContent = 'Medium';
+            strengthText.className = 'text-xs text-yellow-600 mt-1';
+        } else {
+            strengthBars[i].classList.add('bg-green-400');
+            strengthText.textContent = 'Strong';
+            strengthText.className = 'text-xs text-green-600 mt-1';
+        }
+    }
+}
+
+function checkPasswordRequirements(password) {
+    const requirements = [
+        { id: 'req-length', test: password.length >= 8 },
+        { id: 'req-uppercase', test: /[A-Z]/.test(password) },
+        { id: 'req-lowercase', test: /[a-z]/.test(password) },
+        { id: 'req-number', test: /[0-9]/.test(password) }
+    ];
+    
+    requirements.forEach(req => {
+        const element = document.getElementById(req.id);
+        const icon = element.querySelector('i');
+        
+        if (req.test) {
+            icon.classList.remove('fa-circle-xmark', 'text-red-400');
+            icon.classList.add('fa-circle-check', 'text-green-500');
+            element.classList.add('text-green-700');
+            element.classList.remove('text-gray-600');
+        } else {
+            icon.classList.remove('fa-circle-check', 'text-green-500');
+            icon.classList.add('fa-circle-xmark', 'text-red-400');
+            element.classList.remove('text-green-700');
+            element.classList.add('text-gray-600');
+        }
+    });
+}
+
+function checkPasswordMatch() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const matchDiv = document.getElementById('password-match');
+    
+    if (confirmPassword && newPassword !== confirmPassword) {
+        matchDiv.classList.remove('hidden');
+        document.getElementById('confirm-password').classList.add('border-red-300', 'focus:ring-red-500');
+        document.getElementById('confirm-password').classList.remove('border-gray-300', 'focus:ring-blue-500');
+    } else {
+        matchDiv.classList.add('hidden');
+        document.getElementById('confirm-password').classList.remove('border-red-300', 'focus:ring-red-500');
+        document.getElementById('confirm-password').classList.add('border-gray-300', 'focus:ring-blue-500');
+    }
+}
+
+function validateForm() {
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const resetButton = document.getElementById('reset-button');
+    
+    const isValidPassword = newPassword.length >= 8 && 
+                           /[A-Z]/.test(newPassword) && 
+                           /[a-z]/.test(newPassword) && 
+                           /[0-9]/.test(newPassword);
+    
+    const passwordsMatch = newPassword === confirmPassword && confirmPassword !== '';
+    
+    if (isValidPassword && passwordsMatch) {
+        resetButton.disabled = false;
+    } else {
+        resetButton.disabled = true;
+    }
+}
+
+// Form submission
+document.getElementById('reset-password-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const button = document.getElementById('reset-button');
+    const buttonText = document.getElementById('button-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    // Show loading state
+    button.disabled = true;
+    button.classList.add('opacity-75', 'cursor-not-allowed');
+    buttonText.textContent = 'Resetting...';
+    loadingSpinner.classList.remove('hidden');
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Hide form section and show success section
+        document.getElementById('form-section').classList.add('hidden');
+        document.getElementById('success-section').classList.remove('hidden');
+        
+        console.log('Password reset successfully');
+    }, 2000);
+});
+
+// Go to login button
+document.getElementById('go-to-login').addEventListener('click', function() {
+    console.log('Navigating to login page');
+    alert('Navigating to login page');
+});
+</script>
+
+
+</body></html>

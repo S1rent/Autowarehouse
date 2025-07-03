@@ -1,0 +1,224 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "fontFamily": {
+        "inter": [
+          "Inter",
+          "sans-serif"
+        ],
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+<main id="forgot-password-main" class="flex items-center justify-center min-h-screen p-4">
+    <div id="forgot-password-container" class="w-full max-w-md">
+        
+        <div id="forgot-password-card" class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            
+            <div id="forgot-password-header" class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <i class="fa-solid fa-key text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Forgot Password?</h1>
+                <p class="text-gray-600">No worries, we'll send you reset instructions</p>
+            </div>
+
+            <div id="forgot-password-content">
+                
+                <div id="form-section">
+                    <form id="forgot-password-form" class="space-y-6">
+                        
+                        <div id="email-field">
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-envelope text-gray-400"></i>
+                                </div>
+                                <input type="email" id="email" name="email" required="" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="Enter your email address">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">We'll send a password reset link to this email</p>
+                        </div>
+
+                        <button type="submit" id="send-reset-button" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 transform hover:scale-[1.02]">
+                            <span id="button-text">Send Reset Link</span>
+                            <i class="fa-solid fa-spinner fa-spin ml-2 hidden" id="loading-spinner"></i>
+                        </button>
+
+                    </form>
+                </div>
+
+                <div id="success-section" class="hidden text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fa-solid fa-check text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Check Your Email</h3>
+                    <p class="text-gray-600 mb-4">We've sent a password reset link to your email address. Please check your inbox and follow the instructions.</p>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-start">
+                            <i class="fa-solid fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
+                            <div class="text-sm text-blue-700">
+                                <p class="font-medium mb-1">Didn't receive the email?</p>
+                                <p>Check your spam folder or click resend below</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="resend-button" class="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors">
+                        Resend Email
+                    </button>
+                </div>
+
+            </div>
+
+            <div id="back-to-login" class="mt-8 text-center">
+                <button class="flex items-center justify-center w-full text-gray-600 hover:text-gray-800 font-medium text-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    Back to Sign In
+                </button>
+            </div>
+
+        </div>
+
+        <div id="help-section" class="mt-6 text-center">
+            <p class="text-xs text-gray-500">
+                Still having trouble? 
+                <span class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer">Contact Support</span>
+            </p>
+        </div>
+
+    </div>
+</main>
+
+<script>
+let emailSent = false;
+
+document.getElementById('forgot-password-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const button = document.getElementById('send-reset-button');
+    const buttonText = document.getElementById('button-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    if (!email) {
+        alert('Please enter your email address');
+        return;
+    }
+    
+    // Show loading state
+    button.disabled = true;
+    button.classList.add('opacity-75', 'cursor-not-allowed');
+    buttonText.textContent = 'Sending...';
+    loadingSpinner.classList.remove('hidden');
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Hide form section and show success section
+        document.getElementById('form-section').classList.add('hidden');
+        document.getElementById('success-section').classList.remove('hidden');
+        
+        emailSent = true;
+        console.log('Password reset email sent to:', email);
+        
+        // Reset button state (in case user goes back)
+        button.disabled = false;
+        button.classList.remove('opacity-75', 'cursor-not-allowed');
+        buttonText.textContent = 'Send Reset Link';
+        loadingSpinner.classList.add('hidden');
+    }, 2000);
+});
+
+document.getElementById('resend-button').addEventListener('click', function() {
+    const email = document.getElementById('email').value;
+    
+    // Disable resend button temporarily
+    this.disabled = true;
+    this.textContent = 'Resending...';
+    this.classList.add('opacity-75');
+    
+    setTimeout(() => {
+        this.disabled = false;
+        this.textContent = 'Resend Email';
+        this.classList.remove('opacity-75');
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.className = 'text-green-600 text-xs mt-2';
+        successMessage.textContent = 'Email resent successfully!';
+        this.parentNode.appendChild(successMessage);
+        
+        setTimeout(() => {
+            successMessage.remove();
+        }, 3000);
+        
+        console.log('Password reset email resent to:', email);
+    }, 1500);
+});
+
+document.getElementById('back-to-login').addEventListener('click', function() {
+    // Reset form if needed
+    if (emailSent) {
+        document.getElementById('form-section').classList.remove('hidden');
+        document.getElementById('success-section').classList.add('hidden');
+        document.getElementById('email').value = '';
+        emailSent = false;
+    }
+    
+    console.log('Navigating back to login page');
+    // In a real app, this would navigate to the login page
+    alert('Navigating back to login page');
+});
+
+// Email validation
+document.getElementById('email').addEventListener('input', function(e) {
+    const email = e.target.value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (email && !emailRegex.test(email)) {
+        e.target.classList.add('border-red-300', 'focus:ring-red-500');
+        e.target.classList.remove('border-gray-300', 'focus:ring-blue-500');
+    } else {
+        e.target.classList.remove('border-red-300', 'focus:ring-red-500');
+        e.target.classList.add('border-gray-300', 'focus:ring-blue-500');
+    }
+});
+</script>
+
+
+</body></html>

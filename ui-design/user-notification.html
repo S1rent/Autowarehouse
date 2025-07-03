@@ -1,0 +1,338 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#64748B",
+        "accent": "#F59E0B"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+    <header id="header" class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-gray-900">MyApp</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700 relative">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Profile" class="w-8 h-8 rounded-full">
+                        <span class="text-sm font-medium text-gray-700">Sarah Johnson</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="page-header" class="mb-8">
+            <div class="flex items-center space-x-3 mb-2">
+                <button onclick="history.back()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-900">Notifikasi</h1>
+            </div>
+            <p class="text-gray-600">Kelola semua notifikasi dan pengaturan pemberitahuan Anda</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div id="notification-sidebar" class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Filter</h3>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-between p-3 text-left rounded-lg bg-primary text-white">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-inbox"></i>
+                                <span class="text-sm font-medium">Semua</span>
+                            </div>
+                            <span class="text-xs bg-white text-primary px-2 py-1 rounded-full">12</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-circle text-red-500 text-xs"></i>
+                                <span class="text-sm font-medium text-gray-700">Belum Dibaca</span>
+                            </div>
+                            <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">3</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-star text-yellow-500"></i>
+                                <span class="text-sm font-medium text-gray-700">Penting</span>
+                            </div>
+                            <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">2</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 text-left rounded-lg hover:bg-gray-50">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-solid fa-check text-green-500"></i>
+                                <span class="text-sm font-medium text-gray-700">Dibaca</span>
+                            </div>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">7</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="notification-settings" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Pengaturan</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Push Notification</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked="" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Email</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked="" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">SMS</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="notification-content" class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900">Notifikasi Terbaru</h3>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-sm text-primary hover:text-blue-600 font-medium">
+                                    <i class="fa-solid fa-check mr-1"></i>
+                                    Tandai Semua Dibaca
+                                </button>
+                                <button class="text-sm text-gray-500 hover:text-gray-700">
+                                    <i class="fa-solid fa-trash mr-1"></i>
+                                    Hapus Semua
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="notification-list" class="divide-y divide-gray-200">
+                        <div class="notification-item p-6 hover:bg-gray-50 cursor-pointer border-l-4 border-l-red-500 bg-red-50">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-semibold text-gray-900">Peringatan Keamanan</p>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                            <span class="text-xs text-gray-500">2 menit yang lalu</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Ada percobaan login dari perangkat baru. Jika ini bukan Anda, segera ubah password.</p>
+                                    <div class="flex items-center space-x-3 mt-3">
+                                        <button class="text-xs bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700">
+                                            Lihat Detail
+                                        </button>
+                                        <button class="text-xs text-gray-500 hover:text-gray-700">
+                                            <i class="fa-solid fa-times mr-1"></i>
+                                            Tutup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-6 hover:bg-gray-50 cursor-pointer border-l-4 border-l-blue-500 bg-blue-50">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-info-circle text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-semibold text-gray-900">Update Sistem</p>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                            <span class="text-xs text-gray-500">1 jam yang lalu</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Sistem akan diperbarui pada malam ini pukul 02:00 WIB. Layanan mungkin terganggu selama 30 menit.</p>
+                                    <div class="flex items-center space-x-3 mt-3">
+                                        <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700">
+                                            Pelajari Lebih Lanjut
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-6 hover:bg-gray-50 cursor-pointer border-l-4 border-l-green-500 bg-green-50">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-check-circle text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-semibold text-gray-900">Pembayaran Berhasil</p>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                            <span class="text-xs text-gray-500">3 jam yang lalu</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Pembayaran langganan premium Anda sebesar Rp 99.000 telah berhasil diproses.</p>
+                                    <div class="flex items-center space-x-3 mt-3">
+                                        <button class="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700">
+                                            Lihat Invoice
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-6 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-user-plus text-gray-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900">Permintaan Pertemanan</p>
+                                        <span class="text-xs text-gray-500">1 hari yang lalu</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">John Doe mengirimkan permintaan pertemanan kepada Anda.</p>
+                                    <div class="flex items-center space-x-3 mt-3">
+                                        <button class="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-blue-600">
+                                            Terima
+                                        </button>
+                                        <button class="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-300">
+                                            Tolak
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notification-item p-6 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-gift text-gray-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900">Promo Spesial</p>
+                                        <span class="text-xs text-gray-500">2 hari yang lalu</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Dapatkan diskon 50% untuk upgrade ke premium. Promo terbatas!</p>
+                                    <div class="flex items-center space-x-3 mt-3">
+                                        <button class="text-xs bg-accent text-white px-3 py-1 rounded-full hover:bg-yellow-600">
+                                            Klaim Sekarang
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="notification-pagination" class="p-6 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">Menampilkan 1-5 dari 12 notifikasi</span>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50" disabled="">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button class="px-3 py-1 text-sm bg-primary text-white rounded">1</button>
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700">2</button>
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700">3</button>
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const unreadDot = this.querySelector('.w-2.h-2');
+                if (unreadDot) {
+                    unreadDot.remove();
+                }
+                this.classList.remove('bg-red-50', 'bg-blue-50', 'bg-green-50');
+                this.classList.remove('border-l-red-500', 'border-l-blue-500', 'border-l-green-500');
+            });
+        });
+
+        document.querySelector('[data-action="mark-all-read"]')?.addEventListener('click', function() {
+            document.querySelectorAll('.notification-item').forEach(item => {
+                const unreadDot = item.querySelector('.w-2.h-2');
+                if (unreadDot) {
+                    unreadDot.remove();
+                }
+                item.classList.remove('bg-red-50', 'bg-blue-50', 'bg-green-50');
+                item.classList.remove('border-l-red-500', 'border-l-blue-500', 'border-l-green-500');
+            });
+        });
+    </script>
+
+</body></html>

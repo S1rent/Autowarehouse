@@ -1,0 +1,339 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#1E40AF",
+        "accent": "#F59E0B",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "danger": "#EF4444"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50">
+    <div id="dashboard-container" class="flex">
+        <aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 z-30">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-store text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">AdminPanel</h1>
+                        <p class="text-sm text-gray-500">Management System</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav id="sidebar-nav" class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <span onclick="showSection('dashboard')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-chart-line w-5"></i>
+                            <span>Dashboard</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('products')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-box w-5"></i>
+                            <span>Products</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('categories')" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white cursor-pointer">
+                            <i class="fa-solid fa-tags w-5"></i>
+                            <span>Categories</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('orders')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-shopping-cart w-5"></i>
+                            <span>Orders</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span onclick="showSection('customers')" class="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer">
+                            <i class="fa-solid fa-users w-5"></i>
+                            <span>Customers</span>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main id="main-content" class="flex-1 ml-64">
+            <header id="header" class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="page-title" class="text-2xl font-bold text-gray-800">Tambah Kategori Baru</h2>
+                        <p id="page-subtitle" class="text-gray-600">Buat kategori produk baru untuk toko Anda</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="goBackToCategories()" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Kembali</span>
+                        </button>
+                        <div class="flex items-center space-x-3">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Admin" class="w-8 h-8 rounded-full">
+                            <span class="text-sm font-medium text-gray-700">Admin User</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="add-category-section" class="p-6">
+                <div class="max-w-4xl mx-auto">
+                    <form id="add-category-form" class="space-y-8">
+                        <div id="basic-info-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Informasi Dasar</h3>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori *</label>
+                                    <input type="text" id="category-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Masukkan nama kategori">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Slug URL</label>
+                                    <input type="text" id="category-slug" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="kategori-slug">
+                                </div>
+                                <div class="lg:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Kategori</label>
+                                    <textarea id="category-description" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Masukkan deskripsi kategori"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="icon-selection-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Pilih Icon Kategori</h3>
+                            <div class="grid grid-cols-8 md:grid-cols-12 gap-4">
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-mobile-alt" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-mobile-alt text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-tshirt" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-tshirt text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-utensils" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-utensils text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-book" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-book text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-home" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-home text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-dumbbell" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-dumbbell text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-car" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-car text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-gamepad" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-gamepad text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-music" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-music text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-camera" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-camera text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-heart" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-heart text-xl"></i>
+                                </button>
+                                <button type="button" onclick="selectIcon(this)" data-icon="fa-gift" class="icon-option p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-200 flex items-center justify-center">
+                                    <i class="fa-solid fa-gift text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="category-settings-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Pengaturan Kategori</h3>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Kategori</label>
+                                    <select id="category-status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                                        <option value="active">Aktif</option>
+                                        <option value="inactive">Tidak Aktif</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Urutan Tampil</label>
+                                    <input type="number" id="category-order" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="0" min="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Parent</label>
+                                    <select id="parent-category" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                                        <option value="">Kategori Utama</option>
+                                        <option value="elektronik">Elektronik</option>
+                                        <option value="fashion">Fashion</option>
+                                        <option value="makanan">Makanan &amp; Minuman</option>
+                                        <option value="buku">Buku &amp; Edukasi</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Warna Tema</label>
+                                    <div class="flex space-x-3">
+                                        <button type="button" onclick="selectColor(this)" data-color="blue" class="w-8 h-8 bg-blue-500 rounded-full border-2 border-gray-300 hover:border-blue-600"></button>
+                                        <button type="button" onclick="selectColor(this)" data-color="green" class="w-8 h-8 bg-green-500 rounded-full border-2 border-gray-300 hover:border-green-600"></button>
+                                        <button type="button" onclick="selectColor(this)" data-color="purple" class="w-8 h-8 bg-purple-500 rounded-full border-2 border-gray-300 hover:border-purple-600"></button>
+                                        <button type="button" onclick="selectColor(this)" data-color="pink" class="w-8 h-8 bg-pink-500 rounded-full border-2 border-gray-300 hover:border-pink-600"></button>
+                                        <button type="button" onclick="selectColor(this)" data-color="yellow" class="w-8 h-8 bg-yellow-500 rounded-full border-2 border-gray-300 hover:border-yellow-600"></button>
+                                        <button type="button" onclick="selectColor(this)" data-color="red" class="w-8 h-8 bg-red-500 rounded-full border-2 border-gray-300 hover:border-red-600"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="category-preview-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-6">Preview Kategori</h3>
+                            <div class="max-w-sm">
+                                <div id="category-preview" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                    <div class="p-6">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div id="preview-icon" class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fa-solid fa-tags text-blue-600 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <h3 id="preview-name" class="text-lg font-semibold text-gray-900 mb-2">Nama Kategori</h3>
+                                        <p id="preview-description" class="text-sm text-gray-600 mb-4">Deskripsi kategori akan muncul di sini</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-500">0 produk</span>
+                                            <span id="preview-status" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white">Aktif</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="form-actions" class="flex items-center justify-end space-x-4 pt-6">
+                            <button type="button" onclick="goBackToCategories()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                Batal
+                            </button>
+                            <button type="button" onclick="saveDraft()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                Simpan Draft
+                            </button>
+                            <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-secondary transition-colors">
+                                Simpan Kategori
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let selectedIcon = 'fa-tags';
+        let selectedColor = 'blue';
+
+        function selectIcon(button) {
+            document.querySelectorAll('.icon-option').forEach(btn => {
+                btn.classList.remove('border-primary', 'bg-primary', 'text-white');
+                btn.classList.add('border-gray-300');
+            });
+            
+            button.classList.remove('border-gray-300');
+            button.classList.add('border-primary', 'bg-primary', 'text-white');
+            
+            selectedIcon = button.getAttribute('data-icon');
+            updatePreview();
+        }
+
+        function selectColor(button) {
+            document.querySelectorAll('[data-color]').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2');
+            });
+            
+            button.classList.add('ring-2', 'ring-offset-2');
+            selectedColor = button.getAttribute('data-color');
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const name = document.getElementById('category-name').value || 'Nama Kategori';
+            const description = document.getElementById('category-description').value || 'Deskripsi kategori akan muncul di sini';
+            const status = document.getElementById('category-status').value;
+            
+            document.getElementById('preview-name').textContent = name;
+            document.getElementById('preview-description').textContent = description;
+            
+            const previewIcon = document.getElementById('preview-icon');
+            const colorClasses = {
+                'blue': 'bg-blue-100 text-blue-600',
+                'green': 'bg-green-100 text-green-600',
+                'purple': 'bg-purple-100 text-purple-600',
+                'pink': 'bg-pink-100 text-pink-600',
+                'yellow': 'bg-yellow-100 text-yellow-600',
+                'red': 'bg-red-100 text-red-600'
+            };
+            
+            previewIcon.className = `w-12 h-12 ${colorClasses[selectedColor]} rounded-lg flex items-center justify-center`;
+            previewIcon.innerHTML = `<i class="fa-solid ${selectedIcon} text-xl"></i>`;
+            
+            const statusElement = document.getElementById('preview-status');
+            if (status === 'active') {
+                statusElement.className = 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-success text-white';
+                statusElement.textContent = 'Aktif';
+            } else {
+                statusElement.className = 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-warning text-white';
+                statusElement.textContent = 'Tidak Aktif';
+            }
+        }
+
+        function goBackToCategories() {
+            window.history.back();
+        }
+
+        function saveDraft() {
+            alert('Draft kategori berhasil disimpan!');
+        }
+
+        document.getElementById('category-name').addEventListener('input', updatePreview);
+        document.getElementById('category-description').addEventListener('input', updatePreview);
+        document.getElementById('category-status').addEventListener('change', updatePreview);
+
+        document.getElementById('add-category-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Kategori berhasil dibuat!');
+            goBackToCategories();
+        });
+    </script>
+
+</body></html>

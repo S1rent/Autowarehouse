@@ -12,9 +12,15 @@ sampai halaman home kosong juga gapapa
 =======================================
 oke, tolong buat file gitignore karena saya mau push repositorynya ke github, pastikan file yang tidak penting atau bisa di generate nantinya jangan diinclude
 =======================================
+Okay now, can you try to 1. create the home dashboard for user its the home.png in the ui-design folder, also 2. create the forgot password ui, 3. Try to match the login and register page as similar as possible as the ui in the folder
 =======================================
+oke, saya baru tau kalo kamu gabisa baca gambar atau pdf, jadi saya udah export ui design dalam bentuk .html dari UXPilot, tolong dibuat semua designnya, nah nanti saya mau kamu tolong siapkan 1 page yang isinya list untuk ases semua ui yang udah kamu buat.
+
+tolong buatkan uinya dulu saja, apinya nanti saja, tapi kalo kamu mau ancang" buat template api juga gapapa sih.
 =======================================
+hmm, tapi ini kenapa jelek banget ui nya, kaya gaada css nya sama sekali ? Tolong dong bikinin juga sesuai gambar dan referensi html yang sudah diberikan
 =======================================
+maaf, tolong dong ini apa ya ? ga sesuai banget sama referensi ui yang sudah saya berikan di folder ui-design, dan semua cssnya jelek banget semuanya tidak ada yang sesuai sama design html dan gambar yang sudah saya siapkan, bahkan masa halaman loginnya cuma putih gini doang
 =======================================
 =======================================
 =======================================
