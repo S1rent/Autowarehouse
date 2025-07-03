@@ -10,6 +10,7 @@ UInya dulu aja ya, dan juga sesuaikan berdasarkan UI yang ada di folder ui-desig
 
 sampai halaman home kosong juga gapapa
 =======================================
+oke, tolong buat file gitignore karena saya mau push repositorynya ke github, pastikan file yang tidak penting atau bisa di generate nantinya jangan diinclude
 =======================================
 =======================================
 =======================================

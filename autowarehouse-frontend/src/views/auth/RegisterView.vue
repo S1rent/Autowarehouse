@@ -144,19 +144,6 @@
             <span v-if="errors.agreeToTerms" class="error-message">{{ errors.agreeToTerms }}</span>
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-container">
-              <input
-                v-model="registerForm.subscribeNewsletter"
-                type="checkbox"
-                class="checkbox-input"
-              />
-              <span class="checkbox-label">
-                Subscribe to our newsletter for updates and promotions
-              </span>
-            </label>
-          </div>
-
           <button
             type="submit"
             class="btn btn-primary btn-full register-button"
