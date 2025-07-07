@@ -27,23 +27,22 @@
             v-for="item in cartItems" 
             :key="item.id"
             class="bg-white rounded-xl shadow-sm border p-6 transition-all duration-300"
-            :class="{ 'opacity-50 transform -translate-x-4': item.removing }"
           >
             <div class="flex items-center space-x-6">
               <div class="flex-shrink-0">
                 <img 
-                  :src="item.image" 
-                  :alt="item.name"
+                  :src="item.productImages?.[0] || '/placeholder-product.jpg'" 
+                  :alt="item.productName"
                   class="w-20 h-20 rounded-lg object-cover"
                 >
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ item.name }}</h3>
-                <p class="text-gray-500 text-sm mb-2">{{ item.description }}</p>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ item.productName }}</h3>
+                <p class="text-gray-500 text-sm mb-2">{{ item.productBrand }} - {{ item.productSku }}</p>
                 <div class="flex items-center space-x-4">
-                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(item.price) }}</span>
+                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(item.productPrice) }}</span>
                   <span 
-                    v-if="item.originalPrice"
+                    v-if="item.originalPrice && item.originalPrice > item.productPrice"
                     class="text-sm text-gray-500 line-through"
                   >
                     Rp {{ formatPrice(item.originalPrice) }}
@@ -240,11 +239,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 // State
 const searchQuery = ref('')
@@ -254,42 +257,19 @@ const couponError = ref('')
 const couponApplied = ref(false)
 const appliedCoupon = ref('')
 
-// Sample cart items
-const cartItems = ref([
-  {
-    id: 1,
-    name: 'Sony WH-1000XM4 Wireless Headphones',
-    description: 'Noise Cancelling, Bluetooth',
-    price: 5000000,
-    originalPrice: 5500000,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
-    removing: false
-  },
-  {
-    id: 2,
-    name: 'iPhone 15 Pro Max',
-    description: '256GB, Titanium Blue',
-    price: 20000000,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
-    removing: false
-  },
-  {
-    id: 3,
-    name: 'AirPods Pro (2nd Generation)',
-    description: 'Active Noise Cancellation',
-    price: 3500000,
-    originalPrice: 4000000,
-    quantity: 2,
-    image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=300&fit=crop',
-    removing: false
+// Initialize cart on mount
+onMounted(async () => {
+  if (authStore.isAuthenticated && authStore.user) {
+    await cartStore.fetchCartItems()
   }
-])
+})
+
+// Get cart items from store
+const cartItems = computed(() => cartStore.items)
 
 // Computed properties
 const subtotal = computed(() => {
-  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  return cartItems.value.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0)
 })
 
 const totalItems = computed(() => {
@@ -320,30 +300,33 @@ const formatPrice = (price: number) => {
   return new Intl.NumberFormat('id-ID').format(price)
 }
 
-const increaseQuantity = (itemId: number) => {
+const increaseQuantity = async (itemId: number) => {
   const item = cartItems.value.find(item => item.id === itemId)
   if (item) {
-    item.quantity++
+    try {
+      await cartStore.updateQuantity(itemId, item.quantity + 1)
+    } catch (error) {
+      console.error('Error updating quantity:', error)
+    }
   }
 }
 
-const decreaseQuantity = (itemId: number) => {
+const decreaseQuantity = async (itemId: number) => {
   const item = cartItems.value.find(item => item.id === itemId)
   if (item && item.quantity > 1) {
-    item.quantity--
+    try {
+      await cartStore.updateQuantity(itemId, item.quantity - 1)
+    } catch (error) {
+      console.error('Error updating quantity:', error)
+    }
   }
 }
 
-const removeItem = (itemId: number) => {
-  const item = cartItems.value.find(item => item.id === itemId)
-  if (item) {
-    item.removing = true
-    setTimeout(() => {
-      const index = cartItems.value.findIndex(item => item.id === itemId)
-      if (index > -1) {
-        cartItems.value.splice(index, 1)
-      }
-    }, 300)
+const removeItem = async (itemId: number) => {
+  try {
+    await cartStore.removeItem(itemId)
+  } catch (error) {
+    console.error('Error removing item:', error)
   }
 }
 

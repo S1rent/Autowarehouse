@@ -5,21 +5,30 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "user_id"}))
 public class Review extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    @NotNull
+    public Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
+    public User user;
 
     @Column(nullable = false)
     @NotNull
@@ -27,23 +36,20 @@ public class Review extends PanacheEntityBase {
     @Max(5)
     public Integer rating;
 
+    @Column(length = 100)
+    public String title;
+
     @Column(columnDefinition = "TEXT")
-    @Size(max = 2000)
     public String comment;
 
     @Column(name = "is_verified_purchase")
     public Boolean isVerifiedPurchase = false;
 
-    @Column(name = "is_approved")
-    public Boolean isApproved = true;
-
     @Column(name = "helpful_count")
     public Integer helpfulCount = 0;
 
-    @ElementCollection
-    @CollectionTable(name = "review_images", joinColumns = @JoinColumn(name = "review_id"))
-    @Column(name = "image_url")
-    public List<String> imageUrls;
+    @Column(name = "is_approved")
+    public Boolean isApproved = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -53,77 +59,107 @@ public class Review extends PanacheEntityBase {
     @Column(name = "updated_at")
     public LocalDateTime updatedAt;
 
-    // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    public User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    public Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    public Order order; // Link to order for verified purchase
-
     // Constructors
     public Review() {}
 
-    public Review(User user, Product product, Integer rating, String comment) {
-        this.user = user;
+    public Review(Product product, User user, Integer rating, String title, String comment) {
         this.product = product;
+        this.user = user;
         this.rating = rating;
+        this.title = title;
         this.comment = comment;
     }
 
     // Static finder methods
+    public static Review findByProductAndUser(Product product, User user) {
+        return find("product = ?1 and user = ?2", product, user).firstResult();
+    }
+
+    public static Review findByProductIdAndUserId(Long productId, Long userId) {
+        return find("product.id = ?1 and user.id = ?2", productId, userId).firstResult();
+    }
+
     public static List<Review> findByProduct(Product product) {
         return find("product = ?1 and isApproved = true order by createdAt desc", product).list();
+    }
+
+    public static List<Review> findByProductId(Long productId) {
+        return find("product.id = ?1 and isApproved = true order by createdAt desc", productId).list();
     }
 
     public static List<Review> findByUser(User user) {
         return find("user = ?1 order by createdAt desc", user).list();
     }
 
-    public static List<Review> findByProductAndRating(Product product, Integer rating) {
-        return find("product = ?1 and rating = ?2 and isApproved = true order by createdAt desc", product, rating).list();
+    public static List<Review> findByUserId(Long userId) {
+        return find("user.id = ?1 order by createdAt desc", userId).list();
     }
 
-    public static List<Review> findVerifiedPurchasesByProduct(Product product) {
+    public static List<Review> findByRating(Integer rating) {
+        return find("rating = ?1 and isApproved = true order by createdAt desc", rating).list();
+    }
+
+    public static List<Review> findVerifiedPurchases(Product product) {
         return find("product = ?1 and isVerifiedPurchase = true and isApproved = true order by createdAt desc", product).list();
     }
 
     public static List<Review> findPendingApproval() {
-        return find("isApproved = false order by createdAt").list();
+        return find("isApproved = false order by createdAt desc").list();
     }
 
-    public static Review findByUserAndProduct(User user, Product product) {
-        return find("user = ?1 and product = ?2", user, product).firstResult();
+    public static List<Review> findMostHelpful(Product product, int limit) {
+        return find("product = ?1 and isApproved = true order by helpfulCount desc, createdAt desc", product)
+                .page(0, limit).list();
+    }
+
+    public static List<Review> findRecent(Product product, int limit) {
+        return find("product = ?1 and isApproved = true order by createdAt desc", product)
+                .page(0, limit).list();
+    }
+
+    public static boolean existsByProductAndUser(Product product, User user) {
+        return count("product = ?1 and user = ?2", product, user) > 0;
+    }
+
+    public static boolean existsByProductIdAndUserId(Long productId, Long userId) {
+        return count("product.id = ?1 and user.id = ?2", productId, userId) > 0;
     }
 
     public static long countByProduct(Product product) {
         return count("product = ?1 and isApproved = true", product);
     }
 
-    public static long countByProductAndRating(Product product, Integer rating) {
+    public static long countByProductId(Long productId) {
+        return count("product.id = ?1 and isApproved = true", productId);
+    }
+
+    public static long countByRating(Product product, Integer rating) {
         return count("product = ?1 and rating = ?2 and isApproved = true", product, rating);
     }
 
-    public static BigDecimal getAverageRatingByProduct(Product product) {
-        List<Review> reviews = findByProduct(product);
-        if (reviews.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-        
-        double average = reviews.stream()
-                .mapToInt(review -> review.rating)
-                .average()
-                .orElse(0.0);
-        
-        return BigDecimal.valueOf(average).setScale(2, BigDecimal.ROUND_HALF_UP);
+    public static long countByRatingAndProductId(Long productId, Integer rating) {
+        return count("product.id = ?1 and rating = ?2 and isApproved = true", productId, rating);
+    }
+
+    public static double getAverageRating(Product product) {
+        Double avg = find("select avg(rating) from Review where product = ?1 and isApproved = true", product)
+                .project(Double.class)
+                .firstResult();
+        return avg != null ? avg : 0.0;
+    }
+
+    public static double getAverageRatingByProductId(Long productId) {
+        Double avg = find("select avg(rating) from Review where product.id = ?1 and isApproved = true", productId)
+                .project(Double.class)
+                .firstResult();
+        return avg != null ? avg : 0.0;
     }
 
     // Helper methods
+    public boolean canBeEdited() {
+        return LocalDateTime.now().isBefore(createdAt.plusDays(7)); // Can edit within 7 days
+    }
+
     public void incrementHelpfulCount() {
         this.helpfulCount++;
     }
@@ -136,28 +172,20 @@ public class Review extends PanacheEntityBase {
         this.isApproved = false;
     }
 
-    public boolean canBeEditedBy(User user) {
-        return this.user.id.equals(user.id) && 
-               this.createdAt.isAfter(LocalDateTime.now().minusHours(24)); // Can edit within 24 hours
-    }
-
-    public String getRatingStars() {
-        return "★".repeat(rating) + "☆".repeat(5 - rating);
-    }
-
-    public boolean hasImages() {
-        return imageUrls != null && !imageUrls.isEmpty();
+    public void markAsVerifiedPurchase() {
+        this.isVerifiedPurchase = true;
     }
 
     @Override
     public String toString() {
         return "Review{" +
                 "id=" + id +
+                ", productId=" + (product != null ? product.id : null) +
+                ", userId=" + (user != null ? user.id : null) +
                 ", rating=" + rating +
+                ", title='" + title + '\'' +
                 ", isVerifiedPurchase=" + isVerifiedPurchase +
                 ", isApproved=" + isApproved +
-                ", user=" + (user != null ? user.email : null) +
-                ", product=" + (product != null ? product.name : null) +
                 ", createdAt=" + createdAt +
                 '}';
     }

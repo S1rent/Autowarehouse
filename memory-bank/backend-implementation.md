@@ -1,309 +1,336 @@
-# Backend Implementation - Autowarehouse
+# Backend Implementation - AutoWarehouse
 
-## 📋 Backend Development Summary
+## Overview
+Backend implementation menggunakan Quarkus framework dengan Java, PostgreSQL database, dan JWT authentication. Sistem ini mendukung e-commerce dengan fitur auction, shopping cart, order management, dan user management.
 
-Implementasi backend Autowarehouse menggunakan Quarkus framework dengan Panache ORM untuk Java. Sistem telah dikembangkan dengan arsitektur yang scalable dan maintainable.
+## Technology Stack
+- **Framework**: Quarkus 3.x
+- **Language**: Java 17+
+- **Database**: PostgreSQL
+- **Authentication**: JWT with RSA keys
+- **ORM**: Hibernate with Panache
+- **Migration**: Flyway
+- **Build Tool**: Maven
 
-## ✅ Completed Backend Components
-
-### 1. Entity Layer (Complete)
-- ✅ **User** - User management dengan role-based access
-- ✅ **Product** - Product catalog dengan inventory management
-- ✅ **Category** - Product categorization system
-- ✅ **Order** - Order management dengan status tracking
-- ✅ **OrderItem** - Order line items dengan pricing
-- ✅ **Auction** - Live auction system
-- ✅ **Bid** - Auction bidding mechanism
-- ✅ **CartItem** - Shopping cart functionality
-- ✅ **WishlistItem** - User wishlist management
-- ✅ **Review** - Product review system
-- ✅ **Notification** - Real-time notification system
-- ✅ **AuctionWatcher** - Auction tracking system
-
-### 2. Enum Types (Complete)
-- ✅ **UserRole** - ADMIN, CUSTOMER roles
-- ✅ **OrderStatus** - Order lifecycle states
-- ✅ **PaymentStatus** - Payment processing states
-- ✅ **AuctionStatus** - Auction lifecycle states
-- ✅ **NotificationType** - Comprehensive notification types
-- ✅ **NotificationPriority** - Priority levels for notifications
-
-### 3. Service Layer (Complete)
-- ✅ **UserService** - Authentication, registration, profile management
-- ✅ **ProductService** - Product CRUD, inventory, pricing
-- ✅ **AuctionService** - Auction management, bidding logic
-- ✅ **OrderService** - Order processing, status updates
-- ✅ **CartService** - Shopping cart operations
-- ✅ **NotificationService** - Notification creation and management
-
-## 🏗️ Architecture Overview
-
-### Entity Relationships
+## Project Structure
 ```
-User (1) -----> (*) Order
-User (1) -----> (*) CartItem
-User (1) -----> (*) WishlistItem
-User (1) -----> (*) Review
-User (1) -----> (*) Notification
-User (1) -----> (*) Bid
-User (1) -----> (*) AuctionWatcher
-
-Product (1) -----> (*) OrderItem
-Product (1) -----> (*) CartItem
-Product (1) -----> (*) WishlistItem
-Product (1) -----> (*) Review
-Product (*) -----> (1) Category
-
-Order (1) -----> (*) OrderItem
-Auction (1) -----> (*) Bid
-Auction (1) -----> (*) AuctionWatcher
+autowarehouse-backend/
+├── src/main/java/com/autowarehouse/
+│   ├── entity/           # JPA Entities
+│   ├── resource/         # REST Resources (Controllers)
+│   ├── service/          # Business Logic Services
+│   └── dto/              # Data Transfer Objects
+├── src/main/resources/
+│   ├── application.properties
+│   ├── db/migration/     # Flyway migrations
+│   └── META-INF/resources/
+│       ├── privateKey.pem
+│       └── publicKey.pem
+└── pom.xml
 ```
 
-### Service Dependencies
-```
-AuctionService --> NotificationService
-OrderService --> ProductService, NotificationService
-CartService --> ProductService
-NotificationService --> (standalone)
-UserService --> (standalone)
-ProductService --> (standalone)
-```
+## Entities
 
-## 🔧 Technical Implementation Details
+### Core Entities
 
-### Database Features
-- **Panache ORM** - Active Record pattern for entities
-- **Hibernate Annotations** - JPA mapping with validation
-- **Automatic Timestamps** - CreationTimestamp, UpdateTimestamp
-- **Soft Deletes** - Logical deletion for audit trails
-- **Optimistic Locking** - Concurrent access control
+#### User Entity
+- **Fields**: id, email, password, firstName, lastName, phoneNumber, address, role, isActive, isEmailVerified, lastLoginAt, createdAt, updatedAt
+- **Relationships**: OneToMany with CartItem, WishlistItem, Order, Bid, AuctionWatcher, Review
+- **Key Methods**: findByEmail, findActiveUsers, authentication helpers
+- **Security**: Password hashing, role-based access
 
-### Business Logic Features
-- **Password Hashing** - BCrypt for secure authentication
-- **Stock Management** - Real-time inventory tracking
-- **Auction Engine** - Live bidding with auto-extension
-- **Notification System** - Event-driven notifications
-- **Order Processing** - Complete order lifecycle
-- **Cart Management** - Session-based shopping cart
+#### Product Entity
+- **Fields**: id, name, description, shortDescription, price, originalPrice, stockQuantity, minStockLevel, sku, brand, model, specifications, features, imageUrls, tags, isActive, isFeatured, isOnSale, saleStartDate, saleEndDate, weightKg, dimensions, warrantyMonths, rating, reviewCount, salesCount, viewCount, category, createdAt, updatedAt
+- **Relationships**: ManyToOne with Category, OneToMany with CartItem, WishlistItem, Review, OrderItem, Auction
+- **Key Methods**: findBySku, findByCategory, findActiveProducts, findFeaturedProducts, findOnSaleProducts, searchProducts, stock management
+- **Features**: Sale pricing, stock tracking, rating calculation, view counting
 
-### Validation & Security
-- **Bean Validation** - JSR-303 annotations
-- **Input Sanitization** - XSS prevention
-- **Role-based Access** - Admin/Customer permissions
-- **Token Management** - JWT for authentication
-- **Audit Logging** - User action tracking
+#### Category Entity
+- **Fields**: id, name, description, slug, parent, imageUrl, isActive, sortOrder, createdAt, updatedAt
+- **Relationships**: ManyToOne with parent Category, OneToMany with children Categories and Products
+- **Key Methods**: findBySlug, findRootCategories, findByParent, hierarchical navigation
+- **Features**: Hierarchical structure, URL-friendly slugs
 
-## 📊 Entity Statistics
+#### Order Entity
+- **Fields**: id, user, orderNumber, status, paymentStatus, subtotal, taxAmount, shippingCost, discountAmount, totalAmount, shippingAddress, billingAddress, paymentMethod, paymentReference, notes, shippedAt, deliveredAt, createdAt, updatedAt
+- **Relationships**: ManyToOne with User, OneToMany with OrderItem
+- **Enums**: OrderStatus (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED), PaymentStatus (PENDING, PAID, FAILED, REFUNDED)
+- **Key Methods**: findByOrderNumber, findByUser, findByStatus, order lifecycle management
+- **Features**: Complete order lifecycle, payment tracking, shipping management
 
-### Core Entities (11)
-1. **User** - 25+ fields, authentication & profile
-2. **Product** - 20+ fields, catalog & inventory
-3. **Category** - 10+ fields, hierarchical structure
-4. **Order** - 15+ fields, order management
-5. **OrderItem** - 10+ fields, line item details
-6. **Auction** - 20+ fields, auction system
-7. **Bid** - 10+ fields, bidding mechanism
-8. **CartItem** - 8+ fields, shopping cart
-9. **WishlistItem** - 6+ fields, user wishlist
-10. **Review** - 15+ fields, product reviews
-11. **Notification** - 12+ fields, notification system
+#### OrderItem Entity
+- **Fields**: id, order, product, productName, productSku, productPrice, quantity, subtotal, createdAt
+- **Relationships**: ManyToOne with Order and Product
+- **Key Methods**: findByOrder, findByProduct, quantity management
+- **Features**: Product snapshot at time of order
 
-### Support Entities (2)
-1. **AuctionWatcher** - 8+ fields, auction tracking
-2. **Enum Classes** - 5 enums with comprehensive values
+### Shopping & Wishlist
 
-### Service Classes (6)
-1. **UserService** - 25+ methods, user management
-2. **ProductService** - 30+ methods, product operations
-3. **AuctionService** - 20+ methods, auction logic
-4. **OrderService** - 20+ methods, order processing
-5. **CartService** - 15+ methods, cart operations
-6. **NotificationService** - 25+ methods, notifications
+#### CartItem Entity
+- **Fields**: id, user, product, quantity, isSelected, createdAt, updatedAt
+- **Relationships**: ManyToOne with User and Product
+- **Constraints**: Unique constraint on user_id + product_id
+- **Key Methods**: findByUser, findSelectedByUser, cart management operations
+- **Features**: Item selection, quantity management, stock validation
 
-## 🚀 Key Features Implemented
-
-### User Management
-- User registration with email verification
-- Secure password hashing and validation
-- Role-based access control (Admin/Customer)
-- Profile management and updates
-- Password reset functionality
-- Last login tracking
-
-### Product Catalog
-- Complete product CRUD operations
-- Category-based organization
-- Inventory management with stock tracking
-- Price management with sale pricing
-- Product search and filtering
-- View count and sales tracking
-- Rating and review aggregation
+#### WishlistItem Entity
+- **Fields**: id, user, product, createdAt
+- **Relationships**: ManyToOne with User and Product
+- **Constraints**: Unique constraint on user_id + product_id
+- **Key Methods**: findByUser, wishlist management operations
+- **Features**: Simple wishlist functionality
 
 ### Auction System
-- Live auction creation and management
-- Real-time bidding with validation
-- Auto-extension for last-minute bids
-- Auction watching and notifications
-- Winner determination and order creation
-- Auction cancellation with notifications
 
-### Order Management
-- Order creation from cart or auction
-- Order status tracking and updates
-- Payment status management
-- Shipping information tracking
-- Order cancellation and refunds
-- Revenue calculation and reporting
+#### Auction Entity
+- **Fields**: id, product, title, description, startingPrice, currentPrice, buyNowPrice, minimumBidIncrement, status, startTime, endTime, winner, totalBids, watchersCount, createdAt, updatedAt
+- **Relationships**: ManyToOne with Product and User (winner), OneToMany with Bid and AuctionWatcher
+- **Enums**: AuctionStatus (DRAFT, SCHEDULED, LIVE, ENDED, CANCELLED)
+- **Key Methods**: findActiveAuctions, findLiveAuctions, findUpcomingAuctions, auction lifecycle management
+- **Features**: Real-time bidding, auto-bidding support, auction scheduling
 
-### Shopping Cart
-- Add/remove products with quantity
-- Cart item selection for checkout
-- Stock validation and updates
-- Cart summary with totals and savings
-- Cart cleanup after order placement
+#### Bid Entity
+- **Fields**: id, auction, user, amount, isAutoBid, maxAutoBid, isWinning, createdAt
+- **Relationships**: ManyToOne with Auction and User
+- **Key Methods**: findByAuction, findByUser, findHighestBidForAuction, bid management
+- **Features**: Manual and automatic bidding, winning bid tracking
 
-### Notification System
-- Event-driven notification creation
-- Multiple notification types and priorities
-- Bulk notifications for admin
-- Notification expiration and cleanup
-- Read/unread status management
-- Action URLs for navigation
+#### AuctionWatcher Entity
+- **Fields**: id, auction, user, createdAt
+- **Relationships**: ManyToOne with Auction and User
+- **Constraints**: Unique constraint on auction_id + user_id
+- **Key Methods**: findByAuction, findByUser, watcher management
+- **Features**: Auction watching/following functionality
 
-## 🔍 Business Logic Highlights
+### Review System
 
-### Inventory Management
-- Real-time stock tracking
-- Automatic stock reduction on orders
-- Stock restoration on cancellations
-- Low stock alerts and monitoring
-- Out-of-stock handling
+#### Review Entity
+- **Fields**: id, product, user, rating, title, comment, isVerifiedPurchase, helpfulCount, isApproved, createdAt, updatedAt
+- **Relationships**: ManyToOne with Product and User
+- **Constraints**: Unique constraint on product_id + user_id
+- **Key Methods**: findByProduct, findByUser, rating calculations, review management
+- **Features**: 5-star rating, verified purchase marking, review approval system
 
-### Auction Engine
-- Minimum bid validation
-- Auto-extension on late bids
-- Reserve price checking
-- Winner notification system
-- Auction watcher management
+## REST Resources (Controllers)
 
-### Order Processing
-- Multi-item order creation
-- Payment status integration
-- Shipping tracking
-- Refund processing
-- Order history and reporting
+### UserResource
+- **Endpoints**:
+  - POST /api/users/register - User registration
+  - POST /api/users/login - User authentication
+  - GET /api/users/profile - Get user profile
+  - PUT /api/users/profile - Update user profile
+  - PUT /api/users/password - Change password
+  - GET /api/users/admin/all - Admin: Get all users
+  - PUT /api/users/admin/{id}/status - Admin: Update user status
+- **Security**: JWT authentication, role-based access control
+- **Features**: Registration, login, profile management, admin user management
 
-### Security Features
-- Password strength validation
-- Email verification tokens
-- Password reset tokens with expiry
-- Role-based method access
-- Input validation and sanitization
+### ProductResource
+- **Endpoints**:
+  - GET /api/products - Get products with filtering/pagination
+  - GET /api/products/{id} - Get product details
+  - GET /api/products/search - Search products
+  - GET /api/products/category/{categoryId} - Get products by category
+  - GET /api/products/featured - Get featured products
+  - POST /api/products/admin/create - Admin: Create product
+  - PUT /api/products/admin/{id} - Admin: Update product
+  - DELETE /api/products/admin/{id} - Admin: Delete product
+  - PUT /api/products/admin/{id}/stock - Admin: Update stock
+- **Features**: Product catalog, search, filtering, admin management
 
-## 📈 Performance Optimizations
+### CartResource
+- **Endpoints**:
+  - GET /api/cart - Get user's cart
+  - POST /api/cart/add - Add item to cart
+  - PUT /api/cart/{id} - Update cart item
+  - DELETE /api/cart/{id} - Remove cart item
+  - DELETE /api/cart/clear - Clear cart
+  - PUT /api/cart/select-all - Select/deselect all items
+- **Features**: Shopping cart management, item selection, quantity updates
 
-### Database Optimizations
-- Lazy loading for relationships
-- Indexed fields for fast queries
-- Batch operations for bulk updates
-- Connection pooling
-- Query optimization
+### OrderResource
+- **Endpoints**:
+  - POST /api/orders/create - Create order from cart
+  - GET /api/orders/{id} - Get order details
+  - GET /api/orders/user/{userId} - Get user orders
+  - PUT /api/orders/{id}/payment - Update payment status
+  - PUT /api/orders/{id}/cancel - Cancel order
+  - GET /api/orders/admin/all - Admin: Get all orders
+  - PUT /api/orders/admin/{id}/status - Admin: Update order status
+  - PUT /api/orders/admin/{id}/ship - Admin: Ship order
+  - PUT /api/orders/admin/{id}/deliver - Admin: Deliver order
+  - GET /api/orders/admin/stats - Admin: Order statistics
+- **Features**: Order creation, payment processing, order lifecycle management
 
-### Caching Strategy
-- Entity-level caching
-- Query result caching
-- Session management
-- Static resource caching
+### AuctionResource
+- **Endpoints**:
+  - GET /api/auctions - Get auctions with filtering
+  - GET /api/auctions/{id} - Get auction details
+  - GET /api/auctions/live - Get live auctions
+  - GET /api/auctions/upcoming - Get upcoming auctions
+  - POST /api/auctions/{id}/bid - Place bid
+  - POST /api/auctions/{id}/watch - Watch/unwatch auction
+  - GET /api/auctions/user/bids - Get user's bids
+  - GET /api/auctions/user/watched - Get watched auctions
+  - POST /api/auctions/admin/create - Admin: Create auction
+  - PUT /api/auctions/admin/{id} - Admin: Update auction
+  - PUT /api/auctions/admin/{id}/start - Admin: Start auction
+  - PUT /api/auctions/admin/{id}/end - Admin: End auction
+- **Features**: Auction management, bidding system, auction watching
 
-### Scalability Features
-- Stateless service design
-- Horizontal scaling ready
-- Database connection pooling
-- Async processing ready
-- Load balancer compatible
+## Services
 
-## 🧪 Quality Assurance
+### JwtService
+- **Functions**: JWT token generation, validation, user extraction
+- **Security**: RSA key-based signing, token expiration handling
+- **Features**: Secure authentication token management
 
-### Code Quality
-- Comprehensive validation annotations
-- Error handling with meaningful messages
-- Transaction management
-- Null safety checks
-- Input sanitization
+### OrderService
+- **Functions**: Order creation from cart, order lifecycle management, payment processing
+- **Features**: Cart to order conversion, inventory management, order status updates
 
-### Business Rules
-- Stock availability validation
-- Auction timing constraints
-- Order status transitions
-- Payment processing rules
-- User permission checks
+### AuctionService
+- **Functions**: Auction lifecycle management, bidding logic, auto-bidding
+- **Features**: Real-time auction processing, winner determination
 
-### Data Integrity
-- Foreign key constraints
-- Unique constraints
-- Not null validations
-- Enum value restrictions
-- Timestamp consistency
+## Database Configuration
 
-## 🔮 Ready for Integration
+### Connection Settings
+```properties
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=${DB_USERNAME:autowarehouse}
+quarkus.datasource.password=${DB_PASSWORD:password}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+```
 
-### API Layer Ready
-Service layer siap untuk REST API implementation:
-- All CRUD operations implemented
-- Business logic encapsulated
-- Error handling standardized
-- Transaction boundaries defined
-- Security hooks prepared
+### Migration Management
+- **Tool**: Flyway
+- **Location**: src/main/resources/db/migration/
+- **Naming**: V1__Create_initial_tables.sql
+- **Features**: Version-controlled database schema evolution
 
-### Frontend Integration Ready
-Backend services mendukung frontend requirements:
-- User authentication and registration
-- Product catalog and search
-- Shopping cart operations
-- Order placement and tracking
-- Auction participation
-- Notification management
+## Security Implementation
 
-### 4. REST API Controllers (Complete) ✅
-- ✅ **UserResource** - User authentication, registration, profile management
-- ✅ **ProductResource** - Product CRUD, search, inventory management
-- ✅ **AuctionResource** - Auction management, bidding, watching
-- ✅ **OrderResource** - Order creation, tracking, management
-- ✅ **CartResource** - Shopping cart operations, validation
+### JWT Authentication
+- **Algorithm**: RS256 (RSA with SHA-256)
+- **Keys**: RSA public/private key pair
+- **Token Expiration**: Configurable (default: 24 hours)
+- **Claims**: User ID, email, role, expiration
 
-## 📋 Next Steps
+### Role-Based Access Control
+- **Roles**: ADMIN, CUSTOMER
+- **Implementation**: @RolesAllowed annotations on endpoints
+- **Features**: Method-level security, role hierarchy
 
-### Immediate (Week 1)
-1. **Authentication Integration** - JWT implementation
-2. **API Documentation** - OpenAPI/Swagger setup
-3. **Error Handling** - Global exception handlers
-4. **Configuration Classes** - Security and database config
+### Password Security
+- **Hashing**: BCrypt with salt
+- **Validation**: Strong password requirements
+- **Features**: Secure password storage and verification
 
-### Short Term (Week 2-3)
-1. **Database Migration** - Flyway/Liquibase setup
-2. **Testing Suite** - Unit and integration tests
-3. **API Security** - CORS, rate limiting
-4. **Monitoring** - Health checks, metrics
+## API Features
 
-### Medium Term (Month 1)
-1. **Real-time Features** - WebSocket for auctions
-2. **File Upload** - Image handling for products
-3. **Email Service** - Notification delivery
-4. **Payment Integration** - Payment gateway
+### Pagination & Filtering
+- **Implementation**: Query parameters for page, size, sort
+- **Filtering**: Product search, category filtering, status filtering
+- **Sorting**: Multiple sort criteria support
 
-## 🏆 Implementation Success
+### Error Handling
+- **Structure**: Consistent error response format
+- **Validation**: Bean validation with custom messages
+- **Logging**: Comprehensive error logging
 
-Backend implementation berhasil diselesaikan dengan:
+### Response Format
+- **Success**: Structured response with data
+- **Error**: Error code, message, and details
+- **Pagination**: Total count, page info in responses
 
-- ✅ **Complete Entity Model** - 13 entities dengan relationships
-- ✅ **Business Logic Services** - 6 service classes dengan 150+ methods
-- ✅ **Data Validation** - Comprehensive validation rules
-- ✅ **Security Implementation** - Authentication dan authorization
-- ✅ **Scalable Architecture** - Ready untuk production deployment
-- ✅ **Quality Code** - Clean, maintainable, dan well-documented
+## Performance Optimizations
 
----
+### Database
+- **Lazy Loading**: FetchType.LAZY for relationships
+- **Indexing**: Strategic database indexes
+- **Connection Pooling**: HikariCP connection pool
 
-**Status**: ✅ **BACKEND CORE COMPLETED**  
-**Next Phase**: REST API Development & Testing  
-**Timeline**: Ready untuk API layer implementation
+### Caching
+- **Query Caching**: Hibernate second-level cache
+- **Application Caching**: Strategic caching of frequently accessed data
+
+### API Optimization
+- **Projection**: DTO pattern for API responses
+- **Batch Operations**: Bulk operations where applicable
+- **Pagination**: Limit result sets for large collections
+
+## Deployment Configuration
+
+### Environment Variables
+- **Database**: DB_URL, DB_USERNAME, DB_PASSWORD
+- **JWT**: JWT_ISSUER, JWT_EXPIRATION
+- **Application**: QUARKUS_PROFILE, LOG_LEVEL
+
+### Production Settings
+- **Logging**: Structured logging with appropriate levels
+- **Monitoring**: Health checks and metrics endpoints
+- **Security**: HTTPS enforcement, CORS configuration
+
+## Testing Strategy
+
+### Unit Tests
+- **Entities**: Entity validation and business logic
+- **Services**: Service layer business logic
+- **Resources**: REST endpoint testing
+
+### Integration Tests
+- **Database**: Repository layer testing
+- **API**: End-to-end API testing
+- **Security**: Authentication and authorization testing
+
+## Development Workflow
+
+### Code Organization
+- **Packages**: Clear separation of concerns
+- **Naming**: Consistent naming conventions
+- **Documentation**: Comprehensive code documentation
+
+### Database Evolution
+- **Migrations**: Version-controlled schema changes
+- **Rollback**: Safe rollback procedures
+- **Testing**: Migration testing in development
+
+### API Documentation
+- **OpenAPI**: Automatic API documentation generation
+- **Examples**: Request/response examples
+- **Validation**: API contract validation
+
+## Monitoring & Maintenance
+
+### Health Checks
+- **Database**: Connection health monitoring
+- **Application**: Service health endpoints
+- **Dependencies**: External service monitoring
+
+### Logging
+- **Levels**: Appropriate log levels for different environments
+- **Format**: Structured logging for analysis
+- **Retention**: Log retention policies
+
+### Metrics
+- **Performance**: Response time monitoring
+- **Usage**: API usage statistics
+- **Errors**: Error rate monitoring
+
+## Future Enhancements
+
+### Scalability
+- **Microservices**: Service decomposition strategy
+- **Caching**: Redis integration for distributed caching
+- **Load Balancing**: Horizontal scaling preparation
+
+### Features
+- **Real-time**: WebSocket integration for live updates
+- **Search**: Elasticsearch integration for advanced search
+- **Analytics**: Business intelligence and reporting
+
+### Security
+- **OAuth2**: Third-party authentication integration
+- **Rate Limiting**: API rate limiting implementation
+- **Audit**: Comprehensive audit logging

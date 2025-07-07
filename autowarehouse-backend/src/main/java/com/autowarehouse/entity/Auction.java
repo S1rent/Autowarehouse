@@ -2,10 +2,8 @@ package com.autowarehouse.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -21,27 +19,37 @@ public class Auction extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    @NotNull
+    public Product product;
+
+    @Column(nullable = false, length = 200)
     @NotBlank
-    @Size(max = 200)
     public String title;
 
     @Column(columnDefinition = "TEXT")
     public String description;
 
-    @Column(name = "starting_bid", nullable = false, precision = 12, scale = 2)
+    @Column(name = "starting_price", nullable = false, precision = 12, scale = 2)
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    public BigDecimal startingBid;
+    public BigDecimal startingPrice;
 
-    @Column(name = "current_bid", precision = 12, scale = 2)
-    public BigDecimal currentBid;
+    @Column(name = "current_price", nullable = false, precision = 12, scale = 2)
+    @NotNull
+    public BigDecimal currentPrice;
 
-    @Column(name = "reserve_price", precision = 12, scale = 2)
-    public BigDecimal reservePrice;
+    @Column(name = "buy_now_price", precision = 12, scale = 2)
+    public BigDecimal buyNowPrice;
 
-    @Column(name = "bid_increment", precision = 12, scale = 2)
-    public BigDecimal bidIncrement = new BigDecimal("10000"); // Default 10k increment
+    @Column(name = "minimum_bid_increment", nullable = false, precision = 12, scale = 2)
+    @NotNull
+    public BigDecimal minimumBidIncrement = new BigDecimal("1000.00");
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @NotNull
+    public AuctionStatus status = AuctionStatus.SCHEDULED;
 
     @Column(name = "start_time", nullable = false)
     @NotNull
@@ -51,30 +59,15 @@ public class Auction extends PanacheEntityBase {
     @NotNull
     public LocalDateTime endTime;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    public AuctionStatus status = AuctionStatus.UPCOMING;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_id")
+    public User winner;
 
     @Column(name = "total_bids")
     public Integer totalBids = 0;
 
-    @Column(name = "total_watchers")
-    public Integer totalWatchers = 0;
-
-    @Column(name = "is_featured")
-    public Boolean isFeatured = false;
-
-    @Column(name = "auto_extend_minutes")
-    public Integer autoExtendMinutes = 5; // Auto-extend if bid in last 5 minutes
-
-    @Column(name = "condition_description")
-    @Size(max = 500)
-    public String conditionDescription;
-
-    @ElementCollection
-    @CollectionTable(name = "auction_images", joinColumns = @JoinColumn(name = "auction_id"))
-    @Column(name = "image_url")
-    public List<String> imageUrls;
+    @Column(name = "watchers_count")
+    public Integer watchersCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -85,20 +78,7 @@ public class Auction extends PanacheEntityBase {
     public LocalDateTime updatedAt;
 
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    public Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    public Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "winner_id")
-    public User winner;
-
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @OrderBy("bidAmount DESC, createdAt DESC")
     public List<Bid> bids;
 
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -107,57 +87,86 @@ public class Auction extends PanacheEntityBase {
     // Constructors
     public Auction() {}
 
-    public Auction(String title, String description, BigDecimal startingBid, LocalDateTime startTime, LocalDateTime endTime, Category category) {
+    public Auction(Product product, String title, String description, BigDecimal startingPrice, 
+                   LocalDateTime startTime, LocalDateTime endTime) {
+        this.product = product;
         this.title = title;
         this.description = description;
-        this.startingBid = startingBid;
-        this.currentBid = startingBid;
+        this.startingPrice = startingPrice;
+        this.currentPrice = startingPrice;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.category = category;
+    }
+
+    // Enums
+    public enum AuctionStatus {
+        DRAFT, SCHEDULED, LIVE, ENDED, CANCELLED
     }
 
     // Static finder methods
+    public static List<Auction> findActiveAuctions() {
+        return find("status in (?1, ?2) order by endTime asc", 
+                   AuctionStatus.SCHEDULED, AuctionStatus.LIVE).list();
+    }
+
     public static List<Auction> findLiveAuctions() {
-        return find("status = ?1 order by endTime", AuctionStatus.LIVE).list();
+        return find("status = ?1 order by endTime asc", AuctionStatus.LIVE).list();
     }
 
     public static List<Auction> findUpcomingAuctions() {
-        return find("status = ?1 order by startTime", AuctionStatus.UPCOMING).list();
+        return find("status = ?1 order by startTime asc", AuctionStatus.SCHEDULED).list();
     }
 
     public static List<Auction> findEndingSoonAuctions() {
-        LocalDateTime soon = LocalDateTime.now().plusHours(2);
-        return find("status = ?1 and endTime <= ?2 order by endTime", AuctionStatus.LIVE, soon).list();
+        LocalDateTime soon = LocalDateTime.now().plusHours(24);
+        return find("status = ?1 and endTime <= ?2 order by endTime asc", 
+                   AuctionStatus.LIVE, soon).list();
     }
 
-    public static List<Auction> findByCategory(Category category) {
-        return find("category = ?1 and status != ?2 order by startTime desc", category, AuctionStatus.CANCELLED).list();
+    public static List<Auction> findByStatus(AuctionStatus status) {
+        return find("status = ?1 order by createdAt desc", status).list();
     }
 
-    public static List<Auction> findByCategoryId(Long categoryId) {
-        return find("category.id = ?1 and status != ?2 order by startTime desc", categoryId, AuctionStatus.CANCELLED).list();
+    public static List<Auction> findByStatus(String status) {
+        return find("status = ?1 order by createdAt desc", 
+                   AuctionStatus.valueOf(status.toUpperCase())).list();
     }
 
-    public static List<Auction> findFeaturedAuctions() {
-        return find("isFeatured = true and status != ?1 order by startTime desc", AuctionStatus.CANCELLED).list();
+    public static List<Auction> findByProduct(Product product) {
+        return find("product = ?1 order by createdAt desc", product).list();
+    }
+
+    public static List<Auction> findByProductId(Long productId) {
+        return find("product.id = ?1 order by createdAt desc", productId).list();
     }
 
     public static List<Auction> findByWinner(User winner) {
         return find("winner = ?1 order by endTime desc", winner).list();
     }
 
-    public static List<Auction> searchByTitle(String searchTerm) {
-        return find("lower(title) like ?1 and status != ?2", "%" + searchTerm.toLowerCase() + "%", AuctionStatus.CANCELLED).list();
+    public static List<Auction> findByWinnerId(Long winnerId) {
+        return find("winner.id = ?1 order by endTime desc", winnerId).list();
+    }
+
+    public static long countByStatus(AuctionStatus status) {
+        return count("status", status);
+    }
+
+    public static long countLiveAuctions() {
+        return count("status", AuctionStatus.LIVE);
+    }
+
+    public static long countUpcomingAuctions() {
+        return count("status", AuctionStatus.SCHEDULED);
     }
 
     // Helper methods
-    public boolean isLive() {
-        return status == AuctionStatus.LIVE;
+    public boolean isScheduled() {
+        return status == AuctionStatus.SCHEDULED;
     }
 
-    public boolean isUpcoming() {
-        return status == AuctionStatus.UPCOMING;
+    public boolean isLive() {
+        return status == AuctionStatus.LIVE;
     }
 
     public boolean isEnded() {
@@ -168,79 +177,76 @@ public class Auction extends PanacheEntityBase {
         return status == AuctionStatus.CANCELLED;
     }
 
-    public boolean hasReservePrice() {
-        return reservePrice != null && reservePrice.compareTo(BigDecimal.ZERO) > 0;
+    public boolean canBid() {
+        return status == AuctionStatus.LIVE && LocalDateTime.now().isBefore(endTime);
     }
 
-    public boolean isReserveMet() {
-        return !hasReservePrice() || (currentBid != null && currentBid.compareTo(reservePrice) >= 0);
+    public boolean canCancel() {
+        return status == AuctionStatus.SCHEDULED || status == AuctionStatus.LIVE;
     }
 
-    public long getTimeLeftInMinutes() {
-        if (isEnded() || isCancelled()) {
-            return 0;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        if (isUpcoming()) {
-            return java.time.Duration.between(now, startTime).toMinutes();
-        } else {
-            return java.time.Duration.between(now, endTime).toMinutes();
-        }
+    public boolean shouldStart() {
+        return status == AuctionStatus.SCHEDULED && LocalDateTime.now().isAfter(startTime);
     }
 
-    public boolean shouldAutoExtend() {
-        if (!isLive() || autoExtendMinutes == null || autoExtendMinutes <= 0) {
-            return false;
-        }
-        return getTimeLeftInMinutes() <= autoExtendMinutes;
+    public boolean shouldEnd() {
+        return status == AuctionStatus.LIVE && LocalDateTime.now().isAfter(endTime);
     }
 
-    public void extendEndTime(int minutes) {
-        this.endTime = this.endTime.plusMinutes(minutes);
+    public BigDecimal getMinimumBid() {
+        return currentPrice.add(minimumBidIncrement);
     }
 
-    public BigDecimal getNextMinimumBid() {
-        if (currentBid == null) {
-            return startingBid;
-        }
-        return currentBid.add(bidIncrement);
+    public boolean isValidBid(BigDecimal bidAmount) {
+        return bidAmount.compareTo(getMinimumBid()) >= 0;
     }
 
-    public void updateCurrentBid(BigDecimal newBid) {
-        this.currentBid = newBid;
+    public void updateCurrentPrice(BigDecimal newPrice) {
+        this.currentPrice = newPrice;
         this.totalBids++;
     }
 
-    public void addWatcher() {
-        this.totalWatchers++;
+    public void setWinner(User winner) {
+        this.winner = winner;
+        this.status = AuctionStatus.ENDED;
     }
 
-    public void removeWatcher() {
-        if (this.totalWatchers > 0) {
-            this.totalWatchers--;
+    public void start() {
+        if (status != AuctionStatus.SCHEDULED) {
+            throw new IllegalStateException("Auction must be scheduled to start");
+        }
+        this.status = AuctionStatus.LIVE;
+    }
+
+    public void end() {
+        if (status != AuctionStatus.LIVE) {
+            throw new IllegalStateException("Auction must be live to end");
+        }
+        this.status = AuctionStatus.ENDED;
+    }
+
+    public void cancel() {
+        if (!canCancel()) {
+            throw new IllegalStateException("Auction cannot be cancelled in current state");
+        }
+        this.status = AuctionStatus.CANCELLED;
+    }
+
+    public void incrementWatchersCount() {
+        this.watchersCount++;
+    }
+
+    public void decrementWatchersCount() {
+        if (this.watchersCount > 0) {
+            this.watchersCount--;
         }
     }
 
-    public void updateStatus() {
+    public long getTimeRemainingMinutes() {
+        if (status != AuctionStatus.LIVE) return 0;
         LocalDateTime now = LocalDateTime.now();
-        
-        if (status == AuctionStatus.UPCOMING && now.isAfter(startTime)) {
-            status = AuctionStatus.LIVE;
-        } else if (status == AuctionStatus.LIVE && now.isAfter(endTime)) {
-            status = AuctionStatus.ENDED;
-            // Set winner if there are bids and reserve is met
-            if (totalBids > 0 && isReserveMet() && !bids.isEmpty()) {
-                winner = bids.get(0).user; // Highest bidder
-            }
-        }
-    }
-
-    public Bid getHighestBid() {
-        return bids != null && !bids.isEmpty() ? bids.get(0) : null;
-    }
-
-    public String getPrimaryImageUrl() {
-        return imageUrls != null && !imageUrls.isEmpty() ? imageUrls.get(0) : null;
+        if (now.isAfter(endTime)) return 0;
+        return java.time.Duration.between(now, endTime).toMinutes();
     }
 
     @Override
@@ -248,12 +254,11 @@ public class Auction extends PanacheEntityBase {
         return "Auction{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", startingBid=" + startingBid +
-                ", currentBid=" + currentBid +
                 ", status=" + status +
-                ", totalBids=" + totalBids +
+                ", currentPrice=" + currentPrice +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
+                ", totalBids=" + totalBids +
                 '}';
     }
 }

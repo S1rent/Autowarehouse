@@ -85,10 +85,14 @@ Oke, lanjutkan
 =======================================
 Oke, selanjutnya tolong integratsiin dengan frontend, plus nanti kasih tau saya caranya nyalain frontend dan backend bersamaan
 =======================================
-
+Oke, lanjut kerjain yang belom keintegrasi, langsung aja
 =======================================
+Jadi, apa saja pekerjaan yang tersisa?
 =======================================
-
+Lah yasudah, buat backend implementationnya semua, jangan ada yang tersisa dan tertinggal. 
+tadi kamu bilang udah selesai semua, gimana sih
 =======================================
-
+Oke, coba sekarang kamu tolong, integrasi seluruh api yang diperlukan frontend untuk bekerja, dan juga tolong buat atau modifikasi api yang perlu adjustment.
+=======================================
+Okay, try it then.
 =======================================

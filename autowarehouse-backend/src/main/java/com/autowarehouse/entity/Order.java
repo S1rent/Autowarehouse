@@ -2,10 +2,8 @@ package com.autowarehouse.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -21,60 +19,66 @@ public class Order extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(name = "order_number", unique = true, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
+    public User user;
+
+    @Column(name = "order_number", unique = true, nullable = false, length = 50)
     @NotBlank
-    @Size(max = 50)
     public String orderNumber;
 
-    @Column(name = "subtotal", nullable = false, precision = 12, scale = 2)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     @NotNull
-    @DecimalMin(value = "0.0")
+    public OrderStatus status = OrderStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false, length = 20)
+    @NotNull
+    public PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    @NotNull
     public BigDecimal subtotal;
 
-    @Column(name = "tax_amount", precision = 12, scale = 2)
+    @Column(name = "tax_amount", nullable = false, precision = 12, scale = 2)
+    @NotNull
     public BigDecimal taxAmount = BigDecimal.ZERO;
 
-    @Column(name = "shipping_cost", precision = 12, scale = 2)
+    @Column(name = "shipping_cost", nullable = false, precision = 12, scale = 2)
+    @NotNull
     public BigDecimal shippingCost = BigDecimal.ZERO;
 
-    @Column(name = "discount_amount", precision = 12, scale = 2)
+    @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
+    @NotNull
     public BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     @NotNull
-    @DecimalMin(value = "0.0")
     public BigDecimal totalAmount;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    public OrderStatus status = OrderStatus.PENDING;
-
-    @Column(name = "payment_method")
-    @Size(max = 50)
-    public String paymentMethod;
-
-    @Column(name = "payment_status")
-    @Enumerated(EnumType.STRING)
-    public PaymentStatus paymentStatus = PaymentStatus.PENDING;
-
-    @Column(name = "shipping_address", columnDefinition = "TEXT")
+    @Column(name = "shipping_address", nullable = false, columnDefinition = "TEXT")
+    @NotBlank
     public String shippingAddress;
 
     @Column(name = "billing_address", columnDefinition = "TEXT")
     public String billingAddress;
 
-    @Column(name = "tracking_number")
-    @Size(max = 100)
-    public String trackingNumber;
+    @Column(name = "payment_method", length = 50)
+    public String paymentMethod;
+
+    @Column(name = "payment_reference")
+    public String paymentReference;
+
+    @Column(columnDefinition = "TEXT")
+    public String notes;
 
     @Column(name = "shipped_at")
     public LocalDateTime shippedAt;
 
     @Column(name = "delivered_at")
     public LocalDateTime deliveredAt;
-
-    @Column(columnDefinition = "TEXT")
-    public String notes;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -85,75 +89,159 @@ public class Order extends PanacheEntityBase {
     public LocalDateTime updatedAt;
 
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    public User user;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    public List<OrderItem> orderItems;
+    public List<OrderItem> items;
 
     // Constructors
     public Order() {}
 
-    public Order(String orderNumber, User user) {
-        this.orderNumber = orderNumber;
+    public Order(User user, String orderNumber, BigDecimal subtotal, BigDecimal totalAmount, String shippingAddress) {
         this.user = user;
+        this.orderNumber = orderNumber;
+        this.subtotal = subtotal;
+        this.totalAmount = totalAmount;
+        this.shippingAddress = shippingAddress;
+    }
+
+    // Enums
+    public enum OrderStatus {
+        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+    }
+
+    public enum PaymentStatus {
+        PENDING, PAID, FAILED, REFUNDED
     }
 
     // Static finder methods
+    public static Order findByOrderNumber(String orderNumber) {
+        return find("orderNumber", orderNumber).firstResult();
+    }
+
     public static List<Order> findByUser(User user) {
         return find("user = ?1 order by createdAt desc", user).list();
+    }
+
+    public static List<Order> findByUserId(Long userId) {
+        return find("user.id = ?1 order by createdAt desc", userId).list();
     }
 
     public static List<Order> findByStatus(OrderStatus status) {
         return find("status = ?1 order by createdAt desc", status).list();
     }
 
-    public static Order findByOrderNumber(String orderNumber) {
-        return find("orderNumber", orderNumber).firstResult();
+    public static List<Order> findByStatus(String status) {
+        return find("status = ?1 order by createdAt desc", OrderStatus.valueOf(status.toUpperCase())).list();
+    }
+
+    public static List<Order> findByPaymentStatus(PaymentStatus paymentStatus) {
+        return find("paymentStatus = ?1 order by createdAt desc", paymentStatus).list();
+    }
+
+    public static List<Order> findRecentOrders(int limit) {
+        return find("order by createdAt desc").page(0, limit).list();
     }
 
     public static List<Order> findPendingOrders() {
-        return find("status = ?1 order by createdAt", OrderStatus.PENDING).list();
+        return find("status = ?1 order by createdAt desc", OrderStatus.PENDING).list();
     }
 
-    public static List<Order> findRecentOrders(int days) {
-        LocalDateTime since = LocalDateTime.now().minusDays(days);
-        return find("createdAt >= ?1 order by createdAt desc", since).list();
+    public static List<Order> findCompletedOrders() {
+        return find("status = ?1 order by createdAt desc", OrderStatus.DELIVERED).list();
+    }
+
+    public static long countByStatus(OrderStatus status) {
+        return count("status", status);
+    }
+
+    public static long countPendingOrders() {
+        return count("status", OrderStatus.PENDING);
+    }
+
+    public static long countCompletedOrders() {
+        return count("status", OrderStatus.DELIVERED);
+    }
+
+    public static BigDecimal getTotalRevenue() {
+        return find("select sum(totalAmount) from Order where paymentStatus = ?1", PaymentStatus.PAID)
+                .project(BigDecimal.class)
+                .firstResult();
     }
 
     // Helper methods
-    public void calculateTotals() {
-        this.subtotal = orderItems.stream()
-                .map(item -> item.price.multiply(BigDecimal.valueOf(item.quantity)))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        this.totalAmount = subtotal
-                .add(taxAmount != null ? taxAmount : BigDecimal.ZERO)
-                .add(shippingCost != null ? shippingCost : BigDecimal.ZERO)
-                .subtract(discountAmount != null ? discountAmount : BigDecimal.ZERO);
+    public boolean isPending() {
+        return status == OrderStatus.PENDING;
     }
 
-    public void updateStatus(OrderStatus newStatus) {
-        this.status = newStatus;
-        
-        if (newStatus == OrderStatus.SHIPPED && shippedAt == null) {
-            this.shippedAt = LocalDateTime.now();
-        } else if (newStatus == OrderStatus.DELIVERED && deliveredAt == null) {
-            this.deliveredAt = LocalDateTime.now();
-        }
+    public boolean isConfirmed() {
+        return status == OrderStatus.CONFIRMED;
+    }
+
+    public boolean isShipped() {
+        return status == OrderStatus.SHIPPED;
+    }
+
+    public boolean isDelivered() {
+        return status == OrderStatus.DELIVERED;
+    }
+
+    public boolean isCancelled() {
+        return status == OrderStatus.CANCELLED;
+    }
+
+    public boolean isPaid() {
+        return paymentStatus == PaymentStatus.PAID;
     }
 
     public boolean canBeCancelled() {
         return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
     }
 
-    public boolean isCompleted() {
-        return status == OrderStatus.DELIVERED;
+    public boolean canBeShipped() {
+        return status == OrderStatus.CONFIRMED && paymentStatus == PaymentStatus.PAID;
+    }
+
+    public boolean canBeDelivered() {
+        return status == OrderStatus.SHIPPED;
+    }
+
+    public void updateStatus(OrderStatus newStatus) {
+        this.status = newStatus;
+        if (newStatus == OrderStatus.SHIPPED && shippedAt == null) {
+            shippedAt = LocalDateTime.now();
+        } else if (newStatus == OrderStatus.DELIVERED && deliveredAt == null) {
+            deliveredAt = LocalDateTime.now();
+        }
+    }
+
+    public void updatePaymentStatus(PaymentStatus newPaymentStatus, String reference) {
+        this.paymentStatus = newPaymentStatus;
+        this.paymentReference = reference;
+    }
+
+    public void ship(String trackingNumber) {
+        if (!canBeShipped()) {
+            throw new IllegalStateException("Order cannot be shipped in current state");
+        }
+        updateStatus(OrderStatus.SHIPPED);
+        this.paymentReference = trackingNumber; // Using payment reference for tracking
+    }
+
+    public void deliver() {
+        if (!canBeDelivered()) {
+            throw new IllegalStateException("Order cannot be delivered in current state");
+        }
+        updateStatus(OrderStatus.DELIVERED);
+    }
+
+    public void cancel() {
+        if (!canBeCancelled()) {
+            throw new IllegalStateException("Order cannot be cancelled in current state");
+        }
+        updateStatus(OrderStatus.CANCELLED);
     }
 
     public int getTotalItems() {
-        return orderItems.stream().mapToInt(item -> item.quantity).sum();
+        return items != null ? items.stream().mapToInt(item -> item.quantity).sum() : 0;
     }
 
     @Override
@@ -161,8 +249,9 @@ public class Order extends PanacheEntityBase {
         return "Order{" +
                 "id=" + id +
                 ", orderNumber='" + orderNumber + '\'' +
-                ", totalAmount=" + totalAmount +
                 ", status=" + status +
+                ", paymentStatus=" + paymentStatus +
+                ", totalAmount=" + totalAmount +
                 ", createdAt=" + createdAt +
                 '}';
     }

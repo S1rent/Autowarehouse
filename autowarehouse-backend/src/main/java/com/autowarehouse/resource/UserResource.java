@@ -3,6 +3,7 @@ package com.autowarehouse.resource;
 import com.autowarehouse.entity.User;
 import com.autowarehouse.entity.UserRole;
 import com.autowarehouse.service.UserService;
+import com.autowarehouse.service.JwtService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -19,6 +20,9 @@ public class UserResource {
 
     @Inject
     UserService userService;
+
+    @Inject
+    JwtService jwtService;
 
     @POST
     @Path("/register")
@@ -51,8 +55,8 @@ public class UserResource {
                         .build();
             }
             
-            // TODO: Generate JWT token
-            return Response.ok(new LoginResponse(user, "jwt-token-placeholder"))
+            String token = jwtService.generateToken(user);
+            return Response.ok(new LoginResponse(user, token))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

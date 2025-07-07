@@ -2,130 +2,114 @@ package com.autowarehouse.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "auction_watchers")
+@Table(name = "auction_watchers", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"auction_id", "user_id"}))
 public class AuctionWatcher extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(name = "notify_on_bid")
-    public Boolean notifyOnBid = true;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auction_id", nullable = false)
+    @NotNull
+    public Auction auction;
 
-    @Column(name = "notify_on_ending_soon")
-    public Boolean notifyOnEndingSoon = true;
-
-    @Column(name = "notify_on_end")
-    public Boolean notifyOnEnd = true;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
+    public User user;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     public LocalDateTime createdAt;
 
-    // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    public User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "auction_id", nullable = false)
-    public Auction auction;
-
     // Constructors
     public AuctionWatcher() {}
 
-    public AuctionWatcher(User user, Auction auction) {
-        this.user = user;
+    public AuctionWatcher(Auction auction, User user) {
         this.auction = auction;
+        this.user = user;
     }
 
     // Static finder methods
-    public static List<AuctionWatcher> findByUser(User user) {
-        return find("user = ?1 order by createdAt desc", user).list();
+    public static AuctionWatcher findByAuctionAndUser(Auction auction, User user) {
+        return find("auction = ?1 and user = ?2", auction, user).firstResult();
+    }
+
+    public static AuctionWatcher findByAuctionIdAndUserId(Long auctionId, Long userId) {
+        return find("auction.id = ?1 and user.id = ?2", auctionId, userId).firstResult();
     }
 
     public static List<AuctionWatcher> findByAuction(Auction auction) {
         return find("auction = ?1 order by createdAt desc", auction).list();
     }
 
-    public static AuctionWatcher findByUserAndAuction(User user, Auction auction) {
-        return find("user = ?1 and auction = ?2", user, auction).firstResult();
+    public static List<AuctionWatcher> findByAuctionId(Long auctionId) {
+        return find("auction.id = ?1 order by createdAt desc", auctionId).list();
     }
 
-    public static List<AuctionWatcher> findActiveWatchers(User user) {
-        return find("user = ?1 and auction.status in (?2, ?3) order by createdAt desc", 
-                   user, AuctionStatus.UPCOMING, AuctionStatus.LIVE).list();
+    public static List<AuctionWatcher> findByUser(User user) {
+        return find("user = ?1 order by createdAt desc", user).list();
     }
 
-    public static List<AuctionWatcher> findWatchersForNotification(Auction auction, String notificationType) {
-        String query = "auction = ?1";
-        
-        switch (notificationType) {
-            case "bid":
-                query += " and notifyOnBid = true";
-                break;
-            case "ending_soon":
-                query += " and notifyOnEndingSoon = true";
-                break;
-            case "end":
-                query += " and notifyOnEnd = true";
-                break;
-        }
-        
-        return find(query, auction).list();
+    public static List<AuctionWatcher> findByUserId(Long userId) {
+        return find("user.id = ?1 order by createdAt desc", userId).list();
+    }
+
+    public static List<Auction> findWatchedAuctionsByUser(User user) {
+        return find("select aw.auction from AuctionWatcher aw where aw.user = ?1 order by aw.createdAt desc", user).list();
+    }
+
+    public static List<Auction> findWatchedAuctionsByUserId(Long userId) {
+        return find("select aw.auction from AuctionWatcher aw where aw.user.id = ?1 order by aw.createdAt desc", userId).list();
+    }
+
+    public static boolean existsByAuctionAndUser(Auction auction, User user) {
+        return count("auction = ?1 and user = ?2", auction, user) > 0;
+    }
+
+    public static boolean existsByAuctionIdAndUserId(Long auctionId, Long userId) {
+        return count("auction.id = ?1 and user.id = ?2", auctionId, userId) > 0;
     }
 
     public static long countByAuction(Auction auction) {
         return count("auction", auction);
     }
 
+    public static long countByAuctionId(Long auctionId) {
+        return count("auction.id", auctionId);
+    }
+
     public static long countByUser(User user) {
         return count("user", user);
     }
 
-    public static boolean existsByUserAndAuction(User user, Auction auction) {
-        return count("user = ?1 and auction = ?2", user, auction) > 0;
+    public static long countByUserId(Long userId) {
+        return count("user.id", userId);
     }
 
-    // Helper methods
-    public void updateNotificationPreferences(boolean notifyOnBid, boolean notifyOnEndingSoon, boolean notifyOnEnd) {
-        this.notifyOnBid = notifyOnBid;
-        this.notifyOnEndingSoon = notifyOnEndingSoon;
-        this.notifyOnEnd = notifyOnEnd;
+    public static void deleteByAuctionAndUser(Auction auction, User user) {
+        delete("auction = ?1 and user = ?2", auction, user);
     }
 
-    public boolean shouldNotifyOnBid() {
-        return notifyOnBid != null && notifyOnBid;
-    }
-
-    public boolean shouldNotifyOnEndingSoon() {
-        return notifyOnEndingSoon != null && notifyOnEndingSoon;
-    }
-
-    public boolean shouldNotifyOnEnd() {
-        return notifyOnEnd != null && notifyOnEnd;
-    }
-
-    public boolean isAuctionActive() {
-        return auction != null && 
-               (auction.status == AuctionStatus.UPCOMING || auction.status == AuctionStatus.LIVE);
+    public static void deleteByAuctionIdAndUserId(Long auctionId, Long userId) {
+        delete("auction.id = ?1 and user.id = ?2", auctionId, userId);
     }
 
     @Override
     public String toString() {
         return "AuctionWatcher{" +
                 "id=" + id +
-                ", notifyOnBid=" + notifyOnBid +
-                ", notifyOnEndingSoon=" + notifyOnEndingSoon +
-                ", notifyOnEnd=" + notifyOnEnd +
-                ", user=" + (user != null ? user.email : null) +
-                ", auction=" + (auction != null ? auction.title : null) +
+                ", auctionId=" + (auction != null ? auction.id : null) +
+                ", userId=" + (user != null ? user.id : null) +
                 ", createdAt=" + createdAt +
                 '}';
     }

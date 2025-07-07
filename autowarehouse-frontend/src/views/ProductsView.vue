@@ -191,7 +191,7 @@
             >
               <div class="relative">
                 <img 
-                  :src="product.image" 
+                  :src="product.imageUrls?.[0] || '/placeholder-product.jpg'" 
                   :alt="product.name"
                   class="w-full h-48 object-cover"
                 >
@@ -200,15 +200,14 @@
                   class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
                 >
                   <i 
-                    :class="product.inWishlist ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+                    class="fa-regular fa-heart text-gray-600"
                   ></i>
                 </button>
                 <span 
-                  v-if="product.badge"
-                  :class="getBadgeClass(product.badge)"
-                  class="absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold"
+                  v-if="product.isOnSale"
+                  class="bg-red-500 text-white absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold"
                 >
-                  {{ product.badge }}
+                  Sale
                 </span>
               </div>
               <div class="p-4">
@@ -222,7 +221,7 @@
                       :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
                     ></i>
                   </div>
-                  <span class="text-sm text-gray-600">({{ product.rating }}) {{ product.reviews }} ulasan</span>
+                  <span class="text-sm text-gray-600">({{ product.rating }}) ulasan</span>
                 </div>
                 <div class="flex justify-between items-center mb-3">
                   <div>
@@ -235,10 +234,10 @@
                     </span>
                   </div>
                   <span 
-                    :class="getStockClass(product.stock)"
+                    :class="getStockClass(product.stockQuantity)"
                     class="text-xs px-2 py-1 rounded"
                   >
-                    Stok: {{ product.stock }}
+                    Stok: {{ product.stockQuantity }}
                   </span>
                 </div>
                 <div class="flex space-x-2">
@@ -282,18 +281,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useProductsStore } from '@/stores/products'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
+import type { ProductFilters } from '@/services/api'
 
 const router = useRouter()
+const productsStore = useProductsStore()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 // State
 const searchQuery = ref('')
 const sortBy = ref('popular')
 const viewMode = ref('grid')
-const currentPage = ref(1)
-const itemsPerPage = 9
+const itemsPerPage = 12
 
 // Filters
 const filters = reactive({
@@ -305,161 +310,50 @@ const filters = reactive({
   priceMax: null as number | null
 })
 
-// Sample products data
-const products = ref([
-  {
-    id: 1,
-    name: 'MacBook Pro 14" M3',
-    description: 'Apple - 512GB SSD, 16GB RAM',
-    price: 32000000,
-    originalPrice: 35000000,
-    rating: 5,
-    reviews: 124,
-    category: 'laptop',
-    brand: 'apple',
-    badge: 'Populer',
-    stock: 5,
-    inWishlist: false,
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop'
-  },
-  {
-    id: 2,
-    name: 'Samsung Galaxy S24 Ultra',
-    description: 'Samsung - 256GB, Titanium Gray',
-    price: 18500000,
-    originalPrice: 20000000,
-    rating: 4,
-    reviews: 89,
-    category: 'smartphone',
-    brand: 'samsung',
-    badge: 'Sale',
-    stock: 12,
-    inWishlist: true,
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop'
-  },
-  {
-    id: 3,
-    name: 'Sony Alpha A7 IV',
-    description: 'Sony - Body Only, Mirrorless',
-    price: 42000000,
-    rating: 5,
-    reviews: 67,
-    category: 'kamera',
-    brand: 'sony',
-    badge: null,
-    stock: 2,
-    inWishlist: false,
-    image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=300&fit=crop'
-  },
-  {
-    id: 4,
-    name: 'Dell Alienware x17 R2',
-    description: 'Dell - RTX 4080, Intel i9',
-    price: 65000000,
-    rating: 4,
-    reviews: 43,
-    category: 'laptop',
-    brand: 'dell',
-    badge: 'Gaming',
-    stock: 7,
-    inWishlist: false,
-    image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&h=300&fit=crop'
-  },
-  {
-    id: 5,
-    name: 'iPad Pro 12.9"',
-    description: 'Apple - M2 Chip, 256GB',
-    price: 16000000,
-    rating: 5,
-    reviews: 156,
-    category: 'tablet',
-    brand: 'apple',
-    badge: null,
-    stock: 15,
-    inWishlist: false,
-    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop'
-  },
-  {
-    id: 6,
-    name: 'Samsung Galaxy Tab S9',
-    description: 'Samsung - 128GB, WiFi',
-    price: 8500000,
-    originalPrice: 9500000,
-    rating: 4,
-    reviews: 78,
-    category: 'tablet',
-    brand: 'samsung',
-    badge: 'Sale',
-    stock: 20,
-    inWishlist: false,
-    image: 'https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400&h=300&fit=crop'
+// Initialize on mount
+onMounted(async () => {
+  await loadProducts()
+})
+
+// Watch for filter changes
+watch([filters, sortBy, searchQuery], () => {
+  loadProducts()
+}, { deep: true })
+
+// Load products function
+const loadProducts = async () => {
+  try {
+    const productFilters: ProductFilters = {
+      search: searchQuery.value || undefined,
+      brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
+      minPrice: filters.priceMin || undefined,
+      maxPrice: filters.priceMax || undefined,
+      onSale: filters.priceRange === 'sale' ? true : undefined,
+      page: productsStore.currentPage,
+      size: itemsPerPage
+    }
+    
+    await productsStore.fetchProducts(productFilters)
+  } catch (error) {
+    console.error('Error loading products:', error)
   }
-])
+}
 
 // Computed
 const filteredProducts = computed(() => {
-  let filtered = [...products.value]
-
-  // Search filter
-  if (searchQuery.value) {
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-
-  // Category filter
-  if (filters.categories.length > 0) {
-    filtered = filtered.filter(product => filters.categories.includes(product.category))
-  }
-
-  // Brand filter
-  if (filters.brands.length > 0) {
-    filtered = filtered.filter(product => filters.brands.includes(product.brand))
-  }
-
-  // Rating filter
-  if (filters.ratings.length > 0) {
-    filtered = filtered.filter(product => filters.ratings.includes(product.rating.toString()))
-  }
-
-  // Price range filter
-  if (filters.priceRange) {
-    const [min, max] = filters.priceRange.split('-')
-    filtered = filtered.filter(product => {
-      if (max === '+') {
-        return product.price >= parseInt(min)
-      }
-      return product.price >= parseInt(min) && product.price <= parseInt(max)
-    })
-  }
-
-  // Sort
-  switch (sortBy.value) {
-    case 'price-low':
-      filtered.sort((a, b) => a.price - b.price)
-      break
-    case 'price-high':
-      filtered.sort((a, b) => b.price - a.price)
-      break
-    case 'rating':
-      filtered.sort((a, b) => b.rating - a.rating)
-      break
-    case 'newest':
-      filtered.sort((a, b) => b.id - a.id)
-      break
-    default: // popular
-      filtered.sort((a, b) => b.reviews - a.reviews)
-  }
-
-  // Pagination
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filtered.slice(start, end)
+  return productsStore.products
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(products.value.length / itemsPerPage)
+  return productsStore.totalPages
+})
+
+const currentPage = computed({
+  get: () => productsStore.currentPage,
+  set: (value: number) => {
+    productsStore.setPage(value)
+    loadProducts()
+  }
 })
 
 // Methods
@@ -487,15 +381,22 @@ const getStockClass = (stock: number) => {
 }
 
 const toggleWishlist = (productId: number) => {
-  const product = products.value.find(p => p.id === productId)
-  if (product) {
-    product.inWishlist = !product.inWishlist
-  }
+  console.log('Toggle wishlist:', productId)
+  // TODO: Implement wishlist functionality
 }
 
-const addToCart = (productId: number) => {
-  console.log('Add to cart:', productId)
-  // Implement add to cart logic
+const addToCart = async (productId: number) => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await cartStore.addToCart(productId, 1)
+    console.log('Added to cart:', productId)
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  }
 }
 
 const viewProduct = (productId: number) => {

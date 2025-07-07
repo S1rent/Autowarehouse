@@ -114,6 +114,26 @@ public class ProductResource {
     }
 
     @GET
+    @Path("/featured/featured")
+    public Response getFeaturedProducts(@QueryParam("limit") @DefaultValue("10") int limit) {
+        List<Product> products = productService.findFeaturedProducts(limit);
+        List<ProductResponse> response = products.stream()
+                .map(ProductResponse::new)
+                .toList();
+        return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/featured/on-sale")
+    public Response getOnSaleProducts(@QueryParam("limit") @DefaultValue("10") int limit) {
+        List<Product> products = productService.findOnSaleProducts(limit);
+        List<ProductResponse> response = products.stream()
+                .map(ProductResponse::new)
+                .toList();
+        return Response.ok(response).build();
+    }
+
+    @GET
     @Path("/featured/top-rated")
     public Response getTopRatedProducts(@QueryParam("limit") @DefaultValue("10") int limit) {
         List<Product> products = productService.findTopRatedProducts(limit);

@@ -72,11 +72,11 @@ public class User extends PanacheEntityBase {
     @Column(name = "password_reset_token")
     public String passwordResetToken;
 
-    @Column(name = "password_reset_expires")
-    public LocalDateTime passwordResetExpires;
+    @Column(name = "password_reset_token_expiry")
+    public LocalDateTime passwordResetTokenExpiry;
 
-    @Column(name = "last_login")
-    public LocalDateTime lastLogin;
+    @Column(name = "last_login_at")
+    public LocalDateTime lastLoginAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -130,7 +130,7 @@ public class User extends PanacheEntityBase {
     }
 
     public static User findByPasswordResetToken(String token) {
-        return find("passwordResetToken = ?1 and passwordResetExpires > ?2", token, LocalDateTime.now()).firstResult();
+        return find("passwordResetToken = ?1 and passwordResetTokenExpiry > ?2", token, LocalDateTime.now()).firstResult();
     }
 
     public static List<User> findActiveUsers() {
@@ -139,6 +139,19 @@ public class User extends PanacheEntityBase {
 
     public static List<User> findByRole(UserRole role) {
         return find("role", role).list();
+    }
+
+    public static List<User> findRecentUsers(int days) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+        return find("createdAt >= ?1", cutoffDate).list();
+    }
+
+    public static long countActiveUsers() {
+        return count("isActive", true);
+    }
+
+    public static long countByRole(UserRole role) {
+        return count("role", role);
     }
 
     // Helper methods
@@ -156,17 +169,23 @@ public class User extends PanacheEntityBase {
 
     public boolean isPasswordResetTokenValid() {
         return passwordResetToken != null && 
-               passwordResetExpires != null && 
-               passwordResetExpires.isAfter(LocalDateTime.now());
+               passwordResetTokenExpiry != null && 
+               passwordResetTokenExpiry.isAfter(LocalDateTime.now());
+    }
+
+    public boolean isPasswordResetTokenExpired() {
+        return passwordResetToken == null || 
+               passwordResetTokenExpiry == null || 
+               passwordResetTokenExpiry.isBefore(LocalDateTime.now());
     }
 
     public void clearPasswordResetToken() {
         this.passwordResetToken = null;
-        this.passwordResetExpires = null;
+        this.passwordResetTokenExpiry = null;
     }
 
     public void updateLastLogin() {
-        this.lastLogin = LocalDateTime.now();
+        this.lastLoginAt = LocalDateTime.now();
     }
 
     @Override

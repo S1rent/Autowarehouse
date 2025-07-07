@@ -1,6 +1,8 @@
 package com.autowarehouse.resource;
 
 import com.autowarehouse.entity.CartItem;
+import com.autowarehouse.entity.Product;
+import com.autowarehouse.entity.User;
 import com.autowarehouse.service.CartService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -15,7 +17,6 @@ import java.util.List;
 @Path("/api/cart")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({"ADMIN", "CUSTOMER"})
 public class CartResource {
 
     @Inject
@@ -23,6 +24,7 @@ public class CartResource {
 
     @GET
     @Path("/user/{userId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getCartItems(@PathParam("userId") Long userId) {
         try {
             List<CartItem> cartItems = cartService.getCartItems(userId);
@@ -30,15 +32,16 @@ public class CartResource {
                     .map(CartItemResponse::new)
                     .toList();
             return Response.ok(response).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(e.getMessage()))
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to fetch cart items"))
                     .build();
         }
     }
 
     @GET
     @Path("/user/{userId}/selected")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getSelectedCartItems(@PathParam("userId") Long userId) {
         try {
             List<CartItem> cartItems = cartService.getSelectedCartItems(userId);
@@ -46,35 +49,44 @@ public class CartResource {
                     .map(CartItemResponse::new)
                     .toList();
             return Response.ok(response).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(e.getMessage()))
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to fetch selected cart items"))
                     .build();
         }
     }
 
     @GET
     @Path("/user/{userId}/summary")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getCartSummary(@PathParam("userId") Long userId) {
         try {
-            CartService.CartSummary summary = cartService.getCartSummary(userId);
-            return Response.ok(new CartSummaryResponse(summary)).build();
+            CartSummaryResponse summary = cartService.getCartSummary(userId);
+            return Response.ok(summary).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to get cart summary"))
+                    .entity(new ErrorResponse("Failed to fetch cart summary"))
                     .build();
         }
     }
 
     @GET
     @Path("/user/{userId}/count")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getCartItemCount(@PathParam("userId") Long userId) {
-        long count = cartService.getCartItemCount(userId);
-        return Response.ok(new CountResponse(count)).build();
+        try {
+            int count = cartService.getCartItemCount(userId);
+            return Response.ok(new CountResponse(count)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to fetch cart count"))
+                    .build();
+        }
     }
 
     @POST
     @Path("/add")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response addToCart(@Valid AddToCartRequest request) {
         try {
             CartItem cartItem = cartService.addToCart(request.userId, request.productId, request.quantity);
@@ -90,10 +102,11 @@ public class CartResource {
 
     @PUT
     @Path("/{cartItemId}/quantity")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response updateQuantity(@PathParam("cartItemId") Long cartItemId, @Valid UpdateQuantityRequest request) {
         try {
-            cartService.updateCartItemQuantity(cartItemId, request.quantity);
-            return Response.ok(new SuccessResponse("Cart item quantity updated successfully")).build();
+            cartService.updateQuantity(cartItemId, request.quantity);
+            return Response.ok(new SuccessResponse("Quantity updated successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse(e.getMessage()))
@@ -103,10 +116,11 @@ public class CartResource {
 
     @PUT
     @Path("/{cartItemId}/toggle-selection")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response toggleSelection(@PathParam("cartItemId") Long cartItemId) {
         try {
-            cartService.toggleCartItemSelection(cartItemId);
-            return Response.ok(new SuccessResponse("Cart item selection toggled successfully")).build();
+            cartService.toggleSelection(cartItemId);
+            return Response.ok(new SuccessResponse("Selection toggled successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse(e.getMessage()))
@@ -116,10 +130,11 @@ public class CartResource {
 
     @PUT
     @Path("/user/{userId}/select-all")
-    public Response selectAllItems(@PathParam("userId") Long userId, @Valid SelectAllRequest request) {
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public Response selectAll(@PathParam("userId") Long userId, @Valid SelectAllRequest request) {
         try {
-            cartService.selectAllCartItems(userId, request.selected);
-            return Response.ok(new SuccessResponse("All cart items selection updated successfully")).build();
+            cartService.selectAll(userId, request.selected);
+            return Response.ok(new SuccessResponse("All items selection updated")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse(e.getMessage()))
@@ -129,32 +144,21 @@ public class CartResource {
 
     @DELETE
     @Path("/{cartItemId}")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response removeFromCart(@PathParam("cartItemId") Long cartItemId) {
         try {
             cartService.removeFromCart(cartItemId);
-            return Response.ok(new SuccessResponse("Item removed from cart successfully")).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to remove item from cart"))
-                    .build();
-        }
-    }
-
-    @DELETE
-    @Path("/user/{userId}/product/{productId}")
-    public Response removeProductFromCart(@PathParam("userId") Long userId, @PathParam("productId") Long productId) {
-        try {
-            cartService.removeProductFromUserCart(userId, productId);
-            return Response.ok(new SuccessResponse("Product removed from cart successfully")).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to remove product from cart"))
+            return Response.ok(new SuccessResponse("Item removed from cart")).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
                     .build();
         }
     }
 
     @DELETE
     @Path("/user/{userId}/clear")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response clearCart(@PathParam("userId") Long userId) {
         try {
             cartService.clearCart(userId);
@@ -166,24 +170,18 @@ public class CartResource {
         }
     }
 
-    @POST
-    @Path("/user/{userId}/validate")
-    public Response validateCartItems(@PathParam("userId") Long userId) {
-        try {
-            cartService.validateCartItems(userId);
-            return Response.ok(new SuccessResponse("Cart items validated successfully")).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to validate cart items"))
-                    .build();
-        }
-    }
-
     @GET
     @Path("/user/{userId}/product/{productId}/exists")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response checkProductInCart(@PathParam("userId") Long userId, @PathParam("productId") Long productId) {
-        boolean exists = cartService.isProductInCart(userId, productId);
-        return Response.ok(new ExistsResponse(exists)).build();
+        try {
+            boolean exists = cartService.isProductInCart(userId, productId);
+            return Response.ok(new ExistsResponse(exists)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to check product in cart"))
+                    .build();
+        }
     }
 
     // DTO Classes
@@ -223,52 +221,41 @@ public class CartResource {
             this.productName = cartItem.product.name;
             this.productSku = cartItem.product.sku;
             this.productBrand = cartItem.product.brand;
-            this.productPrice = cartItem.product.getCurrentPrice();
+            this.productPrice = cartItem.product.price;
             this.originalPrice = cartItem.product.originalPrice;
             this.productImages = cartItem.product.imageUrls;
             this.quantity = cartItem.quantity;
             this.isSelected = cartItem.isSelected;
             this.subtotal = cartItem.getSubtotal();
-            this.savings = cartItem.getTotalSavings();
+            this.savings = cartItem.getSavings();
             this.availableStock = cartItem.product.stockQuantity;
             this.isProductActive = cartItem.product.isActive;
         }
     }
 
     public static class CartSummaryResponse {
-        public int totalItems;
-        public int selectedItems;
-        public int totalQuantity;
-        public int selectedQuantity;
+        public Integer totalItems;
+        public Integer selectedItems;
+        public Integer totalQuantity;
+        public Integer selectedQuantity;
         public BigDecimal totalAmount;
         public BigDecimal selectedAmount;
         public BigDecimal totalSavings;
         public BigDecimal selectedSavings;
-
-        public CartSummaryResponse(CartService.CartSummary summary) {
-            this.totalItems = summary.totalItems;
-            this.selectedItems = summary.selectedItems;
-            this.totalQuantity = summary.totalQuantity;
-            this.selectedQuantity = summary.selectedQuantity;
-            this.totalAmount = summary.totalAmount;
-            this.selectedAmount = summary.selectedAmount;
-            this.totalSavings = summary.totalSavings;
-            this.selectedSavings = summary.selectedSavings;
-        }
     }
 
     public static class CountResponse {
-        public long count;
+        public Integer count;
 
-        public CountResponse(long count) {
+        public CountResponse(Integer count) {
             this.count = count;
         }
     }
 
     public static class ExistsResponse {
-        public boolean exists;
+        public Boolean exists;
 
-        public ExistsResponse(boolean exists) {
+        public ExistsResponse(Boolean exists) {
             this.exists = exists;
         }
     }
