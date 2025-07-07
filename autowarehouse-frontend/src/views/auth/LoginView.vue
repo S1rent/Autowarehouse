@@ -162,8 +162,10 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // Form data
 const form = reactive({
@@ -222,27 +224,23 @@ const handleLogin = async () => {
   }
 
   isLoading.value = true
+  authStore.clearError()
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Mock login logic
-    console.log('Login attempt:', {
-      userType: form.userType,
+    // Use auth store to login
+    await authStore.login({
       email: form.email,
-      password: form.password,
-      rememberMe: form.rememberMe
+      password: form.password
     })
-
-    // Redirect based on user type
-    if (form.userType === 'admin') {
+    
+    // Redirect based on user role from backend
+    if (authStore.isAdmin) {
       router.push('/admin/dashboard')
     } else {
       router.push('/')
     }
-  } catch (error) {
-    errors.general = 'Login failed. Please check your credentials and try again.'
+  } catch (error: any) {
+    errors.general = authStore.error || 'Login failed. Please check your credentials and try again.'
   } finally {
     isLoading.value = false
   }

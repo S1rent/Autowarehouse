@@ -77,12 +77,13 @@ DARI TADI KAMU NGAPAIN SIH ? GAJELAS SUMPAH NGERJAIN APA CUMA MAKANIN DUIT DOANG
 =======================================
 Oke, sekarang scan ulang semua codingan yang ada, tolong update memory banknya juga jika diperlukan.
 =======================================
-
+Oke, sekarang tolong dong, integrasi semua frontend yang ada dengan backend, begitupula dengan semua 3rd party service yang ada (google login, kafka, websocket, firebase, dan lain-lain)
 =======================================
-
+Oke, lanjut ke implementasinya, saya harap kamu bisa menyelesaikannya semua
 =======================================
+Oke, lanjutkan
 =======================================
-
+Oke, selanjutnya tolong integratsiin dengan frontend, plus nanti kasih tau saya caranya nyalain frontend dan backend bersamaan
 =======================================
 
 =======================================
