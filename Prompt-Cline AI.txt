@@ -22,12 +22,22 @@ hmm, tapi ini kenapa jelek banget ui nya, kaya gaada css nya sama sekali ? Tolon
 =======================================
 maaf, tolong dong ini apa ya ? ga sesuai banget sama referensi ui yang sudah saya berikan di folder ui-design, dan semua cssnya jelek banget semuanya tidak ada yang sesuai sama design html dan gambar yang sudah saya siapkan, bahkan masa halaman loginnya cuma putih gini doang
 =======================================
+Saya melihat ini sudah cukup ada improvement, namun.
+- Halaman register masih belum sama dengan ui yang diberikan
+- Halaman forgot password juga belum sama dengan ui yang diberikan
+- Halaman Product list juga jauh sekali, tidak sama dengan ui yang diberikan
+- Kamu juga belum membuat banyak sekali page lain yang ada di folder ui-design, tolong buatkan semuanya
 =======================================
+kamu belum membuat semua UI yang ada di ui-design lhoo, tolong buatkan semuanya atuh, jangan ada yang ketinggalan masih ada > 10 halaman yang belum kamu kerjakan
 =======================================
-
+yeah, of course please continue
 =======================================
+User auctionnya belom kamu buat ?
 =======================================
+Sepertinya, kamu ada lupa bagian deskripsi di Auction detail.
+dan juga kamu belum membuat page auction 3 dan 4
 =======================================
+hayo, kamu lupa lagi untuk bikin halaman user bid history, live auction 4
 =======================================
 =======================================
 =======================================

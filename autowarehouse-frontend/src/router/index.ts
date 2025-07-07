@@ -5,37 +5,77 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/HomeView.vue')
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/auth/LoginView.vue')
+    component: () => import('../views/auth/LoginView.vue')
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('@/views/auth/RegisterView.vue')
+    component: () => import('../views/auth/RegisterView.vue')
   },
   {
     path: '/forgot-password',
     name: 'ForgotPassword',
-    component: () => import('@/views/auth/ForgotPasswordView.vue')
+    component: () => import('../views/auth/ForgotPasswordView.vue')
   },
   {
     path: '/products',
     name: 'Products',
-    component: () => import('@/views/ProductsView.vue')
+    component: () => import('../views/ProductsView.vue')
+  },
+  {
+    path: '/product/:id',
+    name: 'ProductDetail',
+    component: () => import('../views/ProductDetailView.vue')
   },
   {
     path: '/cart',
     name: 'Cart',
-    component: () => import('@/views/CartView.vue')
+    component: () => import('../views/CartView.vue')
   },
   {
-    path: '/ui-index',
-    name: 'UIIndex',
-    component: () => import('@/views/UIIndexView.vue')
+    path: '/wishlist',
+    name: 'Wishlist',
+    component: () => import('../views/WishlistView.vue')
+  },
+  {
+    path: '/auctions',
+    name: 'LiveAuctions',
+    component: () => import('../views/LiveAuctionView.vue')
+  },
+  {
+    path: '/auction/:id',
+    name: 'AuctionDetail',
+    component: () => import('../views/AuctionDetailView.vue')
+  },
+  {
+    path: '/auction-won',
+    name: 'AuctionWon',
+    component: () => import('../views/AuctionWonView.vue')
+  },
+  {
+    path: '/my-bids',
+    name: 'MyBids',
+    component: () => import('../views/MyBidsView.vue')
+  },
+  {
+    path: '/bid-history',
+    name: 'BidHistory',
+    component: () => import('../views/BidHistoryView.vue')
+  },
+  {
+    path: '/profile',
+    name: 'UserProfile',
+    component: () => import('../views/UserProfileView.vue')
+  },
+  {
+    path: '/notifications',
+    name: 'UserNotifications',
+    component: () => import('../views/UserNotificationsView.vue')
   }
 ]
 

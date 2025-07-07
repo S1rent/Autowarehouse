@@ -1,230 +1,438 @@
 <template>
-  <div class="products-view">
+  <div class="bg-light min-h-screen">
     <!-- Header -->
-    <header class="products-header">
-      <div class="container">
-        <h1 class="page-title">All Products</h1>
-        <p class="page-subtitle">Discover our complete range of computer hardware</p>
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-8">
+            <div class="text-2xl font-bold text-primary">Autowarehouse</div>
+            <nav class="hidden md:flex space-x-6">
+              <router-link to="/" class="text-gray-600 hover:text-primary transition-colors">Beranda</router-link>
+              <span class="text-primary font-semibold">Produk</span>
+              <router-link to="/auction" class="text-gray-600 hover:text-primary transition-colors">Auction</router-link>
+              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
+            </nav>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="hidden md:flex relative">
+              <input 
+                type="text" 
+                placeholder="Cari produk..." 
+                v-model="searchQuery"
+                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <button class="relative">
+              <i class="fa-solid fa-heart text-2xl text-gray-600 hover:text-primary"></i>
+              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+            </button>
+            <router-link to="/cart" class="relative">
+              <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
+              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">2</span>
+            </router-link>
+            <router-link to="/login" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Masuk</router-link>
+          </div>
+        </div>
       </div>
     </header>
 
-    <!-- Filters and Search -->
-    <section class="filters-section">
-      <div class="container">
-        <div class="filters-container">
-          <div class="search-filter">
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              class="search-input"
-              v-model="searchQuery"
-            />
+    <!-- Breadcrumb -->
+    <section class="bg-gray-100 py-4">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center space-x-2 text-sm">
+          <router-link to="/" class="text-primary hover:underline">Beranda</router-link>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+          <span class="text-gray-600">Produk</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex gap-8">
+        
+        <!-- Sidebar Filter -->
+        <aside class="w-80 bg-white rounded-lg shadow-md p-6 h-fit">
+          <h3 class="text-xl font-bold text-dark mb-6">Filter Produk</h3>
+          
+          <!-- Kategori Filter -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-dark mb-3">Kategori</h4>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.categories" value="smartphone" class="mr-2 text-primary">
+                <span class="text-gray-700">Smartphone (45)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.categories" value="laptop" class="mr-2 text-primary">
+                <span class="text-gray-700">Laptop (32)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.categories" value="tablet" class="mr-2 text-primary">
+                <span class="text-gray-700">Tablet (18)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.categories" value="kamera" class="mr-2 text-primary">
+                <span class="text-gray-700">Kamera (24)</span>
+              </label>
+            </div>
           </div>
           
-          <div class="category-filter">
-            <select v-model="selectedCategory" class="filter-select">
-              <option value="">All Categories</option>
-              <option value="laptops">Laptops</option>
-              <option value="desktops">Desktops</option>
-              <option value="components">Components</option>
-              <option value="accessories">Accessories</option>
-            </select>
-          </div>
-
-          <div class="price-filter">
-            <select v-model="priceRange" class="filter-select">
-              <option value="">All Prices</option>
-              <option value="0-100">$0 - $100</option>
-              <option value="100-500">$100 - $500</option>
-              <option value="500-1000">$500 - $1000</option>
-              <option value="1000+">$1000+</option>
-            </select>
-          </div>
-
-          <div class="sort-filter">
-            <select v-model="sortBy" class="filter-select">
-              <option value="name">Sort by Name</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Products Grid -->
-    <section class="products-section">
-      <div class="container">
-        <div class="products-grid">
-          <div class="product-card" v-for="product in filteredProducts" :key="product.id">
-            <div class="product-image">
-              <div class="product-placeholder">
-                <span>{{ product.name.charAt(0) }}</span>
+          <!-- Harga Filter -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-dark mb-3">Rentang Harga</h4>
+            <div class="space-y-3">
+              <div class="flex space-x-2">
+                <input 
+                  type="number" 
+                  placeholder="Min" 
+                  v-model="filters.priceMin"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                <input 
+                  type="number" 
+                  placeholder="Max" 
+                  v-model="filters.priceMax"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
               </div>
-              <div class="product-badge" v-if="product.badge">{{ product.badge }}</div>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn" :class="{ active: product.inWishlist }">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.50903 2.9987 7.05 2.9987C5.59096 2.9987 4.19169 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.04097 1.5487 8.5C1.5487 9.95903 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-                <button class="action-btn quick-view-btn">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                  </svg>
-                </button>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input type="radio" v-model="filters.priceRange" value="0-5000000" class="mr-2 text-primary">
+                  <span class="text-gray-700">&lt; Rp 5.000.000</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" v-model="filters.priceRange" value="5000000-15000000" class="mr-2 text-primary">
+                  <span class="text-gray-700">Rp 5.000.000 - Rp 15.000.000</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" v-model="filters.priceRange" value="15000000+" class="mr-2 text-primary">
+                  <span class="text-gray-700">&gt; Rp 15.000.000</span>
+                </label>
               </div>
             </div>
-            <div class="product-info">
-              <h3 class="product-name">{{ product.name }}</h3>
-              <div class="product-rating">
-                <div class="stars">
-                  <span v-for="i in 5" :key="i" :class="{ filled: i <= product.rating }">★</span>
+          </div>
+          
+          <!-- Brand Filter -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-dark mb-3">Brand</h4>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.brands" value="apple" class="mr-2 text-primary">
+                <span class="text-gray-700">Apple (12)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.brands" value="samsung" class="mr-2 text-primary">
+                <span class="text-gray-700">Samsung (15)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.brands" value="dell" class="mr-2 text-primary">
+                <span class="text-gray-700">Dell (8)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.brands" value="sony" class="mr-2 text-primary">
+                <span class="text-gray-700">Sony (6)</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Rating Filter -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-dark mb-3">Rating</h4>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.ratings" value="5" class="mr-2 text-primary">
+                <div class="flex text-yellow-400 mr-2">
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
                 </div>
-                <span class="rating-count">({{ product.reviews }})</span>
+                <span class="text-gray-700">(4.5+)</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="filters.ratings" value="4" class="mr-2 text-primary">
+                <div class="flex text-yellow-400 mr-2">
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-regular fa-star"></i>
+                </div>
+                <span class="text-gray-700">(4.0+)</span>
+              </label>
+            </div>
+          </div>
+          
+          <button 
+            @click="applyFilters"
+            class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Terapkan Filter
+          </button>
+        </aside>
+        
+        <!-- Product Listing -->
+        <main class="flex-1">
+          
+          <!-- Header & Sort -->
+          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h1 class="text-2xl font-bold text-dark">Produk Elektronik</h1>
+                <p class="text-gray-600">Menampilkan {{ filteredProducts.length }} produk</p>
               </div>
-              <p class="product-description">{{ product.description }}</p>
-              <div class="product-price">
-                <span class="current-price">${{ product.price }}</span>
-                <span class="original-price" v-if="product.originalPrice">${{ product.originalPrice }}</span>
-              </div>
-              <div class="product-buttons">
-                <button class="btn btn-primary btn-small add-to-cart-btn">
-                  Add to Cart
-                </button>
-                <button class="btn btn-outline btn-small">
-                  View Details
-                </button>
+              <div class="flex items-center space-x-4">
+                <span class="text-gray-600">Urutkan:</span>
+                <select 
+                  v-model="sortBy"
+                  class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="popular">Terpopuler</option>
+                  <option value="price-low">Harga Terendah</option>
+                  <option value="price-high">Harga Tertinggi</option>
+                  <option value="newest">Terbaru</option>
+                  <option value="rating">Rating Tertinggi</option>
+                </select>
+                <div class="flex border border-gray-300 rounded-lg">
+                  <button 
+                    @click="viewMode = 'grid'"
+                    :class="viewMode === 'grid' ? 'bg-primary text-white' : 'hover:bg-gray-100'"
+                    class="px-3 py-2 rounded-l-lg"
+                  >
+                    <i class="fa-solid fa-th-large"></i>
+                  </button>
+                  <button 
+                    @click="viewMode = 'list'"
+                    :class="viewMode === 'list' ? 'bg-primary text-white' : 'hover:bg-gray-100'"
+                    class="px-3 py-2 rounded-r-lg"
+                  >
+                    <i class="fa-solid fa-list"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+          
+          <!-- Product Grid -->
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div 
+              v-for="product in filteredProducts" 
+              :key="product.id"
+              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              <div class="relative">
+                <img 
+                  :src="product.image" 
+                  :alt="product.name"
+                  class="w-full h-48 object-cover"
+                >
+                <button 
+                  @click="toggleWishlist(product.id)"
+                  class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+                >
+                  <i 
+                    :class="product.inWishlist ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+                  ></i>
+                </button>
+                <span 
+                  v-if="product.badge"
+                  :class="getBadgeClass(product.badge)"
+                  class="absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold"
+                >
+                  {{ product.badge }}
+                </span>
+              </div>
+              <div class="p-4">
+                <h3 class="font-semibold text-dark mb-2">{{ product.name }}</h3>
+                <p class="text-sm text-gray-600 mb-2">{{ product.description }}</p>
+                <div class="flex items-center mb-2">
+                  <div class="flex text-yellow-400 text-sm mr-2">
+                    <i 
+                      v-for="i in 5" 
+                      :key="i"
+                      :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                    ></i>
+                  </div>
+                  <span class="text-sm text-gray-600">({{ product.rating }}) {{ product.reviews }} ulasan</span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                  <div>
+                    <span class="text-lg font-bold text-primary">Rp {{ formatPrice(product.price) }}</span>
+                    <span 
+                      v-if="product.originalPrice"
+                      class="text-sm text-gray-500 line-through ml-2"
+                    >
+                      Rp {{ formatPrice(product.originalPrice) }}
+                    </span>
+                  </div>
+                  <span 
+                    :class="getStockClass(product.stock)"
+                    class="text-xs px-2 py-1 rounded"
+                  >
+                    Stok: {{ product.stock }}
+                  </span>
+                </div>
+                <div class="flex space-x-2">
+                  <button 
+                    @click="addToCart(product.id)"
+                    class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    <i class="fa-solid fa-shopping-cart mr-1"></i>Keranjang
+                  </button>
+                  <button 
+                    @click="viewProduct(product.id)"
+                    class="px-3 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+          </div>
 
-        <!-- Load More -->
-        <div class="load-more-section" v-if="hasMoreProducts">
-          <button class="btn btn-outline btn-large" @click="loadMoreProducts">
-            Load More Products
-          </button>
-        </div>
+          <!-- Pagination -->
+          <div class="mt-8 flex justify-center">
+            <div class="flex space-x-2">
+              <button 
+                v-for="page in totalPages" 
+                :key="page"
+                @click="currentPage = page"
+                :class="currentPage === page ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
+                class="px-4 py-2 border border-gray-300 rounded-lg"
+              >
+                {{ page }}
+              </button>
+            </div>
+          </div>
+          
+        </main>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
-// Filter states
+const router = useRouter()
+
+// State
 const searchQuery = ref('')
-const selectedCategory = ref('')
-const priceRange = ref('')
-const sortBy = ref('name')
-
-// Pagination
+const sortBy = ref('popular')
+const viewMode = ref('grid')
 const currentPage = ref(1)
-const productsPerPage = 12
-const hasMoreProducts = ref(true)
+const itemsPerPage = 9
+
+// Filters
+const filters = reactive({
+  categories: [],
+  brands: [],
+  ratings: [],
+  priceRange: '',
+  priceMin: null,
+  priceMax: null
+})
 
 // Sample products data
-const allProducts = reactive([
+const products = ref([
   {
     id: 1,
-    name: 'Gaming Laptop RTX 4070',
-    description: 'High-performance gaming laptop with RTX 4070 graphics',
-    price: 1299,
-    originalPrice: 1499,
-    rating: 4,
+    name: 'MacBook Pro 14" M3',
+    description: 'Apple - 512GB SSD, 16GB RAM',
+    price: 32000000,
+    originalPrice: 35000000,
+    rating: 5,
     reviews: 124,
-    category: 'laptops',
-    badge: 'Sale',
-    inWishlist: false
+    category: 'laptop',
+    brand: 'apple',
+    badge: 'Populer',
+    stock: 5,
+    inWishlist: false,
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop'
   },
   {
     id: 2,
-    name: 'Desktop PC Intel i7',
-    description: 'Powerful desktop computer for work and gaming',
-    price: 899,
-    rating: 5,
+    name: 'Samsung Galaxy S24 Ultra',
+    description: 'Samsung - 256GB, Titanium Gray',
+    price: 18500000,
+    originalPrice: 20000000,
+    rating: 4,
     reviews: 89,
-    category: 'desktops',
-    badge: null,
-    inWishlist: true
+    category: 'smartphone',
+    brand: 'samsung',
+    badge: 'Sale',
+    stock: 12,
+    inWishlist: true,
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop'
   },
   {
     id: 3,
-    name: 'Graphics Card RTX 4080',
-    description: 'Latest generation graphics card for 4K gaming',
-    price: 799,
-    originalPrice: 899,
+    name: 'Sony Alpha A7 IV',
+    description: 'Sony - Body Only, Mirrorless',
+    price: 42000000,
     rating: 5,
-    reviews: 156,
-    category: 'components',
-    badge: 'Hot',
-    inWishlist: false
+    reviews: 67,
+    category: 'kamera',
+    brand: 'sony',
+    badge: null,
+    stock: 2,
+    inWishlist: false,
+    image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=300&fit=crop'
   },
   {
     id: 4,
-    name: 'Mechanical Keyboard',
-    description: 'RGB mechanical keyboard with Cherry MX switches',
-    price: 149,
+    name: 'Dell Alienware x17 R2',
+    description: 'Dell - RTX 4080, Intel i9',
+    price: 65000000,
     rating: 4,
-    reviews: 203,
-    category: 'accessories',
-    badge: null,
-    inWishlist: false
+    reviews: 43,
+    category: 'laptop',
+    brand: 'dell',
+    badge: 'Gaming',
+    stock: 7,
+    inWishlist: false,
+    image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&h=300&fit=crop'
   },
   {
     id: 5,
-    name: 'Gaming Monitor 27"',
-    description: '144Hz gaming monitor with 1ms response time',
-    price: 299,
-    rating: 4,
-    reviews: 87,
-    category: 'accessories',
+    name: 'iPad Pro 12.9"',
+    description: 'Apple - M2 Chip, 256GB',
+    price: 16000000,
+    rating: 5,
+    reviews: 156,
+    category: 'tablet',
+    brand: 'apple',
     badge: null,
-    inWishlist: true
+    stock: 15,
+    inWishlist: false,
+    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop'
   },
   {
     id: 6,
-    name: 'SSD 1TB NVMe',
-    description: 'High-speed NVMe SSD for faster boot times',
-    price: 89,
-    originalPrice: 120,
-    rating: 5,
-    reviews: 234,
-    category: 'components',
-    badge: 'Sale',
-    inWishlist: false
-  },
-  {
-    id: 7,
-    name: 'Gaming Mouse',
-    description: 'Precision gaming mouse with RGB lighting',
-    price: 59,
+    name: 'Samsung Galaxy Tab S9',
+    description: 'Samsung - 128GB, WiFi',
+    price: 8500000,
+    originalPrice: 9500000,
     rating: 4,
-    reviews: 145,
-    category: 'accessories',
-    badge: null,
-    inWishlist: false
-  },
-  {
-    id: 8,
-    name: 'RAM 32GB DDR4',
-    description: 'High-performance DDR4 memory kit',
-    price: 179,
-    rating: 5,
-    reviews: 98,
-    category: 'components',
-    badge: null,
-    inWishlist: false
+    reviews: 78,
+    category: 'tablet',
+    brand: 'samsung',
+    badge: 'Sale',
+    stock: 20,
+    inWishlist: false,
+    image: 'https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400&h=300&fit=crop'
   }
 ])
 
-// Computed filtered products
+// Computed
 const filteredProducts = computed(() => {
-  let filtered = [...allProducts]
+  let filtered = [...products.value]
 
   // Search filter
   if (searchQuery.value) {
@@ -235,19 +443,28 @@ const filteredProducts = computed(() => {
   }
 
   // Category filter
-  if (selectedCategory.value) {
-    filtered = filtered.filter(product => product.category === selectedCategory.value)
+  if (filters.categories.length > 0) {
+    filtered = filtered.filter(product => filters.categories.includes(product.category))
   }
 
-  // Price filter
-  if (priceRange.value) {
-    const [min, max] = priceRange.value.split('-').map(p => p.replace('+', ''))
+  // Brand filter
+  if (filters.brands.length > 0) {
+    filtered = filtered.filter(product => filters.brands.includes(product.brand))
+  }
+
+  // Rating filter
+  if (filters.ratings.length > 0) {
+    filtered = filtered.filter(product => filters.ratings.includes(product.rating.toString()))
+  }
+
+  // Price range filter
+  if (filters.priceRange) {
+    const [min, max] = filters.priceRange.split('-')
     filtered = filtered.filter(product => {
-      if (max) {
-        return product.price >= parseInt(min) && product.price <= parseInt(max)
-      } else {
+      if (max === '+') {
         return product.price >= parseInt(min)
       }
+      return product.price >= parseInt(min) && product.price <= parseInt(max)
     })
   }
 
@@ -262,271 +479,69 @@ const filteredProducts = computed(() => {
     case 'rating':
       filtered.sort((a, b) => b.rating - a.rating)
       break
-    default:
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
+    case 'newest':
+      filtered.sort((a, b) => b.id - a.id)
+      break
+    default: // popular
+      filtered.sort((a, b) => b.reviews - a.reviews)
   }
 
-  return filtered.slice(0, currentPage.value * productsPerPage)
+  // Pagination
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filtered.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(products.value.length / itemsPerPage)
 })
 
 // Methods
-const loadMoreProducts = () => {
-  currentPage.value++
-  if (filteredProducts.value.length >= allProducts.length) {
-    hasMoreProducts.value = false
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('id-ID').format(price)
+}
+
+const getBadgeClass = (badge: string) => {
+  switch (badge) {
+    case 'Sale':
+      return 'bg-red-500 text-white'
+    case 'Populer':
+      return 'bg-accent text-white'
+    case 'Gaming':
+      return 'bg-primary text-white'
+    default:
+      return 'bg-gray-500 text-white'
   }
+}
+
+const getStockClass = (stock: number) => {
+  if (stock > 10) return 'bg-green-100 text-green-800'
+  if (stock > 5) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-red-100 text-red-800'
+}
+
+const toggleWishlist = (productId: number) => {
+  const product = products.value.find(p => p.id === productId)
+  if (product) {
+    product.inWishlist = !product.inWishlist
+  }
+}
+
+const addToCart = (productId: number) => {
+  console.log('Add to cart:', productId)
+  // Implement add to cart logic
+}
+
+const viewProduct = (productId: number) => {
+  router.push(`/products/${productId}`)
+}
+
+const applyFilters = () => {
+  currentPage.value = 1
+  // Filters are automatically applied through computed property
 }
 </script>
 
 <style scoped>
-.products-view {
-  min-height: 100vh;
-  background: #f8fafc;
-}
-
-.products-header {
-  background: white;
-  padding: 3rem 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-}
-
-.filters-section {
-  background: white;
-  padding: 2rem 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.filters-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-.search-input,
-.filter-select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.search-input:focus,
-.filter-select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-.products-section {
-  padding: 3rem 0;
-}
-
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.product-card {
-  background: white;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
-}
-
-.product-image {
-  position: relative;
-  height: 220px;
-  background: #f1f5f9;
-  overflow: hidden;
-}
-
-.product-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 4rem;
-  font-weight: bold;
-  color: #94a3b8;
-}
-
-.product-badge {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: #ef4444;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.product-actions {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.product-card:hover .product-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  background: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  transform: scale(1.1);
-}
-
-.wishlist-btn.active {
-  background: #ef4444;
-  color: white;
-}
-
-.product-info {
-  padding: 1.5rem;
-}
-
-.product-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-
-.product-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.stars {
-  display: flex;
-  gap: 0.125rem;
-}
-
-.stars span {
-  color: #e2e8f0;
-  font-size: 1rem;
-}
-
-.stars span.filled {
-  color: #fbbf24;
-}
-
-.rating-count {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.product-description {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
-}
-
-.product-price {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.current-price {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.original-price {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  text-decoration: line-through;
-}
-
-.product-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.product-buttons .btn {
-  flex: 1;
-}
-
-.load-more-section {
-  text-align: center;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .filters-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  
-  .search-filter {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 768px) {
-  .filters-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .product-buttons {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 480px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* Custom styles if needed */
 </style>

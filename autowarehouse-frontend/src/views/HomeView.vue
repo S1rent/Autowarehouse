@@ -10,7 +10,7 @@
               <router-link to="/" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Beranda</router-link>
               <router-link to="/products" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Produk</router-link>
               <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
-              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Auction</span>
+              <router-link to="/auctions" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Auction</router-link>
             </nav>
           </div>
           <div class="flex items-center space-x-4">
@@ -54,9 +54,12 @@
               >
                 <i class="fa-solid fa-shopping-bag mr-2"></i>Belanja Sekarang
               </router-link>
-              <button class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all">
+              <router-link 
+                to="/auctions" 
+                class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all inline-flex items-center justify-center"
+              >
                 <i class="fa-solid fa-gavel mr-2"></i>Cek Auction
-              </button>
+              </router-link>
             </div>
           </div>
           <div class="relative">

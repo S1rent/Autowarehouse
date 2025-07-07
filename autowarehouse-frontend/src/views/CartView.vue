@@ -10,9 +10,9 @@
               <span class="text-xl font-bold text-gray-900">Autowarehouse</span>
             </div>
             <nav class="hidden md:flex space-x-6">
-              <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Home</router-link>
-              <router-link to="/products" class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Categories</router-link>
-              <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Deals</span>
+              <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors">Home</router-link>
+              <router-link to="/products" class="text-gray-600 hover:text-blue-600 transition-colors">Products</router-link>
+              <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Categories</span>
               <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Wishlist</span>
             </nav>
           </div>
@@ -21,8 +21,8 @@
               <input 
                 type="text" 
                 placeholder="Search products..." 
-                class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 v-model="searchQuery"
+                class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
               <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
             </div>
@@ -30,9 +30,9 @@
               <i class="fa-solid fa-shopping-cart text-lg"></i>
               <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItems.length }}</span>
             </button>
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-user text-white text-sm"></i>
-            </div>
+            <router-link to="/login" class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+              <i class="fa-solid fa-user text-gray-600"></i>
+            </router-link>
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@
       <!-- Breadcrumb -->
       <nav class="mb-6">
         <div class="flex items-center space-x-2 text-sm text-gray-500">
-          <router-link to="/" class="hover:text-blue-600 cursor-pointer">Home</router-link>
+          <router-link to="/" class="hover:text-blue-600">Home</router-link>
           <i class="fa-solid fa-chevron-right text-xs"></i>
           <span class="text-gray-900">Shopping Cart</span>
         </div>
@@ -63,42 +63,49 @@
             v-for="item in cartItems" 
             :key="item.id"
             class="bg-white rounded-xl shadow-sm border p-6 transition-all duration-300"
-            :class="{ 'opacity-50 transform translate-x-[-10px]': item.removing }"
+            :class="{ 'opacity-50 transform -translate-x-4': item.removing }"
           >
             <div class="flex items-center space-x-6">
               <div class="flex-shrink-0">
-                <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <i :class="item.icon" class="text-2xl text-gray-400"></i>
-                </div>
+                <img 
+                  :src="item.image" 
+                  :alt="item.name"
+                  class="w-20 h-20 rounded-lg object-cover"
+                >
               </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ item.name }}</h3>
                 <p class="text-gray-500 text-sm mb-2">{{ item.description }}</p>
                 <div class="flex items-center space-x-4">
-                  <span class="text-lg font-bold text-gray-900">Rp {{ item.price.toLocaleString() }}</span>
-                  <span v-if="item.originalPrice" class="text-sm text-gray-500 line-through">Rp {{ item.originalPrice.toLocaleString() }}</span>
+                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(item.price) }}</span>
+                  <span 
+                    v-if="item.originalPrice"
+                    class="text-sm text-gray-500 line-through"
+                  >
+                    Rp {{ formatPrice(item.originalPrice) }}
+                  </span>
                 </div>
               </div>
               <div class="flex items-center space-x-4">
                 <div class="flex items-center border rounded-lg">
                   <button 
-                    class="p-2 hover:bg-gray-100 transition-colors" 
-                    @click="updateQuantity(item.id, item.quantity - 1)"
+                    @click="decreaseQuantity(item.id)"
+                    class="p-2 hover:bg-gray-100"
                     :disabled="item.quantity <= 1"
                   >
                     <i class="fa-solid fa-minus text-sm"></i>
                   </button>
-                  <span class="px-4 py-2 border-x min-w-[3rem] text-center">{{ item.quantity }}</span>
+                  <span class="px-4 py-2 border-x">{{ item.quantity }}</span>
                   <button 
-                    class="p-2 hover:bg-gray-100 transition-colors" 
-                    @click="updateQuantity(item.id, item.quantity + 1)"
+                    @click="increaseQuantity(item.id)"
+                    class="p-2 hover:bg-gray-100"
                   >
                     <i class="fa-solid fa-plus text-sm"></i>
                   </button>
                 </div>
                 <button 
-                  class="text-red-500 hover:text-red-700 p-2 transition-colors" 
                   @click="removeItem(item.id)"
+                  class="text-red-500 hover:text-red-700 p-2"
                 >
                   <i class="fa-solid fa-trash"></i>
                 </button>
@@ -117,13 +124,13 @@
               <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-700">Have a coupon?</span>
                 <button 
-                  class="text-blue-600 text-sm hover:text-blue-700 transition-colors"
-                  @click="toggleCoupon"
+                  @click="toggleCouponInput"
+                  class="text-blue-600 text-sm hover:text-blue-700"
                 >
                   <i class="fa-solid fa-tag mr-1"></i>Apply
                 </button>
               </div>
-              <div v-if="showCouponInput" class="space-y-3">
+              <div v-if="showCouponInput && !couponApplied" class="space-y-2">
                 <div class="flex space-x-2">
                   <input 
                     type="text" 
@@ -132,18 +139,19 @@
                     class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                   <button 
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
                     @click="applyCoupon"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
                   >
                     Apply
                   </button>
                 </div>
+                <p v-if="couponError" class="text-red-500 text-xs">{{ couponError }}</p>
               </div>
-              <div v-if="appliedCoupon" class="flex items-center justify-between text-sm">
+              <div v-if="couponApplied" class="flex items-center justify-between text-sm">
                 <span class="text-green-600">{{ appliedCoupon }} applied</span>
                 <button 
-                  class="text-red-500 hover:text-red-700 transition-colors"
                   @click="removeCoupon"
+                  class="text-red-500 hover:text-red-700"
                 >
                   Remove
                 </button>
@@ -154,32 +162,32 @@
             <div class="space-y-3 mb-6">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Subtotal ({{ totalItems }} items)</span>
-                <span class="text-gray-900">Rp {{ subtotal.toLocaleString() }}</span>
+                <span class="text-gray-900">Rp {{ formatPrice(subtotal) }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Shipping</span>
-                <span class="text-gray-900">Rp {{ shipping.toLocaleString() }}</span>
+                <span class="text-gray-900">Rp {{ formatPrice(shippingCost) }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Tax</span>
-                <span class="text-gray-900">Rp {{ tax.toLocaleString() }}</span>
+                <span class="text-gray-900">Rp {{ formatPrice(tax) }}</span>
               </div>
               <div v-if="discount > 0" class="flex justify-between text-sm">
                 <span class="text-green-600">Coupon Discount</span>
-                <span class="text-green-600">-Rp {{ discount.toLocaleString() }}</span>
+                <span class="text-green-600">-Rp {{ formatPrice(discount) }}</span>
               </div>
               <div class="border-t pt-3">
                 <div class="flex justify-between">
                   <span class="text-lg font-semibold text-gray-900">Total</span>
-                  <span class="text-lg font-bold text-gray-900">Rp {{ total.toLocaleString() }}</span>
+                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(total) }}</span>
                 </div>
               </div>
             </div>
             
             <!-- Checkout Button -->
             <button 
-              class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
               @click="proceedToCheckout"
+              class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
             >
               <i class="fa-solid fa-lock mr-2"></i>
               Proceed to Checkout
@@ -244,8 +252,8 @@
             <h4 class="font-semibold mb-4">Categories</h4>
             <ul class="space-y-2 text-sm text-gray-400">
               <li><span class="hover:text-white cursor-pointer">Electronics</span></li>
+              <li><span class="hover:text-white cursor-pointer">Hardware</span></li>
               <li><span class="hover:text-white cursor-pointer">Gaming</span></li>
-              <li><span class="hover:text-white cursor-pointer">Components</span></li>
               <li><span class="hover:text-white cursor-pointer">Accessories</span></li>
             </ul>
           </div>
@@ -268,62 +276,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// Reactive data
+// State
 const searchQuery = ref('')
 const showCouponInput = ref(false)
 const couponCode = ref('')
+const couponError = ref('')
+const couponApplied = ref(false)
 const appliedCoupon = ref('')
 
-// Cart items
-const cartItems = reactive([
+// Sample cart items
+const cartItems = ref([
   {
     id: 1,
     name: 'Sony WH-1000XM4 Wireless Headphones',
     description: 'Noise Cancelling, Bluetooth',
-    price: 5250000,
-    originalPrice: 6000000,
+    price: 5000000,
+    originalPrice: 5500000,
     quantity: 1,
-    icon: 'fa-solid fa-headphones',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
     removing: false
   },
   {
     id: 2,
     name: 'iPhone 15 Pro Max',
     description: '256GB, Titanium Blue',
-    price: 18000000,
-    originalPrice: null,
+    price: 20000000,
     quantity: 1,
-    icon: 'fa-solid fa-mobile-screen',
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
     removing: false
   },
   {
     id: 3,
     name: 'AirPods Pro (2nd Generation)',
     description: 'Active Noise Cancellation',
-    price: 3750000,
-    originalPrice: 4200000,
+    price: 3500000,
+    originalPrice: 4000000,
     quantity: 2,
-    icon: 'fa-solid fa-headphones-simple',
+    image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=300&fit=crop',
     removing: false
   }
 ])
 
 // Computed properties
-const totalItems = computed(() => {
-  return cartItems.reduce((total, item) => total + item.quantity, 0)
-})
-
 const subtotal = computed(() => {
-  return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 })
 
-const shipping = computed(() => {
-  return subtotal.value > 10000000 ? 0 : 150000 // Free shipping over 10M
+const totalItems = computed(() => {
+  return cartItems.value.reduce((sum, item) => sum + item.quantity, 0)
+})
+
+const shippingCost = computed(() => {
+  return subtotal.value > 10000000 ? 0 : 50000 // Free shipping over 10M
 })
 
 const tax = computed(() => {
@@ -331,59 +340,74 @@ const tax = computed(() => {
 })
 
 const discount = computed(() => {
-  if (appliedCoupon.value === 'SAVE20') {
+  if (couponApplied.value) {
     return Math.round(subtotal.value * 0.2) // 20% discount
   }
   return 0
 })
 
 const total = computed(() => {
-  return subtotal.value + shipping.value + tax.value - discount.value
+  return subtotal.value + shippingCost.value + tax.value - discount.value
 })
 
 // Methods
-const updateQuantity = (itemId: number, newQuantity: number) => {
-  if (newQuantity < 1) return
-  
-  const item = cartItems.find(item => item.id === itemId)
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('id-ID').format(price)
+}
+
+const increaseQuantity = (itemId: number) => {
+  const item = cartItems.value.find(item => item.id === itemId)
   if (item) {
-    item.quantity = newQuantity
+    item.quantity++
+  }
+}
+
+const decreaseQuantity = (itemId: number) => {
+  const item = cartItems.value.find(item => item.id === itemId)
+  if (item && item.quantity > 1) {
+    item.quantity--
   }
 }
 
 const removeItem = (itemId: number) => {
-  const item = cartItems.find(item => item.id === itemId)
+  const item = cartItems.value.find(item => item.id === itemId)
   if (item) {
     item.removing = true
     setTimeout(() => {
-      const index = cartItems.findIndex(item => item.id === itemId)
+      const index = cartItems.value.findIndex(item => item.id === itemId)
       if (index > -1) {
-        cartItems.splice(index, 1)
+        cartItems.value.splice(index, 1)
       }
     }, 300)
   }
 }
 
-const toggleCoupon = () => {
+const toggleCouponInput = () => {
   showCouponInput.value = !showCouponInput.value
 }
 
 const applyCoupon = () => {
-  if (couponCode.value.toUpperCase() === 'SAVE20') {
-    appliedCoupon.value = 'SAVE20'
+  couponError.value = ''
+  
+  if (couponCode.value.toLowerCase() === 'save20') {
+    couponApplied.value = true
+    appliedCoupon.value = couponCode.value.toUpperCase()
     showCouponInput.value = false
     couponCode.value = ''
   } else {
-    alert('Invalid coupon code')
+    couponError.value = 'Invalid coupon code'
   }
 }
 
 const removeCoupon = () => {
+  couponApplied.value = false
   appliedCoupon.value = ''
   showCouponInput.value = false
 }
 
 const proceedToCheckout = () => {
+  // Implement checkout logic
+  console.log('Proceeding to checkout...')
   router.push('/checkout')
 }
 </script>
@@ -391,19 +415,5 @@ const proceedToCheckout = () => {
 <style scoped>
 .font-inter {
   font-family: 'Inter', sans-serif;
-}
-
-/* Smooth transitions for cart items */
-.transition-all {
-  transition: all 0.3s ease;
-}
-
-/* Hover effects */
-button:hover {
-  transform: translateY(-1px);
-}
-
-button:active {
-  transform: translateY(0);
 }
 </style>
