@@ -1,38 +1,7 @@
 <template>
   <div class="bg-light min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50">
-      <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-8">
-            <div class="text-2xl font-bold text-primary">Autowarehouse</div>
-            <nav class="hidden md:flex space-x-6">
-              <router-link to="/" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Beranda</router-link>
-              <router-link to="/products" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Produk</router-link>
-              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
-              <router-link to="/auctions" class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Auction</router-link>
-            </nav>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="hidden md:flex relative">
-              <input 
-                type="text" 
-                placeholder="Cari hardware, RAM, aksesoris..." 
-                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-80"
-              >
-              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
-            <router-link to="/cart" class="relative">
-              <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
-              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-            </router-link>
-            <router-link to="/login" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              Masuk
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Use UserNavbar for logged in users, or GuestNavbar for guests -->
+    <UserNavbar />
 
     <!-- Hero Banner -->
     <section class="bg-gradient-to-br from-primary via-secondary to-indigo-600 text-white h-[600px] flex items-center relative overflow-hidden">
@@ -293,6 +262,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import UserNavbar from '../components/UserNavbar.vue'
 
 // Countdown timer
 const countdown = reactive({

@@ -2,11 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
+  // Default route
   {
     path: '/',
     name: 'Home',
     component: () => import('../views/HomeView.vue')
   },
+  
+  // Auth routes
   {
     path: '/login',
     name: 'Login',
@@ -22,6 +25,8 @@ const routes: RouteRecordRaw[] = [
     name: 'ForgotPassword',
     component: () => import('../views/auth/ForgotPasswordView.vue')
   },
+
+  // User routes
   {
     path: '/products',
     name: 'Products',
@@ -96,6 +101,50 @@ const routes: RouteRecordRaw[] = [
     path: '/customer-service',
     name: 'CustomerService',
     component: () => import('../views/CustomerServiceView.vue')
+  },
+
+  // Admin routes
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: () => import('../views/admin/AdminDashboardView.vue')
+  },
+  {
+    path: '/admin/products',
+    name: 'AdminProducts',
+    component: () => import('../views/admin/AdminProductView.vue')
+  },
+  {
+    path: '/admin/auctions',
+    name: 'AdminAuctions',
+    component: () => import('../views/admin/AdminAuctionView.vue')
+  },
+  {
+    path: '/admin/categories',
+    name: 'AdminCategories',
+    component: () => import('../views/admin/AdminCategoryView.vue')
+  },
+  {
+    path: '/admin/customer-service',
+    name: 'AdminCustomerService',
+    component: () => import('../views/admin/AdminCustomerServiceView.vue')
+  },
+  {
+    path: '/admin/notifications',
+    name: 'AdminNotifications',
+    component: () => import('../views/admin/AdminNotificationView.vue')
+  },
+  {
+    path: '/admin/orders',
+    name: 'AdminOrders',
+    component: () => import('../views/admin/AdminOrderView.vue')
+  },
+
+  // UI Index for development
+  {
+    path: '/ui-index',
+    name: 'UIIndex',
+    component: () => import('../views/UIIndexView.vue')
   }
 ]
 

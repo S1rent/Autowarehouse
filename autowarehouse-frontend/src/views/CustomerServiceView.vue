@@ -1,28 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <h1 class="text-xl font-bold text-gray-900">Autowarehouse</h1>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button class="text-gray-500 hover:text-gray-700 relative">
-              <i class="fa-solid fa-bell text-lg"></i>
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-            </button>
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-user text-white text-sm"></i>
-              </div>
-              <span class="text-sm font-medium text-gray-700">Sarah Johnson</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8">
@@ -169,6 +147,7 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 const chatMessages = ref(null)

@@ -44,4 +44,47 @@ you haven't create user-customer-service page
 and also
 the shopping-cart(2)
 =======================================
+Oke sekarang ada sisa page untuk admin, tolong buatin semua pagenya
+
+admin-auction(1), (2)
+admin category management (1), (2)
+admin customer-service
+admin dashboard (home page)
+admin notification
+admin order-management (1) (2)
+=======================================
+tolong dong, pastiin smuanya di create halamannya, ini masih banyak yang bolong loh, padahal saya udah jelasin smuanya ke kamu sedetail mungkin halaman mana yang harus kamu kerjakan dari folder ui-design
+
+=======================================
+Tolong update seluruh halaman user dengan navbar khusus untuk user. Serta seluruh halaman admin dengan navbar khusus admin.
+tolong diseragamkan, jadi total hanya perlu 2 navbar, mungkin 3 navbar khusus ketika pengguna belum login
+=======================================
+eh tolong dong, ini kenapa navbarnya ganti ganti sih, kalo untuk user yaudah 1 tipe navbar aja. untuk guest 1 tipe, untuk admin 1 tipe, jangan setiap halaman ganti mulu. please kerja yang bener napa, prompt kamu tuh mahal banget 
+=======================================
+KENAPA SIH KAMU NGAPUS" IN PAGE YANG UDAH ADA DI ROUTERNYA, SAYA GA NGERTI
+=======================================
+prompt saya kurang jelas ato gimana sih ? jelas-jelas saya ngomong, untuk seluruh page customer, pake header yang sama. 
+untuk seluruh page admin, pake header yang sama,
+ini banyak banget yang beda-beda.
+
+PERHATIKAN HEADERNYA AJA, SAYA GA NYURUH KAMU UTAK ATIK YANG LAIN.
+
+TERUS ITU ROUTERNYA TOLONG DIBENRIN YA TUHANNNNNNNNNN, BANYAK PAGE YANG JADI GA KETEMU KAYAK CUSTOMER SERVICE DLL, NGAPAIN SIH DI GANTI GANTI
+=======================================
+
+=======================================
+=======================================
+
+=======================================
+
+=======================================
+=======================================
+
+=======================================
+
+=======================================
+=======================================
+
+=======================================
+
 =======================================

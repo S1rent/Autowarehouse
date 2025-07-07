@@ -1,41 +1,6 @@
 <template>
   <div class="bg-light min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50">
-      <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-8">
-            <div class="text-2xl font-bold text-primary">Autowarehouse</div>
-            <nav class="hidden md:flex space-x-6">
-              <router-link to="/" class="text-gray-600 hover:text-primary transition-colors">Beranda</router-link>
-              <span class="text-primary font-semibold">Produk</span>
-              <router-link to="/auction" class="text-gray-600 hover:text-primary transition-colors">Auction</router-link>
-              <span class="text-gray-600 hover:text-primary transition-colors cursor-pointer">Kategori</span>
-            </nav>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="hidden md:flex relative">
-              <input 
-                type="text" 
-                placeholder="Cari produk..." 
-                v-model="searchQuery"
-                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
-            <button class="relative">
-              <i class="fa-solid fa-heart text-2xl text-gray-600 hover:text-primary"></i>
-              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-            </button>
-            <router-link to="/cart" class="relative">
-              <i class="fa-solid fa-shopping-cart text-2xl text-gray-600 hover:text-primary"></i>
-              <span class="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">2</span>
-            </router-link>
-            <router-link to="/login" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Masuk</router-link>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Breadcrumb -->
     <section class="bg-gray-100 py-4">
@@ -319,6 +284,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 
@@ -331,12 +297,12 @@ const itemsPerPage = 9
 
 // Filters
 const filters = reactive({
-  categories: [],
-  brands: [],
-  ratings: [],
+  categories: [] as string[],
+  brands: [] as string[],
+  ratings: [] as string[],
   priceRange: '',
-  priceMin: null,
-  priceMax: null
+  priceMin: null as number | null,
+  priceMax: null as number | null
 })
 
 // Sample products data
