@@ -1,12 +1,19 @@
 # 🛠️ Technical Stack - Autowarehouse System
 
 ## Frontend Technologies
-- **Framework**: Vue 3 + TypeScript
+- **Framework**: Vue 3 + TypeScript + Vite
 - **API Style**: Composition API
-- **State Management**: Pinia
-- **Real-time Communication**: WebSocket client untuk auction
-- **Localization**: Multi-language support (Indonesia & English)
-- **UI/UX**: Responsive design, mobile-friendly, optional dark mode
+- **Build Tool**: Vite dengan Hot Module Replacement
+- **Routing**: Vue Router 4 dengan lazy loading
+- **State Management**: Pinia (configured, ready for use)
+- **HTTP Client**: Axios (configured)
+- **Styling**: Tailwind CSS + Custom CSS Variables
+- **Icons**: Font Awesome 6 (comprehensive icon set)
+- **Fonts**: Google Fonts (Inter family)
+- **Utilities**: @vueuse/core untuk composables
+- **Real-time Communication**: WebSocket client untuk auction (ready for implementation)
+- **UI/UX**: Fully responsive design, mobile-first approach
+- **Development Tools**: TypeScript, ESLint, PostCSS, Autoprefixer
 
 ## Backend Technologies
 - **Framework**: Java + Quarkus
@@ -28,6 +35,14 @@
 - **Authorization**: Role-based access control
 
 ## Development & Deployment
+- **Frontend Build**: Vite production build dengan optimizations
+- **Code Splitting**: Route-based lazy loading
+- **Asset Optimization**: Automatic image dan asset optimization
+- **Tree Shaking**: Unused code elimination
+- **Modern JS**: ES modules untuk browser modern
+- **Development Server**: Hot reload dengan fast refresh
+- **Type Checking**: TypeScript strict mode
+- **Linting**: ESLint dengan Vue 3 rules
 - **Architecture**: Microservice-compatible backend
 - **Scalability**: Horizontal scalability via Kubernetes (optional)
 - **Caching**: Performance caching implementation
@@ -53,8 +68,15 @@
 - WebSocket connections
 
 ## Development Tools & Standards
-- TypeScript untuk type safety
-- Code validation dan linting
-- Automated testing
-- API documentation
-- Version control dengan Git
+- **TypeScript**: Strict type checking untuk type safety
+- **ESLint**: Code validation dan linting dengan Vue 3 rules
+- **Prettier**: Code formatting (configured)
+- **PostCSS**: CSS processing dengan Autoprefixer
+- **Tailwind CSS**: Utility-first CSS framework
+- **Vite**: Modern build tool dengan fast HMR
+- **Vue DevTools**: Browser extension support
+- **Automated Testing**: Vitest setup (ready for implementation)
+- **API Documentation**: OpenAPI/Swagger ready
+- **Version Control**: Git dengan conventional commits
+- **Package Management**: npm dengan lock file
+- **Environment Variables**: .env support untuk different environments
