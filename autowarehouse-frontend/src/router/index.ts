@@ -38,6 +38,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/CartView.vue')
   },
   {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('../views/CheckoutView.vue')
+  },
+  {
     path: '/wishlist',
     name: 'Wishlist',
     component: () => import('../views/WishlistView.vue')
@@ -68,6 +73,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/BidHistoryView.vue')
   },
   {
+    path: '/order-history',
+    name: 'OrderHistory',
+    component: () => import('../views/OrderHistoryView.vue')
+  },
+  {
+    path: '/order/:id',
+    name: 'OrderDetail',
+    component: () => import('../views/OrderDetailView.vue')
+  },
+  {
     path: '/profile',
     name: 'UserProfile',
     component: () => import('../views/UserProfileView.vue')
@@ -76,6 +91,11 @@ const routes: RouteRecordRaw[] = [
     path: '/notifications',
     name: 'UserNotifications',
     component: () => import('../views/UserNotificationsView.vue')
+  },
+  {
+    path: '/customer-service',
+    name: 'CustomerService',
+    component: () => import('../views/CustomerServiceView.vue')
   }
 ]
 

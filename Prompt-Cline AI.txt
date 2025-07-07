@@ -39,5 +39,9 @@ dan juga kamu belum membuat page auction 3 dan 4
 =======================================
 hayo, kamu lupa lagi untuk bikin halaman user bid history, live auction 4
 =======================================
+You haven't create order history(1), (2), (3)
+you haven't create user-customer-service page
+and also
+the shopping-cart(2)
 =======================================
 =======================================
