@@ -71,6 +71,9 @@ public class Order extends PanacheEntityBase {
     @Column(name = "payment_reference")
     public String paymentReference;
 
+    @Column(name = "tracking_number")
+    public String trackingNumber;
+
     @Column(columnDefinition = "TEXT")
     public String notes;
 
@@ -242,6 +245,23 @@ public class Order extends PanacheEntityBase {
 
     public int getTotalItems() {
         return items != null ? items.stream().mapToInt(item -> item.quantity).sum() : 0;
+    }
+
+    public void calculateTotals() {
+        if (items == null || items.isEmpty()) {
+            this.subtotal = BigDecimal.ZERO;
+            this.totalAmount = BigDecimal.ZERO;
+            return;
+        }
+
+        this.subtotal = items.stream()
+                .map(item -> item.calculateTotalPrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        this.totalAmount = this.subtotal
+                .add(this.taxAmount)
+                .add(this.shippingCost)
+                .subtract(this.discountAmount);
     }
 
     @Override

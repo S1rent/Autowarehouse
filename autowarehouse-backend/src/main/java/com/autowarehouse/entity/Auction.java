@@ -46,6 +46,41 @@ public class Auction extends PanacheEntityBase {
     @NotNull
     public BigDecimal minimumBidIncrement = new BigDecimal("1000.00");
 
+    @Column(name = "reserve_price", precision = 12, scale = 2)
+    public BigDecimal reservePrice;
+
+    @Column(name = "current_bid", precision = 12, scale = 2)
+    public BigDecimal currentBid;
+
+    @Column(name = "starting_bid", precision = 12, scale = 2)
+    public BigDecimal startingBid;
+
+    @Column(name = "bid_count")
+    public Integer bidCount = 0;
+
+    @Column(name = "watcher_count")
+    public Integer watcherCount = 0;
+
+    @Column(name = "bid_increment", precision = 12, scale = 2)
+    public BigDecimal bidIncrement;
+
+    @Column(name = "auto_extend_minutes")
+    public Integer autoExtendMinutes = 5;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    public Category category;
+
+    @Column(name = "cancel_reason")
+    public String cancelReason;
+
+    @Column(name = "winning_bid", precision = 12, scale = 2)
+    public BigDecimal winningBid;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_winner_id")
+    public User currentWinner;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @NotNull
@@ -121,6 +156,16 @@ public class Auction extends PanacheEntityBase {
         LocalDateTime soon = LocalDateTime.now().plusHours(24);
         return find("status = ?1 and endTime <= ?2 order by endTime asc", 
                    AuctionStatus.LIVE, soon).list();
+    }
+
+    public static List<Auction> findEndingSoon(int hours) {
+        LocalDateTime soon = LocalDateTime.now().plusHours(hours);
+        return find("status = ?1 and endTime <= ?2 order by endTime asc", 
+                   AuctionStatus.LIVE, soon).list();
+    }
+
+    public static List<Auction> findByCategory(Category category) {
+        return find("category = ?1 order by createdAt desc", category).list();
     }
 
     public static List<Auction> findByStatus(AuctionStatus status) {

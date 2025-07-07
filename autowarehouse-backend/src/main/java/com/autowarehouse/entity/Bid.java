@@ -94,6 +94,10 @@ public class Bid extends PanacheEntityBase {
         return find("auction.id = ?1 order by amount desc", auctionId).firstResult();
     }
 
+    public static Bid findWinningBid(Auction auction) {
+        return find("auction = ?1 and isWinning = true", auction).firstResult();
+    }
+
     public static List<Bid> findAutoBidsForAuction(Auction auction, BigDecimal currentPrice) {
         return find("auction = ?1 and isAutoBid = true and maxAutoBid > ?2 order by maxAutoBid desc", 
                    auction, currentPrice).list();

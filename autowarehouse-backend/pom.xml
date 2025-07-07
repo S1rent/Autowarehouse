@@ -106,11 +106,7 @@
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
     
-    <!-- CORS -->
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-cors</artifactId>
-    </dependency>
+    <!-- CORS is handled automatically by Quarkus RESTEasy Reactive -->
     
     <!-- Health Check -->
     <dependency>

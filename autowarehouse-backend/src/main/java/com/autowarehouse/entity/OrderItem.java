@@ -48,6 +48,16 @@ public class OrderItem extends PanacheEntityBase {
     @NotNull
     public BigDecimal subtotal;
 
+    @Column(precision = 12, scale = 2)
+    public BigDecimal price;
+
+    @Column(name = "total_price", precision = 12, scale = 2)
+    public BigDecimal totalPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auction_id")
+    public Auction auction;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     public LocalDateTime createdAt;
@@ -90,8 +100,16 @@ public class OrderItem extends PanacheEntityBase {
         return count("product.id", productId);
     }
 
+    public static List<OrderItem> findByAuction(Auction auction) {
+        return find("auction", auction).list();
+    }
+
     // Helper methods
     public BigDecimal getItemTotal() {
+        return productPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    public BigDecimal calculateTotalPrice() {
         return productPrice.multiply(BigDecimal.valueOf(quantity));
     }
 

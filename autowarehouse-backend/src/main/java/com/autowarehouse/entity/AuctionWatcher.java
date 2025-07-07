@@ -44,6 +44,15 @@ public class AuctionWatcher extends PanacheEntityBase {
         return find("auction = ?1 and user = ?2", auction, user).firstResult();
     }
 
+    public static AuctionWatcher findByUserAndAuction(User user, Auction auction) {
+        return find("user = ?1 and auction = ?2", user, auction).firstResult();
+    }
+
+    public static List<AuctionWatcher> findWatchersForNotification(Auction auction, String notificationType) {
+        // For now, return all watchers - can be extended later for notification preferences
+        return find("auction = ?1", auction).list();
+    }
+
     public static AuctionWatcher findByAuctionIdAndUserId(Long auctionId, Long userId) {
         return find("auction.id = ?1 and user.id = ?2", auctionId, userId).firstResult();
     }
