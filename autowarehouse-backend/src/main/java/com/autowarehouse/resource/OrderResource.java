@@ -79,7 +79,8 @@ public class OrderResource {
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response updatePaymentStatus(@PathParam("id") Long id, @Valid UpdatePaymentRequest request) {
         try {
-            orderService.updatePaymentStatus(id, request.paymentStatus, request.paymentReference);
+            Order.PaymentStatus paymentStatus = Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase());
+            orderService.updatePaymentStatus(id, paymentStatus);
             return Response.ok(new SuccessResponse("Payment status updated successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -91,9 +92,9 @@ public class OrderResource {
     @PUT
     @Path("/{id}/cancel")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public Response cancelOrder(@PathParam("id") Long id) {
+    public Response cancelOrder(@PathParam("id") Long id, @Valid CancelOrderRequest request) {
         try {
-            orderService.cancelOrder(id);
+            orderService.cancelOrder(id, request.reason != null ? request.reason : "Cancelled by user");
             return Response.ok(new SuccessResponse("Order cancelled successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -110,7 +111,8 @@ public class OrderResource {
         try {
             List<Order> orders;
             if (status != null && !status.isEmpty()) {
-                orders = orderService.findByStatus(status);
+                Order.OrderStatus orderStatus = Order.OrderStatus.valueOf(status.toUpperCase());
+                orders = orderService.findByStatus(orderStatus);
             } else {
                 orders = orderService.findAllOrders();
             }
@@ -131,7 +133,8 @@ public class OrderResource {
     @RolesAllowed("ADMIN")
     public Response updateOrderStatus(@PathParam("id") Long id, @Valid UpdateStatusRequest request) {
         try {
-            orderService.updateOrderStatus(id, request.status);
+            Order.OrderStatus orderStatus = Order.OrderStatus.valueOf(request.status.toUpperCase());
+            orderService.updateOrderStatus(id, orderStatus);
             return Response.ok(new SuccessResponse("Order status updated successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -213,6 +216,10 @@ public class OrderResource {
 
     public static class ShipOrderRequest {
         public String trackingNumber;
+    }
+
+    public static class CancelOrderRequest {
+        public String reason;
     }
 
     public static class OrderResponse {

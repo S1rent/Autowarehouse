@@ -27,7 +27,8 @@ public class AuctionResource {
         try {
             List<Auction> auctions;
             if (status != null && !status.isEmpty()) {
-                auctions = auctionService.findByStatus(status);
+                Auction.AuctionStatus auctionStatus = Auction.AuctionStatus.valueOf(status.toUpperCase());
+                auctions = auctionService.findByStatus(auctionStatus);
             } else {
                 auctions = auctionService.findActiveAuctions();
             }
@@ -221,18 +222,18 @@ public class AuctionResource {
     @RolesAllowed("ADMIN")
     public Response createAuction(@Valid CreateAuctionRequest request) {
         try {
-            Auction auction = auctionService.createAuction(
-                request.productId,
-                request.title,
-                request.description,
-                request.startingPrice,
-                request.buyNowPrice,
-                request.minimumBidIncrement,
-                request.startTime,
-                request.endTime
-            );
+            Auction auction = new Auction();
+            auction.title = request.title;
+            auction.description = request.description;
+            auction.startingPrice = request.startingPrice;
+            auction.buyNowPrice = request.buyNowPrice;
+            auction.minimumBidIncrement = request.minimumBidIncrement;
+            auction.startTime = request.startTime;
+            auction.endTime = request.endTime;
+            
+            Auction createdAuction = auctionService.createAuction(auction);
             return Response.status(Response.Status.CREATED)
-                    .entity(new AuctionDetailResponse(auction))
+                    .entity(new AuctionDetailResponse(createdAuction))
                     .build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -246,17 +247,17 @@ public class AuctionResource {
     @RolesAllowed("ADMIN")
     public Response updateAuction(@PathParam("id") Long id, @Valid UpdateAuctionRequest request) {
         try {
-            Auction auction = auctionService.updateAuction(
-                id,
-                request.title,
-                request.description,
-                request.startingPrice,
-                request.buyNowPrice,
-                request.minimumBidIncrement,
-                request.startTime,
-                request.endTime
-            );
-            return Response.ok(new AuctionDetailResponse(auction)).build();
+            Auction auction = new Auction();
+            auction.title = request.title;
+            auction.description = request.description;
+            auction.startingPrice = request.startingPrice;
+            auction.buyNowPrice = request.buyNowPrice;
+            auction.minimumBidIncrement = request.minimumBidIncrement;
+            auction.startTime = request.startTime;
+            auction.endTime = request.endTime;
+            
+            Auction updatedAuction = auctionService.updateAuction(id, auction);
+            return Response.ok(new AuctionDetailResponse(updatedAuction)).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse(e.getMessage()))
@@ -267,9 +268,9 @@ public class AuctionResource {
     @PUT
     @Path("/admin/{id}/cancel")
     @RolesAllowed("ADMIN")
-    public Response cancelAuction(@PathParam("id") Long id) {
+    public Response cancelAuction(@PathParam("id") Long id, @Valid CancelAuctionRequest request) {
         try {
-            auctionService.cancelAuction(id);
+            auctionService.cancelAuction(id, request.reason != null ? request.reason : "Cancelled by admin");
             return Response.ok(new SuccessResponse("Auction cancelled successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -302,6 +303,10 @@ public class AuctionResource {
     }
 
     public static class UpdateAuctionRequest extends CreateAuctionRequest {
+    }
+
+    public static class CancelAuctionRequest {
+        public String reason;
     }
 
     public static class AuctionResponse {

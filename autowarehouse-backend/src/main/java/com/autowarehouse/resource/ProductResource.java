@@ -389,7 +389,7 @@ public class ProductResource {
             this.isOnSale = product.isOnSaleNow();
             this.rating = product.rating;
             this.reviewCount = product.reviewCount;
-            this.viewCount = product.viewCount;
+            this.viewCount = product.viewCount.intValue();
             this.salesCount = product.salesCount;
         }
     }

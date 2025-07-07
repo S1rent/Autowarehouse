@@ -164,7 +164,7 @@ public class NotificationService {
 
     @Transactional
     public void createPromotionalNotification(String title, String message, Long referenceId, String referenceType) {
-        List<User> customers = User.findByRole(UserRole.CUSTOMER);
+        List<User> customers = User.findByRole("CUSTOMER");
         for (User customer : customers) {
             createNotification(customer, title, message, NotificationType.PROMOTIONAL, referenceId, referenceType);
         }

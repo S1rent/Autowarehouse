@@ -50,9 +50,8 @@ public class User extends PanacheEntityBase {
     public String phoneNumber;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     @Roles
-    public UserRole role = UserRole.CUSTOMER;
+    public String role = "CUSTOMER";
 
     @Column(name = "is_active")
     public Boolean isActive = true;
@@ -108,7 +107,7 @@ public class User extends PanacheEntityBase {
     // Constructors
     public User() {}
 
-    public User(String email, String password, String firstName, String lastName, UserRole role) {
+    public User(String email, String password, String firstName, String lastName, String role) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -137,7 +136,7 @@ public class User extends PanacheEntityBase {
         return find("isActive", true).list();
     }
 
-    public static List<User> findByRole(UserRole role) {
+    public static List<User> findByRole(String role) {
         return find("role", role).list();
     }
 
@@ -150,7 +149,7 @@ public class User extends PanacheEntityBase {
         return count("isActive", true);
     }
 
-    public static long countByRole(UserRole role) {
+    public static long countByRole(String role) {
         return count("role", role);
     }
 
@@ -160,11 +159,11 @@ public class User extends PanacheEntityBase {
     }
 
     public boolean isAdmin() {
-        return role == UserRole.ADMIN;
+        return "ADMIN".equals(role);
     }
 
     public boolean isCustomer() {
-        return role == UserRole.CUSTOMER;
+        return "CUSTOMER".equals(role);
     }
 
     public boolean isPasswordResetTokenValid() {

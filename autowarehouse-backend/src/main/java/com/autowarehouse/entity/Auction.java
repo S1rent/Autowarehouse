@@ -189,6 +189,10 @@ public class Auction extends PanacheEntityBase {
         return find("winner = ?1 order by endTime desc", winner).list();
     }
 
+    public static List<Auction> findWatchedByUser(User user) {
+        return find("select aw.auction from AuctionWatcher aw where aw.user = ?1 order by aw.createdAt desc", user).list();
+    }
+
     public static List<Auction> findByWinnerId(Long winnerId) {
         return find("winner.id = ?1 order by endTime desc", winnerId).list();
     }

@@ -78,6 +78,10 @@ public class CartItem extends PanacheEntityBase {
         return find("user.id = ?1 and isSelected = true order by createdAt desc", userId).list();
     }
 
+    public static List<CartItem> findByUserAndSelected(User user, boolean selected) {
+        return find("user = ?1 and isSelected = ?2 order by createdAt desc", user, selected).list();
+    }
+
     public static boolean existsByUserAndProduct(User user, Product product) {
         return count("user = ?1 and product = ?2", user, product) > 0;
     }
@@ -128,6 +132,10 @@ public class CartItem extends PanacheEntityBase {
         if (product == null || !product.isOnSaleNow()) return BigDecimal.ZERO;
         BigDecimal savings = product.getSavings();
         return savings.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    public BigDecimal getTotalSavings() {
+        return getSavings();
     }
 
     public boolean isProductAvailable() {

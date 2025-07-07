@@ -30,8 +30,8 @@ public class JwtService {
                 .claim("email", user.email)
                 .claim("firstName", user.firstName)
                 .claim("lastName", user.lastName)
-                .claim("role", user.role.name())
-                .groups(Set.of(user.role.name()))
+                .claim("role", user.role)
+                .groups(Set.of(user.role))
                 .expiresIn(Duration.ofSeconds(tokenLifespan))
                 .sign();
     }

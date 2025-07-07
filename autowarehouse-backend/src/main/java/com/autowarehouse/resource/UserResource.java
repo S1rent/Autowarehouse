@@ -256,7 +256,7 @@ public class UserResource {
     }
 
     public static class UpdateRoleRequest {
-        public UserRole role;
+        public String role;
     }
 
     public static class UserResponse {
@@ -265,7 +265,7 @@ public class UserResource {
         public String firstName;
         public String lastName;
         public String phoneNumber;
-        public UserRole role;
+        public String role;
         public Boolean isActive;
         public Boolean isEmailVerified;
 

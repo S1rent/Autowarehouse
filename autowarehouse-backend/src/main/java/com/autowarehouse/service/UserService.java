@@ -31,7 +31,7 @@ public class UserService {
         user.isActive = true;
         user.isEmailVerified = false;
         user.emailVerificationToken = UUID.randomUUID().toString();
-        user.role = user.role != null ? user.role : UserRole.CUSTOMER;
+        user.role = user.role != null ? user.role : "CUSTOMER";
 
         user.persist();
         return user;
@@ -44,7 +44,7 @@ public class UserService {
         user.password = password;
         user.firstName = firstName;
         user.lastName = lastName;
-        user.role = UserRole.CUSTOMER;
+        user.role = "CUSTOMER";
         
         return createUser(user);
     }
@@ -78,11 +78,11 @@ public class UserService {
     }
 
     public List<User> findAllCustomers() {
-        return User.findByRole(UserRole.CUSTOMER);
+        return User.findByRole("CUSTOMER");
     }
 
     public List<User> findAllAdmins() {
-        return User.findByRole(UserRole.ADMIN);
+        return User.findByRole("ADMIN");
     }
 
     public List<User> findActiveUsers() {
@@ -185,7 +185,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateRole(Long userId, UserRole role) {
+    public void updateRole(Long userId, String role) {
         User user = User.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -204,11 +204,11 @@ public class UserService {
     }
 
     public long getCustomersCount() {
-        return User.countByRole(UserRole.CUSTOMER);
+        return User.countByRole("CUSTOMER");
     }
 
     public long getAdminsCount() {
-        return User.countByRole(UserRole.ADMIN);
+        return User.countByRole("ADMIN");
     }
 
     public boolean emailExists(String email) {

@@ -36,8 +36,8 @@ public class OrderService {
         Order order = new Order();
         order.orderNumber = generateOrderNumber();
         order.user = user;
-        order.status = OrderStatus.PENDING;
-        order.paymentStatus = PaymentStatus.PENDING;
+        order.status = Order.OrderStatus.PENDING;
+        order.paymentStatus = Order.PaymentStatus.PENDING;
         order.persist();
 
         // Create order items
@@ -72,7 +72,7 @@ public class OrderService {
             throw new IllegalArgumentException("User is not the winner of this auction");
         }
 
-        if (auction.status != AuctionStatus.ENDED) {
+        if (auction.status != Auction.AuctionStatus.ENDED) {
             throw new IllegalArgumentException("Auction has not ended yet");
         }
 
@@ -86,8 +86,8 @@ public class OrderService {
         Order order = new Order();
         order.orderNumber = generateOrderNumber();
         order.user = user;
-        order.status = OrderStatus.PENDING;
-        order.paymentStatus = PaymentStatus.PENDING;
+        order.status = Order.OrderStatus.PENDING;
+        order.paymentStatus = Order.PaymentStatus.PENDING;
         order.persist();
 
         // Create order item from auction
@@ -120,7 +120,7 @@ public class OrderService {
         return Order.findByUser(user);
     }
 
-    public List<Order> findByStatus(OrderStatus status) {
+    public List<Order> findByStatus(Order.OrderStatus status) {
         return Order.findByStatus(status);
     }
 
@@ -132,14 +132,67 @@ public class OrderService {
         return Order.findRecentOrders(days);
     }
 
+    public Order createOrderFromCart(Long userId) {
+        User user = User.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        List<CartItem> cartItems = CartItem.findByUserAndSelected(user, true);
+        if (cartItems.isEmpty()) {
+            throw new IllegalArgumentException("No selected items in cart");
+        }
+
+        return createOrder(user, cartItems);
+    }
+
+    public List<Order> findByUserId(Long userId) {
+        User user = User.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return findByUser(user);
+    }
+
+    public List<Order> findAllOrders() {
+        return Order.listAll();
+    }
+
     @Transactional
-    public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
+    public void shipOrder(Long orderId, String trackingNumber) {
         Order order = Order.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
         }
 
-        OrderStatus oldStatus = order.status;
+        order.trackingNumber = trackingNumber;
+        order.updateStatus(Order.OrderStatus.SHIPPED);
+        order.persist();
+
+        notificationService.notifyOrderShipped(order.user, order);
+    }
+
+    @Transactional
+    public void deliverOrder(Long orderId) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        order.updateStatus(Order.OrderStatus.DELIVERED);
+        order.persist();
+
+        notificationService.notifyOrderDelivered(order.user, order);
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, Order.OrderStatus newStatus) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        Order.OrderStatus oldStatus = order.status;
         order.updateStatus(newStatus);
         order.persist();
 
@@ -157,7 +210,7 @@ public class OrderService {
             case CANCELLED:
                 notificationService.notifyOrderCancelled(order.user, order);
                 // Restore product stock if order was cancelled
-                if (oldStatus == OrderStatus.PENDING || oldStatus == OrderStatus.CONFIRMED) {
+                if (oldStatus == Order.OrderStatus.PENDING || oldStatus == Order.OrderStatus.CONFIRMED) {
                     restoreProductStock(order);
                 }
                 break;
@@ -165,7 +218,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updatePaymentStatus(Long orderId, PaymentStatus paymentStatus) {
+    public void updatePaymentStatus(Long orderId, Order.PaymentStatus paymentStatus) {
         Order order = Order.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
@@ -173,8 +226,8 @@ public class OrderService {
 
         order.paymentStatus = paymentStatus;
         
-        if (paymentStatus == PaymentStatus.PAID && order.status == OrderStatus.PENDING) {
-            order.updateStatus(OrderStatus.CONFIRMED);
+        if (paymentStatus == Order.PaymentStatus.PAID && order.status == Order.OrderStatus.PENDING) {
+            order.updateStatus(Order.OrderStatus.CONFIRMED);
         }
         
         order.persist();
@@ -225,7 +278,7 @@ public class OrderService {
             throw new IllegalArgumentException("Order cannot be cancelled in current status");
         }
 
-        order.updateStatus(OrderStatus.CANCELLED);
+        order.updateStatus(Order.OrderStatus.CANCELLED);
         order.notes = (order.notes != null ? order.notes + "\n" : "") + "Cancelled: " + reason;
         order.persist();
 
@@ -243,16 +296,16 @@ public class OrderService {
             throw new IllegalArgumentException("Order not found");
         }
 
-        if (order.paymentStatus != PaymentStatus.PAID) {
+        if (order.paymentStatus != Order.PaymentStatus.PAID) {
             throw new IllegalArgumentException("Order payment is not in paid status");
         }
 
         // Update payment status
         if (refundAmount.compareTo(order.totalAmount) >= 0) {
-            order.paymentStatus = PaymentStatus.REFUNDED;
-            order.updateStatus(OrderStatus.REFUNDED);
+            order.paymentStatus = Order.PaymentStatus.REFUNDED;
+            order.updateStatus(Order.OrderStatus.REFUNDED);
         } else {
-            order.paymentStatus = PaymentStatus.PARTIALLY_REFUNDED;
+            order.paymentStatus = Order.PaymentStatus.PARTIALLY_REFUNDED;
         }
 
         order.persist();
@@ -290,15 +343,15 @@ public class OrderService {
     }
 
     public long getPendingOrdersCount() {
-        return Order.countByStatus(OrderStatus.PENDING);
+        return Order.countByStatus(Order.OrderStatus.PENDING);
     }
 
     public long getCompletedOrdersCount() {
-        return Order.countByStatus(OrderStatus.DELIVERED);
+        return Order.countByStatus(Order.OrderStatus.DELIVERED);
     }
 
     public BigDecimal getTotalRevenue() {
-        List<Order> completedOrders = Order.findByStatus(OrderStatus.DELIVERED);
+        List<Order> completedOrders = Order.findByStatus(Order.OrderStatus.DELIVERED);
         return completedOrders.stream()
                 .map(order -> order.totalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -306,7 +359,7 @@ public class OrderService {
 
     public BigDecimal getRevenueForPeriod(LocalDateTime startDate, LocalDateTime endDate) {
         List<Order> orders = Order.find("status = ?1 and createdAt >= ?2 and createdAt <= ?3", 
-                                       OrderStatus.DELIVERED, startDate, endDate).list();
+                                       Order.OrderStatus.DELIVERED, startDate, endDate).list();
         return orders.stream()
                 .map(order -> order.totalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -320,7 +373,7 @@ public class OrderService {
     }
 
     @Transactional
-    private void restoreProductStock(Order order) {
+    public void restoreProductStock(Order order) {
         List<OrderItem> orderItems = OrderItem.findByOrder(order);
         for (OrderItem orderItem : orderItems) {
             // Only restore stock if it's not from an auction

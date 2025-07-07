@@ -28,7 +28,7 @@ public class AuctionService {
         }
 
         // Set default values
-        auction.status = AuctionStatus.UPCOMING;
+        auction.status = Auction.AuctionStatus.SCHEDULED;
         auction.currentBid = auction.startingBid;
         auction.bidCount = 0;
         auction.watcherCount = 0;
@@ -50,7 +50,7 @@ public class AuctionService {
         }
 
         // Only allow updates if auction hasn't started
-        if (auction.status != AuctionStatus.UPCOMING) {
+        if (auction.status != Auction.AuctionStatus.SCHEDULED) {
             throw new IllegalArgumentException("Cannot update auction that has already started");
         }
 
@@ -77,7 +77,7 @@ public class AuctionService {
         return Auction.listAll();
     }
 
-    public List<Auction> findByStatus(AuctionStatus status) {
+    public List<Auction> findByStatus(Auction.AuctionStatus status) {
         return Auction.findByStatus(status);
     }
 
@@ -105,6 +105,40 @@ public class AuctionService {
         return Auction.findByWinner(winner);
     }
 
+    public List<Auction> findActiveAuctions() {
+        return findLiveAuctions();
+    }
+
+    public List<Auction> findEndingSoonAuctions() {
+        return findEndingSoon(30); // Default to 30 minutes
+    }
+
+    @Transactional
+    public AuctionWatcher watchAuction(Long auctionId, Long userId) {
+        return addWatcher(auctionId, userId);
+    }
+
+    @Transactional
+    public void unwatchAuction(Long auctionId, Long userId) {
+        removeWatcher(auctionId, userId);
+    }
+
+    public List<Bid> getUserBids(Long userId) {
+        User user = User.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return Bid.findByUser(user);
+    }
+
+    public List<Auction> getUserWatchedAuctions(Long userId) {
+        User user = User.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return Auction.findWatchedByUser(user);
+    }
+
     @Transactional
     public Bid placeBid(Long auctionId, Long userId, BigDecimal bidAmount, boolean isAutoBid, BigDecimal maxAutoBid) {
         Auction auction = Auction.findById(auctionId);
@@ -118,7 +152,7 @@ public class AuctionService {
             throw new IllegalArgumentException("User not found");
         }
 
-        if (auction.status != AuctionStatus.LIVE) {
+        if (auction.status != Auction.AuctionStatus.LIVE) {
             throw new IllegalArgumentException("Auction is not live");
         }
 
@@ -139,7 +173,7 @@ public class AuctionService {
         Bid bid = new Bid();
         bid.auction = auction;
         bid.user = user;
-        bid.bidAmount = bidAmount;
+        bid.amount = bidAmount;
         bid.isAutoBid = isAutoBid;
         bid.maxAutoBid = maxAutoBid;
         bid.isWinning = true;
@@ -191,11 +225,11 @@ public class AuctionService {
             throw new IllegalArgumentException("Auction not found");
         }
 
-        if (auction.status != AuctionStatus.UPCOMING) {
-            throw new IllegalArgumentException("Auction is not in upcoming status");
+        if (auction.status != Auction.AuctionStatus.SCHEDULED) {
+            throw new IllegalArgumentException("Auction is not in scheduled status");
         }
 
-        auction.status = AuctionStatus.LIVE;
+        auction.status = Auction.AuctionStatus.LIVE;
         auction.persist();
 
         // Notify watchers that auction has started
@@ -209,26 +243,26 @@ public class AuctionService {
             throw new IllegalArgumentException("Auction not found");
         }
 
-        if (auction.status != AuctionStatus.LIVE) {
+        if (auction.status != Auction.AuctionStatus.LIVE) {
             throw new IllegalArgumentException("Auction is not live");
         }
 
-        auction.status = AuctionStatus.ENDED;
+        auction.status = Auction.AuctionStatus.ENDED;
         auction.endTime = LocalDateTime.now();
 
         // Determine winner
         Bid winningBid = Bid.findWinningBid(auction);
         if (winningBid != null) {
             // Check if reserve price is met
-            if (auction.reservePrice == null || winningBid.bidAmount.compareTo(auction.reservePrice) >= 0) {
+            if (auction.reservePrice == null || winningBid.amount.compareTo(auction.reservePrice) >= 0) {
                 auction.winner = winningBid.user;
-                auction.winningBid = winningBid.bidAmount;
+                auction.winningBid = winningBid.amount;
 
                 // Notify winner
                 notificationService.createNotification(
                     winningBid.user,
                     "Congratulations! You won the auction!",
-                    "You won the auction for \"" + auction.title + "\" with a bid of $" + winningBid.bidAmount,
+                    "You won the auction for \"" + auction.title + "\" with a bid of $" + winningBid.amount,
                     NotificationType.AUCTION_WON,
                     auction.id,
                     "auction"
@@ -249,11 +283,11 @@ public class AuctionService {
             throw new IllegalArgumentException("Auction not found");
         }
 
-        if (auction.status == AuctionStatus.ENDED) {
+        if (auction.status == Auction.AuctionStatus.ENDED) {
             throw new IllegalArgumentException("Cannot cancel ended auction");
         }
 
-        auction.status = AuctionStatus.CANCELLED;
+        auction.status = Auction.AuctionStatus.CANCELLED;
         auction.cancelReason = reason;
         auction.persist();
 
@@ -290,7 +324,7 @@ public class AuctionService {
             return existingWatcher;
         }
 
-        AuctionWatcher watcher = new AuctionWatcher(user, auction);
+        AuctionWatcher watcher = new AuctionWatcher(auction, user);
         watcher.persist();
 
         // Update watcher count
@@ -342,11 +376,11 @@ public class AuctionService {
     }
 
     public long getLiveAuctionsCount() {
-        return Auction.countByStatus(AuctionStatus.LIVE);
+        return Auction.countByStatus(Auction.AuctionStatus.LIVE);
     }
 
     public long getUpcomingAuctionsCount() {
-        return Auction.countByStatus(AuctionStatus.UPCOMING);
+        return Auction.countByStatus(Auction.AuctionStatus.SCHEDULED);
     }
 
     private void notifyWatchers(Auction auction, String eventType) {

@@ -108,11 +108,11 @@ public class Order extends PanacheEntityBase {
 
     // Enums
     public enum OrderStatus {
-        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED, REFUNDED
     }
 
     public enum PaymentStatus {
-        PENDING, PAID, FAILED, REFUNDED
+        PENDING, PAID, FAILED, REFUNDED, PARTIALLY_REFUNDED
     }
 
     // Static finder methods

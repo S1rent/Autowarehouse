@@ -112,8 +112,14 @@ Okay, try it then.
 =======================================
 coba deh kamu run mvn quarkus dev, run project BE nya, error tau. kamu masa ngedevelop tapi ga ngerun projectnya daritadi? parah amat
 =======================================
+coba run lagi, masih error itu mvn:quarkusdev
+ah yang bener lah, jangan buang uang saya
 =======================================
+ayolah, ini saya run mvn quarkus:dev masih gabisa udah 3x
 =======================================
+[ERROR] /E:/Ecomindo/Autowarehouse/autowarehouse-backend/src/main/java/com/autowarehouse/service/UserService.java:[211,41] incompatible types: com.autowarehouse.entity.UserRole cannot be converted to java.lang.String
+
+mana sih kamu benerin apa daritadi bingung deh
 =======================================
 =======================================
 =======================================

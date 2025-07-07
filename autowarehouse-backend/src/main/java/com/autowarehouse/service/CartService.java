@@ -241,6 +241,21 @@ public class CartService {
         return CartItem.findByUserAndProduct(user, product) != null;
     }
 
+    @Transactional
+    public void updateQuantity(Long cartItemId, Integer newQuantity) {
+        updateCartItemQuantity(cartItemId, newQuantity);
+    }
+
+    @Transactional
+    public void toggleSelection(Long cartItemId) {
+        toggleCartItemSelection(cartItemId);
+    }
+
+    @Transactional
+    public void selectAll(Long userId, Boolean selected) {
+        selectAllCartItems(userId, selected);
+    }
+
     private BigDecimal calculateCartTotal(List<CartItem> cartItems) {
         return cartItems.stream()
                 .map(CartItem::getSubtotal)

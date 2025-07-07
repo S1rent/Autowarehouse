@@ -61,8 +61,17 @@ public class CartResource {
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getCartSummary(@PathParam("userId") Long userId) {
         try {
-            CartSummaryResponse summary = cartService.getCartSummary(userId);
-            return Response.ok(summary).build();
+            CartService.CartSummary summary = cartService.getCartSummary(userId);
+            CartSummaryResponse response = new CartSummaryResponse();
+            response.totalItems = summary.totalItems;
+            response.selectedItems = summary.selectedItems;
+            response.totalQuantity = summary.totalQuantity;
+            response.selectedQuantity = summary.selectedQuantity;
+            response.totalAmount = summary.totalAmount;
+            response.selectedAmount = summary.selectedAmount;
+            response.totalSavings = summary.totalSavings;
+            response.selectedSavings = summary.selectedSavings;
+            return Response.ok(response).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse("Failed to fetch cart summary"))
@@ -75,8 +84,8 @@ public class CartResource {
     @RolesAllowed({"ADMIN", "CUSTOMER"})
     public Response getCartItemCount(@PathParam("userId") Long userId) {
         try {
-            int count = cartService.getCartItemCount(userId);
-            return Response.ok(new CountResponse(count)).build();
+            long count = cartService.getCartItemCount(userId);
+            return Response.ok(new CountResponse((int) count)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse("Failed to fetch cart count"))

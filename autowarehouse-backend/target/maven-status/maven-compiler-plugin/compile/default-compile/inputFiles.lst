@@ -4,7 +4,6 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\NotificationService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Notification.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\NotificationType.java
-E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\OrderStatus.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Product.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\OrderItem.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\UserRole.java
@@ -15,12 +14,10 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\ProductResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\CartResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\AuctionService.java
-E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\PaymentStatus.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\ProductService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\UserResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Category.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\JwtService.java
-E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\AuctionStatus.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Order.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\UserService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\AuctionWatcher.java
