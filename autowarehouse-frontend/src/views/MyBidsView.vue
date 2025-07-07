@@ -1,27 +1,6 @@
 <template>
   <div class="bg-gray-50 font-inter min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-lg border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <i class="fas fa-gavel text-2xl text-blue-600"></i>
-            <h1 class="text-xl font-bold text-gray-900">Autowarehouse Auction</h1>
-          </div>
-          <nav class="hidden md:flex space-x-8">
-            <router-link to="/auctions" class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Live Auctions</router-link>
-            <span class="text-blue-600 hover:text-blue-700 font-medium cursor-pointer border-b-2 border-blue-600 pb-1">My Bids</span>
-            <span class="text-gray-600 hover:text-blue-600 font-medium cursor-pointer">Categories</span>
-          </nav>
-          <div class="flex items-center space-x-4">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              <i class="fas fa-plus mr-2"></i>Create Auction
-            </button>
-            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" class="w-8 h-8 rounded-full">
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar/>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -194,6 +173,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 

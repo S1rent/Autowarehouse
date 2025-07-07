@@ -1,27 +1,7 @@
 <template>
   <div class="bg-gray-50 font-inter min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center space-x-2">
-              <i class="fa-solid fa-store text-blue-600 text-xl"></i>
-              <span class="text-xl font-bold text-gray-900">Autowarehouse</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button class="text-gray-500 hover:text-gray-700">
-              <i class="fa-solid fa-bell text-lg"></i>
-            </button>
-            <div class="flex items-center space-x-2">
-              <img :src="user.avatar" alt="Profile" class="w-8 h-8 rounded-full">
-              <span class="text-sm font-medium text-gray-700">{{ user.name }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar/>
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -253,6 +233,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 
