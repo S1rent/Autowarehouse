@@ -1,35 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-shopping-bag text-white text-sm"></i>
-              </div>
-            </div>
-            <h1 class="text-xl font-semibold text-gray-900">Autowarehouse</h1>
-          </div>
-          
-          <nav class="hidden md:flex space-x-6">
-            <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors">Dashboard</router-link>
-            <router-link to="/order-history" class="text-blue-600 font-medium">Riwayat Pesanan</router-link>
-            <router-link to="/profile" class="text-gray-600 hover:text-blue-600 transition-colors">Profil</router-link>
-          </nav>
-          
-          <div class="flex items-center space-x-4">
-            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <i class="fa-regular fa-bell"></i>
-            </button>
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-user text-white text-sm"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -257,6 +228,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 

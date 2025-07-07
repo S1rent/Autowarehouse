@@ -1,41 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-inter">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center space-x-2">
-              <i class="fa-solid fa-store text-blue-600 text-xl"></i>
-              <span class="text-xl font-bold text-gray-900">Autowarehouse</span>
-            </div>
-            <nav class="hidden md:flex space-x-6">
-              <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors">Home</router-link>
-              <router-link to="/auctions" class="text-gray-600 hover:text-blue-600 transition-colors">Auctions</router-link>
-              <router-link to="/products" class="text-gray-600 hover:text-blue-600 transition-colors">Products</router-link>
-              <router-link to="/wishlist" class="text-gray-600 hover:text-blue-600 transition-colors">Wishlist</router-link>
-            </nav>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="relative">
-              <input 
-                type="text" 
-                placeholder="Search products..." 
-                class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
-            <router-link to="/cart" class="relative p-2 text-blue-600 hover:text-blue-700">
-              <i class="fa-solid fa-shopping-cart text-lg"></i>
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemsCount }}</span>
-            </router-link>
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-user text-white text-sm"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -320,6 +285,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 

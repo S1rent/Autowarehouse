@@ -1,46 +1,6 @@
 <template>
   <div class="bg-gray-50 font-inter min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center space-x-2">
-              <i class="fa-solid fa-store text-blue-600 text-xl"></i>
-              <span class="text-xl font-bold text-gray-900">Autowarehouse</span>
-            </div>
-            <nav class="hidden md:flex space-x-6">
-              <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors">Home</router-link>
-              <router-link to="/products" class="text-blue-600 font-medium">Products</router-link>
-              <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Categories</span>
-              <span class="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer">Live Auction</span>
-            </nav>
-          </div>
-          <div class="flex items-center space-x-4">
-            <div class="relative">
-              <input 
-                type="text" 
-                placeholder="Search products..." 
-                v-model="searchQuery"
-                class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-              <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
-            <router-link to="/wishlist" class="relative p-2 text-gray-600 hover:text-blue-600">
-              <i class="fa-solid fa-heart text-lg"></i>
-              <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-            </router-link>
-            <router-link to="/cart" class="relative p-2 text-gray-600 hover:text-blue-600">
-              <i class="fa-solid fa-shopping-cart text-lg"></i>
-              <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
-            </router-link>
-            <router-link to="/login" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              Login
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Breadcrumb -->
     <section class="bg-gray-100 py-4">
@@ -352,6 +312,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const route = useRoute()
 const router = useRouter()

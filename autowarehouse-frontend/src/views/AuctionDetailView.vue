@@ -1,25 +1,6 @@
 <template>
   <div class="bg-gray-50 font-inter min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-lg border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <button @click="$router.go(-1)" class="text-gray-600 hover:text-blue-600">
-              <i class="fas fa-arrow-left text-xl"></i>
-            </button>
-            <i class="fas fa-gavel text-2xl text-blue-600"></i>
-            <h1 class="text-xl font-bold text-gray-900">Auction Detail</h1>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              <i class="fas fa-heart mr-2"></i>Add to Watchlist
-            </button>
-            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" class="w-8 h-8 rounded-full">
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -236,6 +217,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import UserNavbar from '../components/UserNavbar.vue'
 
 const route = useRoute()
 const bidAmount = ref<number>(0)
