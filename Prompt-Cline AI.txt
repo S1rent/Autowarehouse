@@ -150,3 +150,8 @@ saya udah setup db application properties, bisa ga gausah diganti ganti? saya cu
 =======================================
 fix, dan selesaikan modul login dan register di backend, pastikan skrg udah bisa integrasi ke db, gausah ganti configurasi db lagi saya udah benerin, tolong kerja yang bener layaknya professional
 =======================================
+sekarang, saya udah benerin koneksi ke db nya, gausah di kutak katik sama sekali.
+
+SAYA KASIH TAU TUGAS KAMU SEKALI LAGI HANYA UNTUK NGEDEV MODUL LOGIN DAN REGISTER DI BACKEND, PASTIIN UDAH KE KONEKSI KE DATABASE.
+
+KONEKSI DATABASENYA UDAH BENER, JADI KAMU TINGGAL PASTIIN CODINGAN BACKEND KAMU ITU JALAN. UDAH SESIMPEL ITU DOANG,

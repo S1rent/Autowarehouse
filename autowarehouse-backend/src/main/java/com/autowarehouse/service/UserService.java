@@ -38,8 +38,13 @@ public class UserService {
 
         user.persist();
         
-        // Send email verification
-        emailService.sendEmailVerification(user, user.emailVerificationToken);
+        // Send email verification (with error handling)
+        try {
+            emailService.sendEmailVerification(user, user.emailVerificationToken);
+        } catch (Exception e) {
+            // Log the error but don't fail the registration
+            System.err.println("Failed to send verification email: " + e.getMessage());
+        }
         
         return user;
     }
