@@ -1,21 +1,24 @@
 package com.autowarehouse.service;
 
 import com.autowarehouse.entity.User;
-import com.autowarehouse.entity.UserRole;
 import io.quarkus.elytron.security.common.BcryptUtil;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
 public class UserService {
+
+    @Inject
+    EmailService emailService;
+
+    @Inject
+    JwtService jwtService;
 
     @Transactional
     public User createUser(@Valid User user) {
@@ -30,10 +33,14 @@ public class UserService {
         // Set default values
         user.isActive = true;
         user.isEmailVerified = false;
-        user.emailVerificationToken = UUID.randomUUID().toString();
+        user.emailVerificationToken = jwtService.generateEmailVerificationToken(user);
         user.role = user.role != null ? user.role : "CUSTOMER";
 
         user.persist();
+        
+        // Send email verification
+        emailService.sendEmailVerification(user, user.emailVerificationToken);
+        
         return user;
     }
 
@@ -130,11 +137,13 @@ public class UserService {
             throw new IllegalArgumentException("User not found");
         }
 
-        user.passwordResetToken = UUID.randomUUID().toString();
+        String resetToken = jwtService.generatePasswordResetToken(user);
+        user.passwordResetToken = resetToken;
         user.passwordResetTokenExpiry = LocalDateTime.now().plusHours(24);
         user.persist();
 
-        // TODO: Send password reset email
+        // Send password reset email
+        emailService.sendPasswordResetEmail(user, resetToken);
     }
 
     @Transactional
@@ -148,6 +157,9 @@ public class UserService {
         user.passwordResetToken = null;
         user.passwordResetTokenExpiry = null;
         user.persist();
+
+        // Send password changed notification
+        emailService.sendPasswordChangedNotification(user);
     }
 
     @Transactional
@@ -160,6 +172,9 @@ public class UserService {
         user.isEmailVerified = true;
         user.emailVerificationToken = null;
         user.persist();
+
+        // Send welcome email
+        emailService.sendWelcomeEmail(user);
     }
 
     @Transactional

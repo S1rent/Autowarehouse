@@ -121,6 +121,18 @@ ayolah, ini saya run mvn quarkus:dev masih gabisa udah 3x
 
 mana sih kamu benerin apa daritadi bingung deh
 =======================================
+Oke, for todays work.
+saya udah fix credentials databasenya, tolong scan dulu apa yang tersisa yang belum dikerjakan.
+=======================================
+Oke, saya ingin, kamu integrasikan coba seluruh sistem login dan registernya dulu, sampai ke kirim email 
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
+=======================================
 =======================================
 =======================================
 =======================================
