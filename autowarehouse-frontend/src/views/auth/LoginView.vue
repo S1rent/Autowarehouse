@@ -14,38 +14,6 @@
           </div>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
-            
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-3">Login as</label>
-              <div class="grid grid-cols-2 gap-3">
-                <label class="relative">
-                  <input 
-                    type="radio" 
-                    name="userType" 
-                    value="customer" 
-                    v-model="form.userType"
-                    class="sr-only peer"
-                  >
-                  <div class="flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50">
-                    <i class="fa-solid fa-user text-gray-600 peer-checked:text-blue-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-600">Customer</span>
-                  </div>
-                </label>
-                <label class="relative">
-                  <input 
-                    type="radio" 
-                    name="userType" 
-                    value="admin" 
-                    v-model="form.userType"
-                    class="sr-only peer"
-                  >
-                  <div class="flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50">
-                    <i class="fa-solid fa-shield-halved text-gray-600 peer-checked:text-blue-600 mr-2"></i>
-                    <span class="text-sm font-medium text-gray-700 peer-checked:text-blue-600">Admin</span>
-                  </div>
-                </label>
-              </div>
-            </div>
 
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>

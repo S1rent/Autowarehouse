@@ -15,23 +15,44 @@
 
           <form @submit.prevent="handleRegister" class="space-y-6">
             
-            <div>
-              <label for="fullname" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i class="fa-solid fa-user text-gray-400"></i>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-user text-gray-400"></i>
+                  </div>
+                  <input 
+                    type="text" 
+                    id="firstName" 
+                    v-model="form.firstName"
+                    required 
+                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all" 
+                    placeholder="First name"
+                    :class="{ 'border-red-500': errors.firstName }"
+                  >
                 </div>
-                <input 
-                  type="text" 
-                  id="fullname" 
-                  v-model="form.fullname"
-                  required 
-                  class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all" 
-                  placeholder="Enter your full name"
-                  :class="{ 'border-red-500': errors.fullname }"
-                >
+                <p v-if="errors.firstName" class="mt-1 text-sm text-red-600">{{ errors.firstName }}</p>
               </div>
-              <p v-if="errors.fullname" class="mt-1 text-sm text-red-600">{{ errors.fullname }}</p>
+              
+              <div>
+                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-user text-gray-400"></i>
+                  </div>
+                  <input 
+                    type="text" 
+                    id="lastName" 
+                    v-model="form.lastName"
+                    required 
+                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all" 
+                    placeholder="Last name"
+                    :class="{ 'border-red-500': errors.lastName }"
+                  >
+                </div>
+                <p v-if="errors.lastName" class="mt-1 text-sm text-red-600">{{ errors.lastName }}</p>
+              </div>
             </div>
 
             <div>
@@ -222,7 +243,8 @@ const authStore = useAuthStore()
 
 // Form data
 const form = reactive({
-  fullname: '',
+  firstName: '',
+  lastName: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -235,7 +257,8 @@ const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const successMessage = ref('')
 const errors = reactive({
-  fullname: '',
+  firstName: '',
+  lastName: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -298,7 +321,8 @@ const checkPasswordMatch = () => {
 
 const validateForm = () => {
   // Reset errors
-  errors.fullname = ''
+  errors.firstName = ''
+  errors.lastName = ''
   errors.email = ''
   errors.password = ''
   errors.confirmPassword = ''
@@ -307,9 +331,15 @@ const validateForm = () => {
 
   let isValid = true
 
-  // Full name validation
-  if (!form.fullname.trim()) {
-    errors.fullname = 'Full name is required'
+  // First name validation
+  if (!form.firstName.trim()) {
+    errors.firstName = 'First name is required'
+    isValid = false
+  }
+
+  // Last name validation
+  if (!form.lastName.trim()) {
+    errors.lastName = 'Last name is required'
     isValid = false
   }
 
@@ -326,8 +356,8 @@ const validateForm = () => {
   if (!form.password) {
     errors.password = 'Password is required'
     isValid = false
-  } else if (form.password.length < 8) {
-    errors.password = 'Password must be at least 8 characters'
+  } else if (form.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
     isValid = false
   }
 
@@ -359,24 +389,20 @@ const handleRegister = async () => {
   successMessage.value = ''
 
   try {
-    // Split fullname into firstName and lastName
-    const nameParts = form.fullname.trim().split(' ')
-    const firstName = nameParts[0] || ''
-    const lastName = nameParts.slice(1).join(' ') || ''
-
-    // Use auth store to register
+    // Use auth store to register with firstName and lastName directly
     const response = await authStore.register({
       email: form.email,
       password: form.password,
-      firstName,
-      lastName
+      firstName: form.firstName,
+      lastName: form.lastName
     })
 
     // Show success message
     successMessage.value = 'Registration successful! Please check your email to verify your account before logging in.'
     
     // Clear form
-    form.fullname = ''
+    form.firstName = ''
+    form.lastName = ''
     form.email = ''
     form.password = ''
     form.confirmPassword = ''

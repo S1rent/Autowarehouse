@@ -1,7 +1,8 @@
 <template>
   <div class="bg-light min-h-screen">
-    <!-- Use UserNavbar for logged in users, or GuestNavbar for guests -->
-    <UserNavbar />
+    <!-- Dynamic navbar based on authentication status -->
+    <UserNavbar v-if="authStore.isAuthenticated" />
+    <GuestNavbar v-else />
 
     <!-- Hero Banner -->
     <section class="bg-gradient-to-br from-primary via-secondary to-indigo-600 text-white h-[600px] flex items-center relative overflow-hidden">
@@ -262,7 +263,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
+import GuestNavbar from '../components/GuestNavbar.vue'
+
+const authStore = useAuthStore()
+
+// Initialize auth on component mount
+onMounted(() => {
+  authStore.initializeAuth()
+})
 
 // Countdown timer
 const countdown = reactive({

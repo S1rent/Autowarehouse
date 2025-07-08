@@ -263,22 +263,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 
-// Mock user data - in real app, this would come from auth store
-const userName = ref('John Doe')
-const userEmail = ref('john@example.com')
-const cartCount = ref(3)
-const wishlistCount = ref(5)
-const notificationCount = ref(2)
+// Get user data from auth store
+const userName = computed(() => authStore.fullName || 'User')
+const userEmail = computed(() => authStore.user?.email || '')
+
+// Mock counts for now - these would come from respective stores
+const cartCount = ref(0)
+const wishlistCount = ref(0)
+const notificationCount = ref(0)
 
 const logout = () => {
-  // In real app, clear auth tokens and user data
+  authStore.logout()
   userMenuOpen.value = false
   mobileMenuOpen.value = false
   router.push('/login')

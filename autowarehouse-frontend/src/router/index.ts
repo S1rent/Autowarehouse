@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const routes: RouteRecordRaw[] = [
   // Default route
@@ -151,6 +152,64 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Navigation guards
+router.beforeEach((to, from, next) => {
+  // Check localStorage directly for more reliable auth check
+  const token = localStorage.getItem('auth_token')
+  const userData = localStorage.getItem('user_data')
+  
+  let isAuthenticated = false
+  let isAdmin = false
+  
+  if (token && userData) {
+    try {
+      const user = JSON.parse(userData)
+      isAuthenticated = true
+      isAdmin = user.role === 'ADMIN'
+    } catch (e) {
+      // Invalid stored data, clear it
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_data')
+    }
+  }
+  
+  // Routes that should redirect authenticated users away
+  const authRoutes = ['Login', 'Register', 'ForgotPassword']
+  
+  // If user is authenticated and trying to access auth routes, redirect to home
+  if (isAuthenticated && authRoutes.includes(to.name as string)) {
+    next({ name: 'Home' })
+    return
+  }
+  
+  // Routes that require authentication
+  const protectedRoutes = [
+    'Cart', 'Checkout', 'Wishlist', 'MyBids', 'BidHistory', 
+    'OrderHistory', 'OrderDetail', 'UserProfile', 'UserNotifications',
+    'AuctionWon'
+  ]
+  
+  // If user is not authenticated and trying to access protected routes, redirect to login
+  if (!isAuthenticated && protectedRoutes.includes(to.name as string)) {
+    next({ name: 'Login' })
+    return
+  }
+  
+  // Admin routes protection
+  const adminRoutes = [
+    'AdminDashboard', 'AdminProducts', 'AdminAuctions', 'AdminCategories',
+    'AdminCustomerService', 'AdminNotifications', 'AdminOrders'
+  ]
+  
+  // If user is not admin and trying to access admin routes, redirect to home
+  if (adminRoutes.includes(to.name as string) && !isAdmin) {
+    next({ name: 'Home' })
+    return
+  }
+  
+  next()
 })
 
 export default router
