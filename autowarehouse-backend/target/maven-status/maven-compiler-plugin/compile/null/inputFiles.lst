@@ -1,5 +1,6 @@
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\LoginRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\RegisterRequest.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\security\JwtAuthenticationMechanism.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\CartItem.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\WishlistItem.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\AuctionResource.java
@@ -11,6 +12,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\UserRole.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Bid.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\OrderResource.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\security\SecurityConfig.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\OrderService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\NotificationPriority.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\ProductResource.java
@@ -32,3 +34,4 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\EmailService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\User.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Review.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\security\JwtAuthenticationRequest.java

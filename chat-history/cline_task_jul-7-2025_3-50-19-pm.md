@@ -7172,7 +7172,7 @@ quarkus.http.cors.methods=GET,POST,PUT,DELETE,OPTIONS,PATCH
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=${DB_USERNAME:autowarehouse}
 quarkus.datasource.password=${DB_PASSWORD:password123}
-quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5434/autowarehouse}
 quarkus.datasource.jdbc.max-size=20
 quarkus.datasource.jdbc.min-size=5
 
@@ -7249,7 +7249,7 @@ quarkus.log.console.format=%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n
 # Development Configuration
 %dev.quarkus.log.level=DEBUG
 %dev.quarkus.hibernate-orm.log.sql=true
-%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/autowarehouse_dev
+%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5434/autowarehouse_dev
 
 # Test Configuration
 %test.quarkus.datasource.db-kind=h2
@@ -7289,7 +7289,7 @@ quarkus.http.cors.methods=GET,POST,PUT,DELETE,OPTIONS,PATCH
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=${DB_USERNAME:autowarehouse}
 quarkus.datasource.password=${DB_PASSWORD:password123}
-quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5434/autowarehouse}
 quarkus.datasource.jdbc.max-size=20
 quarkus.datasource.jdbc.min-size=5
 
@@ -7366,7 +7366,7 @@ quarkus.log.console.format=%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n
 # Development Configuration
 %dev.quarkus.log.level=DEBUG
 %dev.quarkus.hibernate-orm.log.sql=true
-%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/autowarehouse_dev
+%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5434/autowarehouse_dev
 
 # Test Configuration
 %test.quarkus.datasource.db-kind=h2
@@ -48088,7 +48088,7 @@ quarkus.http.cors.methods=GET,POST,PUT,DELETE,OPTIONS,PATCH
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=${DB_USERNAME:autowarehouse}
 quarkus.datasource.password=${DB_PASSWORD:password123}
-quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5434/autowarehouse}
 quarkus.datasource.jdbc.max-size=20
 quarkus.datasource.jdbc.min-size=5
 
@@ -48165,7 +48165,7 @@ quarkus.log.console.format=%d{HH:mm:ss} %-5p [%c{2.}] (%t) %s%e%n
 # Development Configuration
 %dev.quarkus.log.level=DEBUG
 %dev.quarkus.hibernate-orm.log.sql=true
-%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/autowarehouse_dev
+%dev.quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5434/autowarehouse_dev
 
 # Test Configuration
 %test.quarkus.datasource.db-kind=h2
@@ -61386,7 +61386,7 @@ autowarehouse-backend/
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=${DB_USERNAME:autowarehouse}
 quarkus.datasource.password=${DB_PASSWORD:password}
-quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5434/autowarehouse}
 ```
 
 ### Migration Management
@@ -61735,7 +61735,7 @@ autowarehouse-backend/
 quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=${DB_USERNAME:autowarehouse}
 quarkus.datasource.password=${DB_PASSWORD:password}
-quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5432/autowarehouse}
+quarkus.datasource.jdbc.url=${DB_URL:jdbc:postgresql://localhost:5434/autowarehouse}
 ```
 
 ### Migration Management

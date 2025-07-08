@@ -22,6 +22,7 @@ com\autowarehouse\resource\OrderResource$UpdateStatusRequest.class
 com\autowarehouse\resource\OrderResource$CreateOrderRequest.class
 com\autowarehouse\resource\ProductResource.class
 com\autowarehouse\resource\UserResource.class
+com\autowarehouse\security\JwtAuthenticationRequest.class
 com\autowarehouse\resource\UserResource$EmailVerificationRequest.class
 com\autowarehouse\resource\AuctionResource$SuccessResponse.class
 com\autowarehouse\resource\AuctionResource$AuctionStatsResponse.class
@@ -47,6 +48,7 @@ com\autowarehouse\resource\AuthResource.class
 com\autowarehouse\resource\OrderResource$SuccessResponse.class
 com\autowarehouse\resource\UserResource$UpdateProfileRequest.class
 com\autowarehouse\resource\ProductResource$UpdateStockRequest.class
+com\autowarehouse\security\SecurityConfig.class
 com\autowarehouse\resource\UserResource$RegisterRequest.class
 com\autowarehouse\service\JwtService.class
 com\autowarehouse\resource\AuctionResource$CreateAuctionRequest.class
@@ -55,6 +57,7 @@ com\autowarehouse\resource\OrderResource$OrderItemResponse.class
 com\autowarehouse\resource\OrderResource$OrderStatsResponse.class
 com\autowarehouse\resource\AuctionResource$CancelAuctionRequest.class
 com\autowarehouse\resource\AuctionResource$UpdateAuctionRequest.class
+com\autowarehouse\security\JwtAuthenticationMechanism.class
 com\autowarehouse\service\NotificationService.class
 com\autowarehouse\resource\OrderResource$CancelOrderRequest.class
 com\autowarehouse\resource\UserResource$ForgotPasswordRequest.class

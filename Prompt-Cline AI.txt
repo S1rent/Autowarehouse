@@ -139,9 +139,14 @@ gausah pake mock mockan lah, bikin error
 Udah, sekarang gini.
 Scan semua project dulu saat ini, dan update memory bank
 =======================================
+Sekarang, tolong pastikan endpoint untuk login, register dari sisi backend sudah bisa dihit dan integrasi ke DB, jangan pakai mock lagi, tolong install swagger ui juga.
+=======================================
+woi udah lah, kamu udah buat private key 3x, udah lah. skip aja langsung ke proses berikutnya, apaan sih
 =======================================
 =======================================
+kamu udah buat public key 5x, private key udah 5x, ngapain dibuat ulang terus sih? udah lah saya cuma minta kamu benerin api nya doang dan pastiin udah integrasi ke db, ngapain kamu bikin private key mulu sih? cuma install swagger-ui doang kamu bingung? kesulitan?
 =======================================
+saya udah setup db application properties, bisa ga gausah diganti ganti? saya cuma suruh kamu buat pastiin endpoint login dan register udah bisa koneksi ke db, ngapain lu ganti ganti sih confignya? sengaja bikin error biar saya bayar mahal ?
 =======================================
-=======================================
+fix, dan selesaikan modul login dan register di backend, pastikan skrg udah bisa integrasi ke db, gausah ganti configurasi db lagi saya udah benerin, tolong kerja yang bener layaknya professional
 =======================================

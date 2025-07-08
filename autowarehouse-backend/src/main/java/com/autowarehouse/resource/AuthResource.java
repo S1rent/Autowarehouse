@@ -9,6 +9,9 @@ import com.autowarehouse.entity.User;
 import com.autowarehouse.service.UserService;
 import com.autowarehouse.service.JwtService;
 import com.autowarehouse.service.EmailService;
+import com.autowarehouse.security.SecurityConfig;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -32,8 +35,12 @@ public class AuthResource {
     @Inject
     EmailService emailService;
 
+    @Inject
+    SecurityConfig securityConfig;
+
     @POST
     @Path("/register")
+    @PermitAll
     @Operation(summary = "Register new user", description = "Register a new user account and send email verification")
     public Response register(@Valid RegisterRequest request) {
         try {
@@ -71,6 +78,7 @@ public class AuthResource {
 
     @POST
     @Path("/login")
+    @PermitAll
     @Operation(summary = "User login", description = "Authenticate user and return JWT tokens")
     public Response login(@Valid LoginRequest request) {
         try {
@@ -112,6 +120,7 @@ public class AuthResource {
 
     @POST
     @Path("/verify-email")
+    @PermitAll
     @Operation(summary = "Verify email", description = "Verify user email with verification token")
     public Response verifyEmail(@QueryParam("token") String token) {
         if (token == null || token.trim().isEmpty()) {
@@ -148,6 +157,7 @@ public class AuthResource {
 
     @POST
     @Path("/forgot-password")
+    @PermitAll
     @Operation(summary = "Request password reset", description = "Send password reset email to user")
     public Response forgotPassword(@Valid PasswordResetRequest request) {
         try {
@@ -183,6 +193,7 @@ public class AuthResource {
 
     @POST
     @Path("/reset-password")
+    @PermitAll
     @Operation(summary = "Reset password", description = "Reset user password with reset token")
     public Response resetPassword(@Valid PasswordResetConfirmRequest request) {
         try {
@@ -213,6 +224,7 @@ public class AuthResource {
 
     @POST
     @Path("/resend-verification")
+    @PermitAll
     @Operation(summary = "Resend email verification", description = "Resend email verification to user")
     public Response resendVerification(@QueryParam("email") String email) {
         if (email == null || email.trim().isEmpty()) {
@@ -264,12 +276,46 @@ public class AuthResource {
 
     @GET
     @Path("/me")
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     @Operation(summary = "Get current user", description = "Get current authenticated user information")
     public Response getCurrentUser() {
-        // This would require JWT authentication context
-        // For now, return a placeholder response
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-            .entity(new AuthResponse("Endpoint not implemented yet", null, null, null, null, null, null, null, false))
-            .build();
+        try {
+            if (!securityConfig.isAuthenticated()) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new AuthResponse("Authentication required", null, null, null, null, null, null, null, false))
+                    .build();
+            }
+
+            Long userId = securityConfig.getCurrentUserId();
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new AuthResponse("Invalid token", null, null, null, null, null, null, null, false))
+                    .build();
+            }
+
+            User user = userService.findById(userId);
+            if (user == null || !user.isActive) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new AuthResponse("User not found or inactive", null, null, null, null, null, null, null, false))
+                    .build();
+            }
+
+            return Response.ok(new AuthResponse(
+                "User information retrieved successfully",
+                null,
+                null,
+                user.id,
+                user.email,
+                user.firstName,
+                user.lastName,
+                user.role,
+                user.isEmailVerified
+            )).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new AuthResponse("Failed to retrieve user information", null, null, null, null, null, null, null, false))
+                .build();
+        }
     }
 }
