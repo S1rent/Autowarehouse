@@ -143,6 +143,22 @@
             </div>
             <p v-if="errors.agreeToTerms" class="mt-1 text-sm text-red-600">{{ errors.agreeToTerms }}</p>
 
+            <!-- Error message -->
+            <div v-if="errors.general" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i>
+                <p class="text-sm text-red-700">{{ errors.general }}</p>
+              </div>
+            </div>
+
+            <!-- Success message -->
+            <div v-if="successMessage" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="fa-solid fa-check-circle text-green-500 mr-2"></i>
+                <p class="text-sm text-green-700">{{ successMessage }}</p>
+              </div>
+            </div>
+
             <button 
               type="submit" 
               :disabled="isLoading"
@@ -199,8 +215,10 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // Form data
 const form = reactive({
@@ -215,6 +233,7 @@ const form = reactive({
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const isLoading = ref(false)
+const successMessage = ref('')
 const errors = reactive({
   fullname: '',
   email: '',
@@ -235,7 +254,7 @@ const passwordStrength = computed(() => {
   if (/[A-Z]/.test(password)) strength++
   if (/[0-9]/.test(password)) strength++
 
-  const levels = {
+  const levels: Record<number, { color: string; text: string }> = {
     0: { color: 'bg-red-500', text: 'Very Weak' },
     1: { color: 'bg-red-500', text: 'Weak' },
     2: { color: 'bg-yellow-500', text: 'Fair' },
@@ -336,22 +355,40 @@ const handleRegister = async () => {
   }
 
   isLoading.value = true
+  authStore.clearError()
+  successMessage.value = ''
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Mock registration logic
-    console.log('Registration attempt:', {
-      fullname: form.fullname,
+    // Split fullname into firstName and lastName
+    const nameParts = form.fullname.trim().split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+
+    // Use auth store to register
+    const response = await authStore.register({
       email: form.email,
-      password: form.password
+      password: form.password,
+      firstName,
+      lastName
     })
 
-    // Redirect to login page
-    router.push('/login')
-  } catch (error) {
-    errors.general = 'Registration failed. Please try again.'
+    // Show success message
+    successMessage.value = 'Registration successful! Please check your email to verify your account before logging in.'
+    
+    // Clear form
+    form.fullname = ''
+    form.email = ''
+    form.password = ''
+    form.confirmPassword = ''
+    form.agreeToTerms = false
+
+    // Redirect to login page after 3 seconds
+    setTimeout(() => {
+      router.push('/login')
+    }, 3000)
+
+  } catch (error: any) {
+    errors.general = authStore.error || 'Registration failed. Please try again.'
   } finally {
     isLoading.value = false
   }

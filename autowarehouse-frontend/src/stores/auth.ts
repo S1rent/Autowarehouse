@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { apiService, type User, type LoginRequest, type RegisterRequest } from '@/services/api'
+import { apiService, type User, type LoginRequest, type RegisterRequest, type AuthResponse, type PasswordResetRequest, type PasswordResetConfirmRequest } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -26,12 +26,24 @@ export const useAuthStore = defineStore('auth', () => {
       
       const response = await apiService.login(credentials)
       
-      user.value = response.user
-      token.value = response.token
-      
-      // Store in localStorage
-      localStorage.setItem('auth_token', response.token)
-      localStorage.setItem('user_data', JSON.stringify(response.user))
+      if (response.accessToken && response.userId) {
+        // Create user object from response
+        user.value = {
+          id: response.userId,
+          email: response.email || '',
+          firstName: response.firstName || '',
+          lastName: response.lastName || '',
+          role: (response.role as 'ADMIN' | 'CUSTOMER') || 'CUSTOMER',
+          isActive: true,
+          isEmailVerified: response.isEmailVerified || false
+        }
+        token.value = response.accessToken
+        
+        // Store in localStorage
+        localStorage.setItem('auth_token', response.accessToken)
+        localStorage.setItem('refresh_token', response.refreshToken || '')
+        localStorage.setItem('user_data', JSON.stringify(user.value))
+      }
       
       return response
     } catch (err: any) {
@@ -47,15 +59,11 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
       error.value = null
       
-      const newUser = await apiService.register(userData)
+      const response = await apiService.register(userData)
       
-      // Auto login after registration
-      await login({
-        email: userData.email,
-        password: userData.password
-      })
-      
-      return newUser
+      // Registration successful, but user needs to verify email
+      // Don't auto-login, just return the response
+      return response
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Registration failed'
       throw err
@@ -79,10 +87,55 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
       error.value = null
       
-      const response = await apiService.forgotPassword(email)
+      const response = await apiService.forgotPassword({ email })
       return response
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to send reset email'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await apiService.resetPassword({ token, newPassword })
+      return response
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to reset password'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const verifyEmail = async (token: string) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await apiService.verifyEmail(token)
+      return response
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to verify email'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const resendVerification = async (email: string) => {
+    try {
+      isLoading.value = true
+      error.value = null
+      
+      const response = await apiService.resendVerification(email)
+      return response
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to resend verification'
       throw err
     } finally {
       isLoading.value = false
@@ -149,6 +202,9 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     forgotPassword,
+    resetPassword,
+    verifyEmail,
+    resendVerification,
     updateProfile,
     initializeAuth,
     clearError

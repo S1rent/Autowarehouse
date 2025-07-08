@@ -126,10 +126,18 @@ saya udah fix credentials databasenya, tolong scan dulu apa yang tersisa yang be
 =======================================
 Oke, saya ingin, kamu integrasikan coba seluruh sistem login dan registernya dulu, sampai ke kirim email 
 =======================================
+iya oke, sekarang tolong integrasi proses login dan registrasi di frontend dan backend, codingin frontendnya
 =======================================
+Oke, sekarang coba ulang, tadi apinya error karena cors. saya udah bantu fix corsnya
 =======================================
+Oke, tadi saya sempat minta kamu fix issue cors ketika frontend mau hit ke backend, ketika saya minta kamu integrasiin modul frontend dan backend login register. Tapi kamu ngehang
 =======================================
+oke sekarang, intinya gini. tolong api backend semuanya dipersiapkan untuk modul login, register, forget password dulu, apinya semuanya dibuat dan dipastikan sudah bisa connect DB.
+
+gausah pake mock mockan lah, bikin error
 =======================================
+Udah, sekarang gini.
+Scan semua project dulu saat ini, dan update memory bank
 =======================================
 =======================================
 =======================================

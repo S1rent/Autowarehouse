@@ -106,6 +106,35 @@
               </router-link>
             </div>
 
+            <!-- Error message -->
+            <div v-if="errors.general" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i>
+                <p class="text-sm text-red-700">{{ errors.general }}</p>
+              </div>
+              <div v-if="showResendVerification" class="mt-2">
+                <button 
+                  @click="handleResendVerification"
+                  :disabled="resendingVerification"
+                  class="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
+                >
+                  <span v-if="resendingVerification">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i>
+                    Sending...
+                  </span>
+                  <span v-else>Resend verification email</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Success message -->
+            <div v-if="successMessage" class="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="fa-solid fa-check-circle text-green-500 mr-2"></i>
+                <p class="text-sm text-green-700">{{ successMessage }}</p>
+              </div>
+            </div>
+
             <button 
               type="submit" 
               :disabled="isLoading"
@@ -178,6 +207,9 @@ const form = reactive({
 // Form state
 const showPassword = ref(false)
 const isLoading = ref(false)
+const showResendVerification = ref(false)
+const resendingVerification = ref(false)
+const successMessage = ref('')
 const errors = reactive({
   email: '',
   password: '',
@@ -225,6 +257,8 @@ const handleLogin = async () => {
 
   isLoading.value = true
   authStore.clearError()
+  showResendVerification.value = false
+  successMessage.value = ''
 
   try {
     // Use auth store to login
@@ -240,9 +274,36 @@ const handleLogin = async () => {
       router.push('/')
     }
   } catch (error: any) {
-    errors.general = authStore.error || 'Login failed. Please check your credentials and try again.'
+    const errorMessage = authStore.error || 'Login failed. Please check your credentials and try again.'
+    errors.general = errorMessage
+    
+    // Check if error is related to email verification
+    if (errorMessage.toLowerCase().includes('verify') || errorMessage.toLowerCase().includes('verification')) {
+      showResendVerification.value = true
+    }
   } finally {
     isLoading.value = false
+  }
+}
+
+const handleResendVerification = async () => {
+  if (!form.email) {
+    errors.general = 'Please enter your email address'
+    return
+  }
+
+  resendingVerification.value = true
+  successMessage.value = ''
+
+  try {
+    await authStore.resendVerification(form.email)
+    successMessage.value = 'Verification email sent! Please check your inbox.'
+    showResendVerification.value = false
+    errors.general = ''
+  } catch (error: any) {
+    errors.general = authStore.error || 'Failed to resend verification email'
+  } finally {
+    resendingVerification.value = false
   }
 }
 

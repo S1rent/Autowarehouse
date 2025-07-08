@@ -70,9 +70,16 @@ export interface LoginRequest {
   password: string
 }
 
-export interface LoginResponse {
-  user: User
-  token: string
+export interface AuthResponse {
+  message: string
+  accessToken?: string
+  refreshToken?: string
+  userId?: number
+  email?: string
+  firstName?: string
+  lastName?: string
+  role?: string
+  isEmailVerified?: boolean
 }
 
 export interface RegisterRequest {
@@ -80,6 +87,15 @@ export interface RegisterRequest {
   password: string
   firstName: string
   lastName: string
+}
+
+export interface PasswordResetRequest {
+  email: string
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string
+  newPassword: string
 }
 
 // Product Types
@@ -234,18 +250,38 @@ export interface OrderStats {
 // API Service Class
 class ApiService {
   // Authentication APIs
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/users/login', credentials)
+  async login(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/login', credentials)
     return response.data
   }
 
-  async register(userData: RegisterRequest): Promise<User> {
-    const response = await api.post<User>('/users/register', userData)
+  async register(userData: RegisterRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/register', userData)
     return response.data
   }
 
-  async forgotPassword(email: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/users/forgot-password', { email })
+  async verifyEmail(token: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(`/auth/verify-email?token=${token}`)
+    return response.data
+  }
+
+  async forgotPassword(request: PasswordResetRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/forgot-password', request)
+    return response.data
+  }
+
+  async resetPassword(request: PasswordResetConfirmRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/reset-password', request)
+    return response.data
+  }
+
+  async resendVerification(email: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(`/auth/resend-verification?email=${email}`)
+    return response.data
+  }
+
+  async getCurrentUser(): Promise<AuthResponse> {
+    const response = await api.get<AuthResponse>('/auth/me')
     return response.data
   }
 
