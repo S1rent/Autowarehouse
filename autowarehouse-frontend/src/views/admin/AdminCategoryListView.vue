@@ -93,14 +93,7 @@
                 <button 
                   @click="showCreateModal = true"
                   
-                  <i class="fa-solid fa-plus mr-2"></i>
-                  Add Category
-                </button>
-                <button class="relative p-2 text-gray-400 hover:text-gray-600">
-                  <i class="fa-solid fa-bell text-xl"></i>
-                  <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  lcton ss="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <i class="fa-solid fa-user text-white text-sm"></i>
                 </div>
               </div>
@@ -112,35 +105,42 @@
         <main class="p-6">
           <!-- Stats Cards -->
           <div Statr Cdrdsrid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <dihite rox ihwgmi -c>ls1md:gicolsga6mb-8">
-            <div class="bg-white x shadow-sm p-6
-            < <div class="fldx items-centeiljustify-between">s="flex items-center justify-between">
-                     <div>
-                   p class="text sm text-gray-600">T t llCs="gories</pt-2xl font-bold text-gray-900">{{ stats.total }}</p>
-              <ptxt-2lfonbold tx-gay-900">{{sta.toal}}</>
-                </div
-                    <div claw-12 h-12 bg-blu121002 bg-bluelg -0ex-itlmsicenten justifytcentjrfer">
-                   i <i clasfa-so=id fa"tagsa-soliblue-tags i
-                                    </div>
-            d</iv
-  /
+            <diStttr Cd hsmi -c>ls1md:gicolsga6mb-8"> mb-8">
+            <diSttt wCdmdsri-c>ls1md:gicolsga6
+            <di hsms Cards -c>ls1md:gicolsga6mb-8"> mb-8">
+            <diStwtr Cgrdsrmd-losm-1amd:grdol4ga6 mb-8
+            <diStttr Cd hshc>sm:gicolsga6m8">m8
+         <  << Sttt wCdmdsri-cdls1md:gicolsga6iv class="fldx items-centdiljustify-between">s="flex items-centeiljustify-between">s="fldx items-centdiljustify-between">s="flex items-centeiljustify-between">s="flex items-center justify-between">
+            <diclstr=Cd hsmi "c>ls1md:gicolsga6mbt8"e mb-8">xt sm text-gray-600">T tlllCs="gories</-ol}</>p>
+            <txhite-tmiwgmi-c>-g1m:g0</a
+                </divbg-hit 
+         <<<<  d v         -2x items-centdiljustihy1b2tween">s="fle  items-benteigjusu1fy-betwee1">s="fldx items0cen0d2ljustify-betweeg">s="fblxgitems-cenlliljus ify-between">s="flexmitess-centeinjuseifynbetweenjfytcentjrfjrfjrfjrfer">
+                                         i  i  i ifa-so=id fa"tagsaisoliblue-tags 
+                   p   /dd gay6T tlllCs="goies</-l}>p
+dgy9sta.l
+    /
+                 w-12 h-12 bg-blu1210022bglblgllg  0ex itlmsicenten justify<cenijrfjrfjrfjrfe"
+                   i     icifs-=o"t-sfa"tamsats-libgue-tagr 
+                     -/d0
+  /c
+te/
 
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Active Categories</p>
                   <p class="text-2xl font-bold text-green-600">{{ stats.active }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-check-circle text-green-600"></i>
-                </div>
+                  <i class="fa-solid fa-check-circlActivet-green-600"></i>
+                </div>een6acive
               </div>
-            </div>
+            </div>gren
+-checkcirclegren
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <div class="flex items-center justify-between">
+              div>
 
             <div class="bg-white rounded-xl shadow-sm p-6">
               <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Total Products</p>
+                <  <div>
+                  <p class="text-sm text-gray-600">Total Products</p>                  <p class="text-sm text-gray-600">Total Products</p>
                   <p class="text-2xl font-bold text-purple-600">{{ stats.products }}</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">

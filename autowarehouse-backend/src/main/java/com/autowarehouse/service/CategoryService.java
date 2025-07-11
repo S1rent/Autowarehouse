@@ -192,4 +192,6 @@ public class CategoryService {
         if (query == null || query.trim().isEmpty()) {
             return getActiveCategories();
         }
-        
+        return Category.searchByName(query.trim());
+    }
+}

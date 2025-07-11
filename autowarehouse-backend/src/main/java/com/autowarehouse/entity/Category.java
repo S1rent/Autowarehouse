@@ -1,5 +1,8 @@
 package com.autowarehouse.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +36,7 @@ public class Category extends PanacheEntityBase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonBackReference
     public Category parent;
 
     @Column(name = "image_url", columnDefinition = "TEXT")
@@ -54,9 +58,11 @@ public class Category extends PanacheEntityBase {
 
     // Relationships
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     public List<Category> children;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"category"})
     public List<Product> products;
 
     // Constructors
@@ -102,6 +108,10 @@ public class Category extends PanacheEntityBase {
 
     public static long countProductsInCategory(Long categoryId) {
         return Product.count("category.id = ?1 and isActive = true", categoryId);
+    }
+
+    public static List<Category> searchByName(String query) {
+        return find("lower(name) like lower(?1) and isActive = true order by sortOrder, name", "%" + query + "%").list();
     }
 
     // Helper methods
