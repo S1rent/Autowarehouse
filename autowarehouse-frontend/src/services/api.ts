@@ -184,6 +184,42 @@ export interface Order {
   createdAt: string
 }
 
+// Category Types
+export interface Category {
+  id: number
+  name: string
+  description?: string
+  slug: string
+  parentId?: number
+  parent?: Category
+  children?: Category[]
+  imageUrl?: string
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface CreateCategoryRequest {
+  name: string
+  description?: string
+  slug: string
+  parentId?: number
+  imageUrl?: string
+  isActive?: boolean
+  sortOrder?: number
+}
+
+export interface UpdateCategoryRequest {
+  name?: string
+  description?: string
+  slug?: string
+  parentId?: number
+  imageUrl?: string
+  isActive?: boolean
+  sortOrder?: number
+}
+
 // Cart Types
 export interface CartItem {
   id: number
@@ -478,6 +514,42 @@ class ApiService {
 
   async updateOrderStatus(orderId: number, status: string): Promise<{ message: string }> {
     const response = await api.put<{ message: string }>(`/orders/admin/${orderId}/status`, { status })
+    return response.data
+  }
+
+  // Category APIs
+  async getCategories(): Promise<Category[]> {
+    const response = await api.get<Category[]>('/categories')
+    return response.data
+  }
+
+  async getCategory(categoryId: number): Promise<Category> {
+    const response = await api.get<Category>(`/categories/${categoryId}`)
+    return response.data
+  }
+
+  async getCategoryBySlug(slug: string): Promise<Category> {
+    const response = await api.get<Category>(`/categories/slug/${slug}`)
+    return response.data
+  }
+
+  async getRootCategories(): Promise<Category[]> {
+    const response = await api.get<Category[]>('/categories/root')
+    return response.data
+  }
+
+  async createCategory(categoryData: CreateCategoryRequest): Promise<Category> {
+    const response = await api.post<Category>('/categories', categoryData)
+    return response.data
+  }
+
+  async updateCategory(categoryId: number, categoryData: UpdateCategoryRequest): Promise<Category> {
+    const response = await api.put<Category>(`/categories/${categoryId}`, categoryData)
+    return response.data
+  }
+
+  async deleteCategory(categoryId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/categories/${categoryId}`)
     return response.data
   }
 }

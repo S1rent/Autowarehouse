@@ -92,8 +92,7 @@
               <div class="flex items-center space-x-4">
                 <button 
                   @click="showCreateModal = true"
-                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                  
                   <i class="fa-solid fa-plus mr-2"></i>
                   Add Category
                 </button>
@@ -112,18 +111,19 @@
         <!-- Content -->
         <main class="p-6">
           <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Total Categories</p>
-                  <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
-                </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-tags text-blue-600"></i>
-                </div>
-              </div>
-            </div>
+          <div Statr Cdrdsrid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <dihite rox ihwgmi -c>ls1md:gicolsga6mb-8">
+            <div class="bg-white x shadow-sm p-6
+            < <div class="fldx items-centeiljustify-between">s="flex items-center justify-between">
+                     <div>
+                   p class="text sm text-gray-600">T t llCs="gories</pt-2xl font-bold text-gray-900">{{ stats.total }}</p>
+              <ptxt-2lfonbold tx-gay-900">{{sta.toal}}</>
+                </div
+                    <div claw-12 h-12 bg-blu121002 bg-bluelg -0ex-itlmsicenten justifytcentjrfer">
+                   i <i clasfa-so=id fa"tagsa-soliblue-tags i
+                                    </div>
+            d</iv
+  /
 
             <div class="bg-white rounded-xl shadow-sm p-6">
               <div class="flex items-center justify-between">
@@ -433,145 +433,101 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { apiService, type Category, type CreateCategoryRequest, type UpdateCategoryRequest } from '@/services/api'
+
+// Extended Category interface for UI
+interface CategoryWithUI extends Category {
+  expanded?: boolean
+  icon?: string
+  status?: string
+  productCount?: number
+  subcategories?: CategoryWithUI[]
+}
 
 // State
 const showCreateModal = ref(false)
-const editingCategory = ref(null)
+const editingCategory = ref<CategoryWithUI | null>(null)
+const loading = ref(false)
+const error = ref('')
 
-// Stats
-const stats = ref({
-  total: 24,
-  active: 20,
-  products: 1247,
-  subcategories: 48
-})
+// Categories data
+const categories = ref<CategoryWithUI[]>([])
+const expandedCategories = ref<Set<number>>(new Set())
 
 // Category form
 const categoryForm = ref({
   name: '',
-  parentId: '',
-  icon: 'fa-solid fa-laptop',
   description: '',
-  isActive: true
+  slug: '',
+  parentId: undefined as number | undefined,
+  imageUrl: '',
+  isActive: true,
+  sortOrder: 0
 })
 
-// Sample categories data
-const categories = ref([
-  {
-    id: 1,
-    name: 'Electronics',
-    icon: 'fa-solid fa-laptop',
-    productCount: 456,
-    status: 'active',
-    expanded: true,
-    subcategories: [
-      { id: 11, name: 'Smartphones', productCount: 123, status: 'active' },
-      { id: 12, name: 'Laptops', productCount: 89, status: 'active' },
-      { id: 13, name: 'Tablets', productCount: 67, status: 'active' },
-      { id: 14, name: 'Accessories', productCount: 177, status: 'active' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Automotive',
-    icon: 'fa-solid fa-car',
-    productCount: 234,
-    status: 'active',
-    expanded: false,
-    subcategories: [
-      { id: 21, name: 'Engine Parts', productCount: 89, status: 'active' },
-      { id: 22, name: 'Body Parts', productCount: 67, status: 'active' },
-      { id: 23, name: 'Electronics', productCount: 45, status: 'active' },
-      { id: 24, name: 'Accessories', productCount: 33, status: 'active' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Gaming',
-    icon: 'fa-solid fa-gamepad',
-    productCount: 189,
-    status: 'active',
-    expanded: false,
-    subcategories: [
-      { id: 31, name: 'Consoles', productCount: 45, status: 'active' },
-      { id: 32, name: 'Games', productCount: 78, status: 'active' },
-      { id: 33, name: 'Accessories', productCount: 66, status: 'active' }
-    ]
-  },
-  {
-    id: 4,
-    name: 'Tools',
-    icon: 'fa-solid fa-tools',
-    productCount: 156,
-    status: 'active',
-    expanded: false,
-    subcategories: [
-      { id: 41, name: 'Hand Tools', productCount: 67, status: 'active' },
-      { id: 42, name: 'Power Tools', productCount: 89, status: 'active' }
-    ]
+// Helper function to get icon for category
+const getIconForCategory = (categoryName: string): string => {
+  const iconMap: Record<string, string> = {
+    'Memory': 'fa-solid fa-microchip',
+    'Storage': 'fa-solid fa-hdd',
+    'Electronics': 'fa-solid fa-laptop',
+    'Automotive': 'fa-solid fa-car',
+    'Gaming': 'fa-solid fa-gamepad',
+    'Tools': 'fa-solid fa-tools',
+    'Home': 'fa-solid fa-home',
+    'Fashion': 'fa-solid fa-tshirt'
   }
-])
-
-const topCategories = ref([
-  { id: 1, name: 'Electronics', icon: 'fa-solid fa-laptop', productCount: 456, revenue: 45 },
-  { id: 2, name: 'Automotive', icon: 'fa-solid fa-car', productCount: 234, revenue: 28 },
-  { id: 3, name: 'Gaming', icon: 'fa-solid fa-gamepad', productCount: 189, revenue: 18 },
-  { id: 4, name: 'Tools', icon: 'fa-solid fa-tools', productCount: 156, revenue: 9 }
-])
-
-// Methods
-const getCategoryIconClass = (icon: string) => {
-  const iconClasses = {
-    'fa-solid fa-laptop': 'bg-blue-100 text-blue-600',
-    'fa-solid fa-car': 'bg-green-100 text-green-600',
-    'fa-solid fa-gamepad': 'bg-purple-100 text-purple-600',
-    'fa-solid fa-tools': 'bg-orange-100 text-orange-600',
-    'fa-solid fa-home': 'bg-yellow-100 text-yellow-600',
-    'fa-solid fa-tshirt': 'bg-pink-100 text-pink-600'
-  }
-  return iconClasses[icon as keyof typeof iconClasses] || 'bg-gray-100 text-gray-600'
-}
-
-const toggleCategory = (categoryId: number) => {
-  const category = categories.value.find(c => c.id === categoryId)
-  if (category) {
-    category.expanded = !category.expanded
-  }
-}
-
-const expandAll = () => {
-  categories.value.forEach(category => {
-    category.expanded = true
-  })
-}
-
-const collapseAll = () => {
-  categories.value.forEach(category => {
-    category.expanded = false
-  })
-}
-
-const editCategory = (category: any) => {
-  editingCategory.value = category
-  categoryForm.value = {
-    name: category.name,
-    parentId: category.parentId || '',
-    icon: category.icon,
-    description: category.description || '',
-    isActive: category.status === 'active'
-  }
-}
-
-const deleteCategory = (categoryId: number) => {
-  if (confirm('Are you sure you want to delete this category?')) {
-    // Remove from main categories
-    const mainIndex = categories.value.findIndex(c => c.id === categoryId)
-    if (mainIndex > -1) {
-      categories.value.splice(mainIndex, 1)
-      return
+  
+  // Find matching icon or default
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (categoryName.toLowerCase().includes(key.toLowerCase())) {
+      return icon
     }
-    
+  }
+  
+  return 'fa-solid fa-tag'
+}
+
+// Computed properties
+const stats = computed(() => {
+  const total = categories.value.length
+  const active = categories.value.filter(c => c.isActive).length
+  const rootCategories = categories.value.filter(c => !c.parentId)
+  const subcategories = categories.value.filter(c => c.parentId)
+  
+  return {
+    total,
+    active,
+    products: 0, // This would need to be calculated from products API
+    subcategories: subcategories.length
+  }
+})
+
+const rootCategories = computed(() => {
+  return categories.value
+    .filter(c => !c.parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+})
+
+const getSubcategories = (parentId: number) => {
+  return categories.value
+    .filter(c => c.parentId === parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+}
+
+const topCategories = computed(() => {
+  return rootCategories.value.slice(0, 4).map(category => ({
+    id: category.id,
+    name: category.name,
+    icon: getIconForCategory(category.name),
+    productCount: 0, // This would need to be calculated from products API
+    revenue: 0 // This would need to be calculated from orders API
+  }))
+})
+
+//    categories.value.splice(mainIndex, 1)
+      return  
     // Remove from subcategories
     categories.value.forEach(category => {
       if (category.subcategories) {
@@ -579,8 +535,6 @@ const deleteCategory = (categoryId: number) => {
         if (subIndex > -1) {
           category.subcategories.splice(subIndex, 1)
         }
-      }
-    })
   }
 }
 
@@ -604,16 +558,41 @@ const closeModal = () => {
 const bulkImport = () => {
   console.log('Bulk import categories')
 }
-
+n
 const exportCategories = () => {
   console.log('Export categories')
 }
-
-onMounted(() => {
-  console.log('Admin Category Management loaded')
-})
-</script>
-
+aretIdaretId
+onMoi( eg('Admin Caicoranagement loaded')
+})dsciptiondsciption
+</script>aus=== 'civ'
 <style scoped>
 /* Custom styles */
 </style>
+// Rmove fom maicaegoiescnst mIndex = cateories.findIndex(c>c.id === cagoryId)f(mnInx > -1) {
+      cies.vlu.splice(mainnex, 1  return}
+    
+    mvefrom sub
+   cgois.vau.forEach(caegry => {  f(categry.subc { onssubIndx=catgysbctegors.finIndex(s=>s.i=== Id)    if (ubIndx > -1) {
+          catgy.subcategis.spic(subIdx1    }    }
+})console.g('Sv ctgory:',cagoyFm)
+closeModal()
+}coscloeModa =()=>{showCreMdal = faleeditingCul
+   = {
+    : '', parentId:'',  icon:'fa-solidfa-laptop',dscrpo: '',
+    isAciv: t
+ }
+}
+constbulkImport=()=>{
+consol.log('Bulkmpories')
+}
+constexportCategories=()=>{
+onsollog('Exor cis')
+}
+
+onMoud(() => {
+  conslog('AdmnC Management ldd')
+</script>
+
+<stylecopd>*usomstyls*/
+</syl>

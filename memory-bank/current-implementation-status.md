@@ -176,6 +176,14 @@ PWA FeatuProgresve Web App apabilities
   - POST /api/auth/forgot-password ✅
   - POST /api/auth/reset-password ✅
   - POST /api/auth/resend-verification ✅
+- **CategoryResource**: Complete category management endpoints ✅
+  - GET /api/categories ✅ (Tested & Working)
+  - GET /api/categories/{id} ✅
+  - GET /api/categories/slug/{slug} ✅
+  - GET /api/categories/root ✅
+  - POST /api/categories ✅
+  - PUT /api/categories/{id} ✅
+  - DELETE /api/categories/{id} ✅
 - **UserResource**: User management endpoints (implementation ready)
 - **ProductResource**: Product CRUD and search endpoints (implementation ready)
 - **AuctionResource**: Auction management and bidding endpoints (implementation ready)
