@@ -15,7 +15,10 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600">Total Kategori</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+              <p class="text-2xl font-bold text-gray-900">
+                <span v-if="statsLoading" class="animate-pulse bg-gray-200 rounded h-8 w-12 inline-block"></span>
+                <span v-else>{{ stats.total }}</span>
+              </p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <i class="fa-solid fa-tags text-blue-600 text-xl"></i>
@@ -27,7 +30,10 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600">Kategori Aktif</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.active }}</p>
+              <p class="text-2xl font-bold text-gray-900">
+                <span v-if="statsLoading" class="animate-pulse bg-gray-200 rounded h-8 w-12 inline-block"></span>
+                <span v-else>{{ stats.active }}</span>
+              </p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
@@ -39,7 +45,10 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600">Total Produk</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.totalProducts }}</p>
+              <p class="text-2xl font-bold text-gray-900">
+                <span v-if="statsLoading" class="animate-pulse bg-gray-200 rounded h-8 w-12 inline-block"></span>
+                <span v-else>{{ stats.totalProducts }}</span>
+              </p>
             </div>
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <i class="fa-solid fa-box text-yellow-600 text-xl"></i>
@@ -51,7 +60,10 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600">Kategori Terpopuler</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.mostPopular }}</p>
+              <p class="text-2xl font-bold text-gray-900">
+                <span v-if="statsLoading" class="animate-pulse bg-gray-200 rounded h-8 w-16 inline-block"></span>
+                <span v-else>{{ stats.mostPopular }}</span>
+              </p>
             </div>
             <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <i class="fa-solid fa-star text-orange-600 text-xl"></i>
@@ -93,7 +105,40 @@
       </div>
 
       <!-- Categories Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Loading skeleton -->
+        <div v-for="n in 8" :key="n" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div class="flex space-x-2">
+                <div class="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+                <div class="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+            <div class="h-6 bg-gray-200 rounded mb-2 animate-pulse"></div>
+            <div class="h-4 bg-gray-200 rounded mb-4 animate-pulse"></div>
+            <div class="flex items-center justify-between">
+              <div class="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div class="h-6 bg-gray-200 rounded w-12 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div v-else-if="filteredCategories.length === 0" class="text-center py-12">
+        <i class="fa-solid fa-tags text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak ada kategori</h3>
+        <p class="text-gray-500 mb-6">Belum ada kategori yang dibuat. Mulai dengan menambahkan kategori pertama.</p>
+        <button 
+          @click="openAddModal"
+          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Tambah Kategori Pertama
+        </button>
+      </div>
+      
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div 
           v-for="category in filteredCategories" 
           :key="category.id"
@@ -101,8 +146,23 @@
         >
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <div :class="category.iconBg" class="w-12 h-12 rounded-lg flex items-center justify-center">
-                <i :class="[category.icon, category.iconColor, 'text-xl']"></i>
+              <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                <img 
+                  v-if="category.imageUrl && !category.imageUrl.startsWith('data:')" 
+                  :src="category.imageUrl" 
+                  :alt="category.name"
+                  class="w-full h-full object-cover rounded-lg"
+                  @error="(e) => { const target = e.target as HTMLImageElement; target.style.display = 'none'; }"
+                >
+                <img 
+                  v-else-if="category.imageUrl && category.imageUrl.startsWith('data:')" 
+                  :src="category.imageUrl" 
+                  :alt="category.name"
+                  class="w-full h-full object-cover rounded-lg"
+                >
+                <div v-else class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-image text-blue-400 text-lg"></i>
+                </div>
               </div>
               <div class="flex space-x-2">
                 <button 
@@ -172,18 +232,44 @@
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
-            <div class="grid grid-cols-6 gap-3">
-              <button 
-                v-for="icon in availableIcons" 
-                :key="icon.name"
-                type="button"
-                @click="selectIcon(icon)"
-                :class="categoryForm.icon === icon.name ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 hover:border-blue-600 hover:bg-blue-600 hover:text-white'"
-                class="p-3 border rounded-lg transition-colors"
-              >
-                <i :class="icon.class"></i>
-              </button>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Kategori</label>
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <div v-if="categoryForm.imageUrl" class="mb-4">
+                <img :src="categoryForm.imageUrl" alt="Preview" class="w-20 h-20 object-cover rounded-lg mx-auto">
+              </div>
+              
+              <!-- Upload Progress -->
+              <div v-if="isUploading" class="mb-4">
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div 
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                    :style="{ width: uploadProgress + '%' }"
+                  ></div>
+                </div>
+                <p class="text-sm text-blue-600">Mengupload... {{ Math.round(uploadProgress) }}%</p>
+              </div>
+              
+              <div v-else>
+                <i class="fa-solid fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                <p class="text-sm text-gray-600 mb-2">Upload gambar kategori</p>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  @change="handleImageUpload"
+                  class="hidden" 
+                  ref="fileInput"
+                  :disabled="isUploading"
+                >
+                <button 
+                  type="button" 
+                  @click="() => { const input = $refs.fileInput as HTMLInputElement; input?.click(); }"
+                  :disabled="isUploading"
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Pilih Gambar
+                </button>
+                <p class="text-xs text-gray-500 mt-2">PNG, JPG hingga 2MB</p>
+              </div>
             </div>
           </div>
 
@@ -235,14 +321,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AdminNavbar from '../../components/AdminNavbar.vue'
+import { apiService, type Category as ApiCategory } from '../../services/api'
+import { uploadCategoryImage, validateImageFile, deleteCategoryImage, type UploadProgress } from '../../services/firebase'
 
 interface Category {
   id: string
   name: string
   description: string
-  icon: string
-  iconBg: string
-  iconColor: string
+  imageUrl: string
   productCount: number
   status: 'active' | 'inactive'
 }
@@ -250,7 +336,7 @@ interface Category {
 interface CategoryForm {
   name: string
   description: string
-  icon: string
+  imageUrl: string
   status: 'active' | 'inactive'
 }
 
@@ -261,96 +347,91 @@ const isEditing = ref(false)
 const editingId = ref<string | null>(null)
 
 const stats = ref({
-  total: 12,
-  active: 10,
-  totalProducts: 245,
-  mostPopular: 'Elektronik'
+  total: 0,
+  active: 0,
+  totalProducts: 0,
+  mostPopular: '-'
 })
+
+const loading = ref(false)
+const statsLoading = ref(false)
 
 const categoryForm = ref<CategoryForm>({
   name: '',
   description: '',
-  icon: 'fa-mobile-alt',
+  imageUrl: '',
   status: 'active'
 })
 
-const availableIcons = [
-  { name: 'fa-mobile-alt', class: 'fa-solid fa-mobile-alt' },
-  { name: 'fa-tshirt', class: 'fa-solid fa-tshirt' },
-  { name: 'fa-utensils', class: 'fa-solid fa-utensils' },
-  { name: 'fa-book', class: 'fa-solid fa-book' },
-  { name: 'fa-home', class: 'fa-solid fa-home' },
-  { name: 'fa-dumbbell', class: 'fa-solid fa-dumbbell' },
-  { name: 'fa-car', class: 'fa-solid fa-car' },
-  { name: 'fa-gamepad', class: 'fa-solid fa-gamepad' },
-  { name: 'fa-music', class: 'fa-solid fa-music' },
-  { name: 'fa-camera', class: 'fa-solid fa-camera' },
-  { name: 'fa-laptop', class: 'fa-solid fa-laptop' },
-  { name: 'fa-heart', class: 'fa-solid fa-heart' }
-]
 
-const categories = ref<Category[]>([
-  {
-    id: '1',
-    name: 'Elektronik',
-    description: 'Smartphone, laptop, dan perangkat elektronik lainnya',
-    icon: 'fa-mobile-alt',
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    productCount: 85,
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Fashion',
-    description: 'Pakaian, sepatu, dan aksesoris fashion',
-    icon: 'fa-tshirt',
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-600',
-    productCount: 62,
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Makanan & Minuman',
-    description: 'Makanan olahan, minuman, dan camilan',
-    icon: 'fa-utensils',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-600',
-    productCount: 43,
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Buku & Edukasi',
-    description: 'Buku, majalah, dan materi edukasi',
-    icon: 'fa-book',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    productCount: 28,
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'Rumah Tangga',
-    description: 'Peralatan dan perlengkapan rumah tangga',
-    icon: 'fa-home',
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    productCount: 15,
-    status: 'inactive'
-  },
-  {
-    id: '6',
-    name: 'Olahraga',
-    description: 'Peralatan olahraga dan fitness',
-    icon: 'fa-dumbbell',
-    iconBg: 'bg-red-100',
-    iconColor: 'text-red-600',
-    productCount: 22,
-    status: 'active'
+const categories = ref<Category[]>([])
+
+// Helper function to generate slug from name
+const generateSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim()
+}
+
+// Helper function to transform API category to frontend category
+const transformApiCategory = (apiCategory: ApiCategory): Category => {
+  return {
+    id: apiCategory.id.toString(),
+    name: apiCategory.name,
+    description: apiCategory.description || '',
+    imageUrl: apiCategory.imageUrl || '',
+    productCount: 0, // Will be calculated separately if needed
+    status: apiCategory.isActive ? 'active' : 'inactive'
   }
-])
+}
+
+// API Functions
+const fetchCategories = async () => {
+  try {
+    loading.value = true
+    const apiCategories = await apiService.getCategories()
+    categories.value = apiCategories.map(transformApiCategory)
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    alert('Gagal memuat kategori. Silakan coba lagi.')
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchStats = async () => {
+  try {
+    statsLoading.value = true
+    
+    // Use the direct API call since apiService doesn't have getCategoryStats method
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'}/categories/admin/stats`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (response.ok) {
+      const statsData = await response.json()
+      stats.value = {
+        total: statsData.totalCategories || 0,
+        active: statsData.activeCategories || 0,
+        totalProducts: 0, // Will be calculated from product stats if needed
+        mostPopular: '-' // Will be calculated if needed
+      }
+    } else {
+      console.error('Failed to fetch stats:', response.status, response.statusText)
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error)
+    // Keep default values on error
+  } finally {
+    statsLoading.value = false
+  }
+}
 
 const filteredCategories = computed(() => {
   let filtered = categories.value
@@ -379,23 +460,6 @@ const getStatusText = (status: string) => {
   return status === 'active' ? 'Aktif' : 'Tidak Aktif'
 }
 
-const getIconConfig = (iconName: string) => {
-  const configs = {
-    'fa-mobile-alt': { bg: 'bg-blue-100', color: 'text-blue-600' },
-    'fa-tshirt': { bg: 'bg-pink-100', color: 'text-pink-600' },
-    'fa-utensils': { bg: 'bg-green-100', color: 'text-green-600' },
-    'fa-book': { bg: 'bg-purple-100', color: 'text-purple-600' },
-    'fa-home': { bg: 'bg-yellow-100', color: 'text-yellow-600' },
-    'fa-dumbbell': { bg: 'bg-red-100', color: 'text-red-600' },
-    'fa-car': { bg: 'bg-gray-100', color: 'text-gray-600' },
-    'fa-gamepad': { bg: 'bg-indigo-100', color: 'text-indigo-600' },
-    'fa-music': { bg: 'bg-orange-100', color: 'text-orange-600' },
-    'fa-camera': { bg: 'bg-teal-100', color: 'text-teal-600' },
-    'fa-laptop': { bg: 'bg-cyan-100', color: 'text-cyan-600' },
-    'fa-heart': { bg: 'bg-rose-100', color: 'text-rose-600' }
-  }
-  return configs[iconName as keyof typeof configs] || { bg: 'bg-gray-100', color: 'text-gray-600' }
-}
 
 const openAddModal = () => {
   isEditing.value = false
@@ -403,7 +467,7 @@ const openAddModal = () => {
   categoryForm.value = {
     name: '',
     description: '',
-    icon: 'fa-mobile-alt',
+    imageUrl: '',
     status: 'active'
   }
   showModal.value = true
@@ -415,7 +479,7 @@ const editCategory = (category: Category) => {
   categoryForm.value = {
     name: category.name,
     description: category.description,
-    icon: category.icon,
+    imageUrl: category.imageUrl,
     status: category.status
   }
   showModal.value = true
@@ -427,68 +491,161 @@ const closeModal = () => {
   editingId.value = null
 }
 
-const selectIcon = (icon: { name: string; class: string }) => {
-  categoryForm.value.icon = icon.name
+// Image upload functionality with Firebase Storage
+const uploadProgress = ref(0)
+const isUploading = ref(false)
+
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+
+  try {
+    isUploading.value = true
+    uploadProgress.value = 0
+
+    // Validate file using Firebase service
+    const validationError = validateImageFile(file)
+    if (validationError) {
+      alert(validationError)
+      return
+    }
+
+    // Create local preview while uploading
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      // Show preview immediately
+      categoryForm.value.imageUrl = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+
+    // Upload to Firebase Storage
+    const result = await uploadCategoryImage(file, (progress) => {
+      uploadProgress.value = progress.percentage
+    })
+
+    // Update form with Firebase URL
+    categoryForm.value.imageUrl = result.url
+    
+    alert('Gambar berhasil diupload!')
+  } catch (error) {
+    console.error('Error uploading image:', error)
+    alert(error instanceof Error ? error.message : 'Gagal mengupload gambar. Silakan coba lagi.')
+    
+    // Reset image URL on error
+    categoryForm.value.imageUrl = ''
+  } finally {
+    isUploading.value = false
+    uploadProgress.value = 0
+    
+    // Reset file input
+    if (target) {
+      target.value = ''
+    }
+  }
 }
 
-const saveCategory = () => {
-  const iconConfig = getIconConfig(categoryForm.value.icon)
-  
-  if (isEditing.value && editingId.value) {
-    // Update existing category
-    const index = categories.value.findIndex(c => c.id === editingId.value)
-    if (index > -1) {
-      categories.value[index] = {
-        ...categories.value[index],
+const saveCategory = async () => {
+  try {
+    const slug = generateSlug(categoryForm.value.name)
+    
+    if (isEditing.value && editingId.value) {
+      // Get the original category to check if image changed
+      const originalCategory = categories.value.find(c => c.id === editingId.value)
+      const oldImageUrl = originalCategory?.imageUrl
+      const newImageUrl = categoryForm.value.imageUrl
+      
+      // Update existing category
+      const updateData = {
         name: categoryForm.value.name,
         description: categoryForm.value.description,
-        icon: categoryForm.value.icon,
-        iconBg: iconConfig.bg,
-        iconColor: iconConfig.color,
-        status: categoryForm.value.status
+        slug: slug,
+        imageUrl: newImageUrl,
+        isActive: categoryForm.value.status === 'active'
       }
+      
+      await apiService.updateCategory(parseInt(editingId.value), updateData)
+      
+      // Delete old image if it was changed and it's a Firebase URL
+      if (oldImageUrl && oldImageUrl !== newImageUrl && oldImageUrl.includes('firebase')) {
+        try {
+          await deleteCategoryImage(oldImageUrl)
+        } catch (error) {
+          console.error('Error deleting old image:', error)
+          // Don't fail the update if image deletion fails
+        }
+      }
+      
+      alert('Kategori berhasil diupdate!')
+      
+      // Refresh data
+      await fetchCategories()
+      await fetchStats()
+    } else {
+      // Add new category
+      const createData = {
+        name: categoryForm.value.name,
+        description: categoryForm.value.description,
+        slug: slug,
+        imageUrl: categoryForm.value.imageUrl,
+        isActive: categoryForm.value.status === 'active'
+      }
+      
+      await apiService.createCategory(createData)
+      alert('Kategori berhasil ditambahkan!')
+      
+      // Refresh data
+      await fetchCategories()
+      await fetchStats()
     }
-    alert('Kategori berhasil diupdate!')
-  } else {
-    // Add new category
-    const newCategory: Category = {
-      id: Date.now().toString(),
-      name: categoryForm.value.name,
-      description: categoryForm.value.description,
-      icon: categoryForm.value.icon,
-      iconBg: iconConfig.bg,
-      iconColor: iconConfig.color,
-      productCount: 0,
-      status: categoryForm.value.status
-    }
-    categories.value.push(newCategory)
-    stats.value.total++
-    if (categoryForm.value.status === 'active') {
-      stats.value.active++
-    }
-    alert('Kategori berhasil ditambahkan!')
+    
+    closeModal()
+  } catch (error) {
+    console.error('Error saving category:', error)
+    alert('Gagal menyimpan kategori. Silakan coba lagi.')
   }
-  
-  closeModal()
 }
 
-const deleteCategory = (categoryId: string) => {
+const deleteCategory = async (categoryId: string) => {
   if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-    const index = categories.value.findIndex(c => c.id === categoryId)
-    if (index > -1) {
-      const category = categories.value[index]
-      categories.value.splice(index, 1)
-      stats.value.total--
-      if (category.status === 'active') {
-        stats.value.active--
+    try {
+      // Get the category to delete its image
+      const categoryToDelete = categories.value.find(c => c.id === categoryId)
+      const imageUrl = categoryToDelete?.imageUrl
+      
+      // Delete category from backend
+      await apiService.deleteCategory(parseInt(categoryId))
+      
+      // Delete image from Firebase Storage if it exists
+      if (imageUrl && imageUrl.includes('firebase')) {
+        try {
+          await deleteCategoryImage(imageUrl)
+        } catch (error) {
+          console.error('Error deleting category image:', error)
+          // Don't fail the deletion if image deletion fails
+        }
       }
-      stats.value.totalProducts -= category.productCount
+      
       alert('Kategori berhasil dihapus!')
+      
+      // Refresh data
+      await fetchCategories()
+      await fetchStats()
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      alert('Gagal menghapus kategori. Silakan coba lagi.')
     }
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log('Admin Category Management loaded')
+  
+  // Fetch initial data
+  await Promise.all([
+    fetchCategories(),
+    fetchStats()
+  ])
 })
 </script>
