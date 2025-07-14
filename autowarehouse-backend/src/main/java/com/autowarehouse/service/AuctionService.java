@@ -30,8 +30,8 @@ public class AuctionService {
         // Set default values
         auction.status = Auction.AuctionStatus.SCHEDULED;
         auction.currentBid = auction.startingBid;
-        auction.bidCount = 0;
-        auction.watcherCount = 0;
+        auction.totalBids = 0;
+        auction.watchersCount = 0;
 
         // Validate reserve price
         if (auction.reservePrice != null && auction.reservePrice.compareTo(auction.startingBid) < 0) {
@@ -61,7 +61,6 @@ public class AuctionService {
         auction.bidIncrement = updatedAuction.bidIncrement;
         auction.startTime = updatedAuction.startTime;
         auction.endTime = updatedAuction.endTime;
-        auction.autoExtendMinutes = updatedAuction.autoExtendMinutes;
         auction.product = updatedAuction.product;
         auction.category = updatedAuction.category;
 
@@ -199,16 +198,8 @@ public class AuctionService {
 
         // Update auction
         auction.currentBid = bidAmount;
-        auction.bidCount++;
+        auction.totalBids++;
         auction.currentWinner = user;
-
-        // Auto-extend if bid placed near end time
-        if (auction.autoExtendMinutes != null && auction.autoExtendMinutes > 0) {
-            LocalDateTime extendThreshold = auction.endTime.minusMinutes(auction.autoExtendMinutes);
-            if (LocalDateTime.now().isAfter(extendThreshold)) {
-                auction.endTime = auction.endTime.plusMinutes(auction.autoExtendMinutes);
-            }
-        }
 
         auction.persist();
 
@@ -328,7 +319,7 @@ public class AuctionService {
         watcher.persist();
 
         // Update watcher count
-        auction.watcherCount++;
+        auction.watchersCount++;
         auction.persist();
 
         return watcher;
@@ -348,7 +339,7 @@ public class AuctionService {
             watcher.delete();
 
             // Update watcher count
-            auction.watcherCount = Math.max(0, auction.watcherCount - 1);
+            auction.watchersCount = Math.max(0, auction.watchersCount - 1);
             auction.persist();
         }
     }

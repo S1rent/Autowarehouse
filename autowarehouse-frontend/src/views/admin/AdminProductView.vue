@@ -117,7 +117,21 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center">
-                        <img :src="product.imageUrls?.[0] || '/placeholder.jpg'" :alt="product.name" class="w-12 h-12 rounded-lg object-cover mr-4">
+                        <div class="w-12 h-12 mr-4 flex-shrink-0">
+                          <img 
+                            v-if="hasProductImage(product)"
+                            :src="getProductImage(product)" 
+                            :alt="product.name" 
+                            class="w-12 h-12 rounded-lg object-cover"
+                            @error="handleImageError"
+                          >
+                          <div 
+                            v-else
+                            class="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center"
+                          >
+                            <i class="fa-solid fa-image text-gray-400 text-lg"></i>
+                          </div>
+                        </div>
                         <div>
                           <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
                           <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
@@ -338,8 +352,36 @@
                 </h3>
                 
                 <div class="space-y-6">
+                  <!-- Show existing images when editing -->
+                  <div v-if="isEditing && existingImages.length > 0" class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Gambar Saat Ini</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <div 
+                        v-for="(imageUrl, index) in existingImages" 
+                        :key="index"
+                        class="relative group"
+                      >
+                        <img 
+                          :src="imageUrl" 
+                          :alt="`Product image ${index + 1}`"
+                          class="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          @error="handleImageError"
+                        >
+                        <button 
+                          type="button"
+                          @click="removeExistingImage(index)"
+                          class="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <i class="fa-solid fa-times text-xs"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Upload Gambar Produk *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                      {{ isEditing ? 'Tambah Gambar Baru' : 'Upload Gambar Produk *' }}
+                    </label>
                     <div 
                       @click="triggerFileInput"
                       class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100"
@@ -568,6 +610,7 @@ const categoriesLoading = ref(false)
 
 // File handling
 const selectedFiles = ref<File[]>([])
+const existingImages = ref<string[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const productForm = ref<ProductForm>({
@@ -693,6 +736,10 @@ const editProduct = async (product: Product) => {
       status: fullProduct.isActive ? 'active' : 'inactive'
     }
     
+    // Load existing images
+    existingImages.value = fullProduct.imageUrls || []
+    selectedFiles.value = []
+    
     editingProductId.value = product.id
     showAddForm.value = true
     isEditing.value = true
@@ -735,6 +782,7 @@ const resetForm = () => {
     status: 'active'
   }
   selectedFiles.value = []
+  existingImages.value = []
   editingProductId.value = null
   isEditing.value = false
 }
@@ -814,8 +862,15 @@ const saveProduct = async () => {
     // Auto-generate SKU if not provided
     const finalSku = productForm.value.sku.trim() || generateSKU()
     
-    // Upload images to Firebase if any files selected
-    let imageUrls: string[] = []
+    // Handle images - combine existing and new images
+    let finalImageUrls: string[] = []
+    
+    // For editing: start with existing images
+    if (isEditing.value) {
+      finalImageUrls = [...existingImages.value]
+    }
+    
+    // Upload new images if any files selected
     if (selectedFiles.value.length > 0) {
       try {
         // Validate all files first
@@ -826,11 +881,14 @@ const saveProduct = async () => {
           }
         }
         
-        // Upload all images
+        // Upload all new images
         const uploadResults = await uploadProductImages(selectedFiles.value)
-        imageUrls = uploadResults.map(result => result.url)
+        const newImageUrls = uploadResults.map(result => result.url)
         
-        console.log('Images uploaded successfully:', imageUrls)
+        // Add new images to final list
+        finalImageUrls = [...finalImageUrls, ...newImageUrls]
+        
+        console.log('Images uploaded successfully:', newImageUrls)
       } catch (uploadError) {
         throw new Error(`Image upload failed: ${uploadError}`)
       }
@@ -848,7 +906,7 @@ const saveProduct = async () => {
         .filter(spec => spec.name && spec.value)
         .map(spec => `${spec.name}: ${spec.value}`)
         .join('\n'),
-      imageUrls: imageUrls,
+      imageUrls: finalImageUrls,
       categoryId: parseInt(productForm.value.category)
     }
     
@@ -911,6 +969,33 @@ const handleFileSelect = (event: Event) => {
 
 const removeFile = (index: number) => {
   selectedFiles.value.splice(index, 1)
+}
+
+// Image handling functions
+const getProductImage = (product: Product): string | undefined => {
+  // Check if product has imageUrls and it's not empty
+  if (product.imageUrls && product.imageUrls.length > 0) {
+    return product.imageUrls[0]
+  }
+  
+  // Return undefined if no image available
+  return undefined
+}
+
+const hasProductImage = (product: Product): boolean => {
+  return !!(product.imageUrls && product.imageUrls.length > 0)
+}
+
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  const container = target.parentElement
+  if (container) {
+    target.style.display = 'none'
+  }
+}
+
+const removeExistingImage = (index: number) => {
+  existingImages.value.splice(index, 1)
 }
 
 // Add debounced version for search
