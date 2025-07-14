@@ -41,7 +41,7 @@
           </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-600">Total Produk</p>
@@ -69,7 +69,7 @@
               <i class="fa-solid fa-star text-orange-600 text-xl"></i>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Filters Section -->

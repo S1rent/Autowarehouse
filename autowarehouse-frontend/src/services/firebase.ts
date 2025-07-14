@@ -4,13 +4,14 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'fire
 // Firebase configuration
 // TODO: Replace with your actual Firebase config
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
-}
+  apiKey: "AIzaSyBq6004V8DsHp69iG5ljSJbQ0-hc9jhCh4",
+  authDomain: "autowarehouse-c3947.firebaseapp.com",
+  projectId: "autowarehouse-c3947",
+  storageBucket: "autowarehouse-c3947.firebasestorage.app",
+  messagingSenderId: "191069017894",
+  appId: "1:191069017894:web:783ac1cffdab46995ed3e7",
+  measurementId: "G-ZWZH3PT1QG"
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)

@@ -35,13 +35,14 @@ Replace the placeholder configuration in `src/services/firebase.ts`:
 
 ```typescript
 const firebaseConfig = {
-  apiKey: "your-actual-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-actual-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456"
-}
+  apiKey: "AIzaSyBq6004V8DsHp69iG5ljSJbQ0-hc9jhCh4",
+  authDomain: "autowarehouse-c3947.firebaseapp.com",
+  projectId: "autowarehouse-c3947",
+  storageBucket: "autowarehouse-c3947.firebasestorage.app",
+  messagingSenderId: "191069017894",
+  appId: "1:191069017894:web:783ac1cffdab46995ed3e7",
+  measurementId: "G-ZWZH3PT1QG"
+};
 ````
 
 ## Step 5: Configure Storage Security Rules
