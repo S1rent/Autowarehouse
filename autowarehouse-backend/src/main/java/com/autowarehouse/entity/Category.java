@@ -132,6 +132,7 @@ public class Category extends PanacheEntityBase {
         return Product.count("category = ?1 and isActive = true", this);
     }
 
+    @JsonIgnore
     public String getFullPath() {
         if (parent == null) {
             return name;

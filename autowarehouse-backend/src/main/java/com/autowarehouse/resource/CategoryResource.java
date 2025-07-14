@@ -27,13 +27,9 @@ public class CategoryResource {
         try {
             List<Category> categories;
             
-            // If we have search or specific active filter, use the new filter method
-            if (search != null || active != null) {
-                categories = categoryService.filterCategories(search, active);
-            } else {
-                // Default behavior: return active categories only
-                categories = categoryService.getActiveCategories();
-            }
+            // Always use the filter method for consistent behavior
+            // When no parameters provided, it will return all categories
+            categories = categoryService.filterCategories(search, active);
             
             return Response.ok(categories).build();
         } catch (Exception e) {

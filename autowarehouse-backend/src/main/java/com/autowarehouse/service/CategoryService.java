@@ -87,6 +87,13 @@ public class CategoryService {
 
         // Update fields if provided
         if (updatedCategory.name != null && !updatedCategory.name.trim().isEmpty()) {
+            // Check if name is being changed and if new name already exists
+            if (!category.name.equals(updatedCategory.name.trim())) {
+                Category existingCategoryByName = Category.find("name", updatedCategory.name.trim()).firstResult();
+                if (existingCategoryByName != null && !existingCategoryByName.id.equals(id)) {
+                    throw new BadRequestException("Category with name '" + updatedCategory.name.trim() + "' already exists");
+                }
+            }
             category.name = updatedCategory.name.trim();
         }
 
