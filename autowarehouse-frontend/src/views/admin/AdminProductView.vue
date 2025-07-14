@@ -44,10 +44,13 @@
                   class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                 >
                   <option value="">Semua Kategori</option>
-                  <option value="elektronik">Elektronik</option>
-                  <option value="fashion">Fashion</option>
-                  <option value="makanan">Makanan</option>
-                  <option value="buku">Buku</option>
+                  <option 
+                    v-for="category in categories" 
+                    :key="category.id" 
+                    :value="category.name"
+                  >
+                    {{ category.name }}
+                  </option>
                 </select>
                 <select 
                   v-model="statusFilter"
@@ -69,8 +72,25 @@
             </div>
           </div>
 
+          <!-- Loading State -->
+          <div v-if="loading" class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="ml-2 text-gray-600">Loading products...</span>
+          </div>
+
+          <!-- Error State -->
+          <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+              <i class="fa-solid fa-exclamation-triangle text-red-600 mr-2"></i>
+              <span class="text-red-800">{{ error }}</span>
+              <button @click="fetchProducts" class="ml-auto text-red-600 hover:text-red-800">
+                <i class="fa-solid fa-refresh"></i> Retry
+              </button>
+            </div>
+          </div>
+
           <!-- Products Table -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div v-if="!loading && !error" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
@@ -97,22 +117,22 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <div class="flex items-center">
-                        <img :src="product.image" :alt="product.name" class="w-12 h-12 rounded-lg object-cover mr-4">
+                        <img :src="product.imageUrls?.[0] || '/placeholder.jpg'" :alt="product.name" class="w-12 h-12 rounded-lg object-cover mr-4">
                         <div>
                           <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
                           <div class="text-sm text-gray-500">SKU: {{ product.sku }}</div>
                         </div>
                       </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.category }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.categoryName }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp {{ formatPrice(product.price) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.stock }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.stockQuantity }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span 
-                        :class="getStatusClass(product.status)"
+                        :class="getStatusClass(getProductStatus(product))"
                         class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                       >
-                        {{ getStatusText(product.status) }}
+                        {{ getStatusText(getProductStatus(product)) }}
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -200,16 +220,16 @@
                       v-model="productForm.category"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
                       required
+                      :disabled="categoriesLoading"
                     >
-                      <option value="">Pilih Kategori</option>
-                      <option value="elektronik">Elektronik</option>
-                      <option value="fashion">Fashion</option>
-                      <option value="makanan">Makanan & Minuman</option>
-                      <option value="buku">Buku & Media</option>
-                      <option value="olahraga">Olahraga</option>
-                      <option value="kesehatan">Kesehatan & Kecantikan</option>
-                      <option value="otomotif">Otomotif</option>
-                      <option value="rumah">Rumah & Taman</option>
+                      <option value="">{{ categoriesLoading ? 'Loading categories...' : 'Pilih Kategori' }}</option>
+                      <option 
+                        v-for="category in categories" 
+                        :key="category.id" 
+                        :value="category.id"
+                      >
+                        {{ category.name }}
+                      </option>
                     </select>
                   </div>
                   
@@ -320,21 +340,52 @@
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">Upload Gambar Produk *</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div 
+                      @click="triggerFileInput"
+                      class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-600 transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    >
                       <i class="fa-solid fa-cloud-upload text-4xl text-gray-400 mb-4"></i>
                       <p class="text-gray-600 mb-2 font-medium">Drag & drop gambar atau klik untuk upload</p>
                       <p class="text-sm text-gray-500 mb-3">PNG, JPG hingga 10MB per file</p>
                       <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         Pilih File
                       </button>
-                      <input type="file" class="hidden" accept="image/*" multiple>
+                      <input 
+                        ref="fileInput"
+                        type="file" 
+                        class="hidden" 
+                        accept="image/*" 
+                        multiple
+                        @change="handleFileSelect"
+                      >
+                    </div>
+                    
+                    <!-- Show selected files -->
+                    <div v-if="selectedFiles.length > 0" class="mt-4">
+                      <p class="text-sm font-medium text-gray-700 mb-2">File yang dipilih:</p>
+                      <div class="space-y-2">
+                        <div 
+                          v-for="(file, index) in selectedFiles" 
+                          :key="index"
+                          class="flex items-center justify-between bg-gray-50 p-2 rounded"
+                        >
+                          <span class="text-sm text-gray-600">{{ file.name }}</span>
+                          <button 
+                            type="button"
+                            @click="removeFile(index)"
+                            class="text-red-600 hover:text-red-700"
+                          >
+                            <i class="fa-solid fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Auction Settings -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                   <i class="fa-solid fa-gavel text-blue-600 mr-2"></i>
                   Pengaturan Lelang
@@ -378,7 +429,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <!-- Status -->
               <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -423,42 +474,54 @@
                 <button 
                   type="button" 
                   @click="goBack" 
-                  class="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  :disabled="saving"
+                  class="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button 
                   type="button" 
                   @click="saveDraft"
-                  class="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  :disabled="saving"
+                  class="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
                 >
-                  Simpan sebagai Draft
+                  <span v-if="saving">
+                    <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+                    Saving...
+                  </span>
+                  <span v-else>Simpan sebagai Draft</span>
                 </button>
                 <button 
                   type="submit" 
-                  class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  :disabled="saving"
+                  class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  Publikasikan Produk
+                  <span v-if="saving">
+                    <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+                    Saving...
+                  </span>
+                  <span v-else>{{ isEditing ? 'Update Produk' : 'Publikasikan Produk' }}</span>
                 </button>
               </div>
             </form>
           </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import AdminNavbar from '../../components/AdminNavbar.vue'
+import { apiService, type Product, type Category, type CreateProductRequest, type UpdateProductRequest } from '@/services/api'
+import { debounce } from '@/utils/debounce'
 
 interface Specification {
   name: string
   value: string
 }
 
-interface Product {
+interface LocalProduct {
   id: string
   name: string
   sku: string
@@ -492,40 +555,19 @@ const currentPage = ref(1)
 const itemsPerPage = 10
 const showAddForm = ref(false)
 const isEditing = ref(false)
-const editingProductId = ref<string | null>(null)
+const editingProductId = ref<number | null>(null)
 
-const products = ref<Product[]>([
-  {
-    id: 'IPH15PRO001',
-    name: 'iPhone 15 Pro',
-    sku: 'IPH15PRO001',
-    category: 'Elektronik',
-    price: 18999000,
-    stock: 25,
-    status: 'active',
-    image: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/6687b03202-5912a40fe3b90038b9ed.png'
-  },
-  {
-    id: 'KCS001',
-    name: 'Kaos Casual Premium',
-    sku: 'KCS001',
-    category: 'Fashion',
-    price: 149000,
-    stock: 0,
-    status: 'out_of_stock',
-    image: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/4d04b8d095-8cfe8cd073db46d980c0.png'
-  },
-  {
-    id: 'KAP500G',
-    name: 'Kopi Arabica Premium',
-    sku: 'KAP500G',
-    category: 'Makanan',
-    price: 85000,
-    stock: 150,
-    status: 'active',
-    image: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/fef1ee1be2-02b82c0ebfa8dfe6e145.png'
-  }
-])
+// API Integration
+const products = ref<Product[]>([])
+const categories = ref<Category[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
+const saving = ref(false)
+const categoriesLoading = ref(false)
+
+// File handling
+const selectedFiles = ref<File[]>([])
+const fileInput = ref<HTMLInputElement | null>(null)
 
 const productForm = ref<ProductForm>({
   name: '',
@@ -553,12 +595,12 @@ const filteredProducts = computed(() => {
 
   if (categoryFilter.value) {
     filtered = filtered.filter(product => 
-      product.category.toLowerCase() === categoryFilter.value.toLowerCase()
+      product.categoryName.toLowerCase() === categoryFilter.value.toLowerCase()
     )
   }
 
   if (statusFilter.value) {
-    filtered = filtered.filter(product => product.status === statusFilter.value)
+    filtered = filtered.filter(product => getProductStatus(product) === statusFilter.value)
   }
 
   // Pagination
@@ -606,37 +648,69 @@ const getStatusText = (status: string) => {
   return texts[status as keyof typeof texts] || 'Unknown'
 }
 
+const getProductStatus = (product: Product): string => {
+  if (product.stockQuantity === 0) {
+    return 'out_of_stock'
+  }
+  return product.isActive ? 'active' : 'inactive'
+}
+
 const showAddProductForm = () => {
   resetForm()
   showAddForm.value = true
   isEditing.value = false
 }
 
-const editProduct = (product: Product) => {
-  productForm.value = {
-    name: product.name,
-    category: product.category,
-    sku: product.sku,
-    price: product.price,
-    stock: product.stock,
-    description: product.description || '',
-    specifications: product.specifications || [{ name: '', value: '' }],
-    auctionEnabled: false,
-    auctionStartPrice: 0,
-    auctionDuration: 7,
-    status: product.status === 'out_of_stock' ? 'active' : product.status as any
+const editProduct = async (product: Product) => {
+  try {
+    // Fetch fresh product data
+    const fullProduct = await apiService.getProduct(product.id)
+    
+    // Parse specifications back to array format
+    const specs = fullProduct.specifications 
+      ? fullProduct.specifications.split('\n').map(line => {
+          const [name, value] = line.split(': ')
+          return { name: name || '', value: value || '' }
+        })
+      : [{ name: '', value: '' }]
+    
+    // Find category ID from categories list
+    const category = categories.value.find(cat => cat.name === fullProduct.categoryName)
+    
+    // Populate form with API data
+    productForm.value = {
+      name: fullProduct.name,
+      category: category?.id.toString() || '',
+      sku: fullProduct.sku,
+      price: fullProduct.price,
+      stock: fullProduct.stockQuantity,
+      description: fullProduct.description,
+      specifications: specs,
+      auctionEnabled: false,
+      auctionStartPrice: 0,
+      auctionDuration: 7,
+      status: fullProduct.isActive ? 'active' : 'inactive'
+    }
+    
+    editingProductId.value = product.id
+    showAddForm.value = true
+    isEditing.value = true
+  } catch (err) {
+    alert('Failed to load product details')
+    console.error(err)
   }
-  editingProductId.value = product.id
-  showAddForm.value = true
-  isEditing.value = true
 }
 
-const deleteProduct = (productId: string) => {
-  if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-    const index = products.value.findIndex(p => p.id === productId)
-    if (index > -1) {
-      products.value.splice(index, 1)
-    }
+const deleteProduct = async (productId: number) => {
+  if (!confirm('Are you sure you want to delete this product?')) return
+  
+  try {
+    await apiService.deleteProduct(productId)
+    alert('Product deleted successfully!')
+    fetchProducts() // Refresh list
+  } catch (err) {
+    alert('Failed to delete product')
+    console.error(err)
   }
 }
 
@@ -673,42 +747,106 @@ const removeSpecification = (index: number) => {
   }
 }
 
-const saveProduct = () => {
-  if (isEditing.value && editingProductId.value) {
-    // Update existing product
-    const index = products.value.findIndex(p => p.id === editingProductId.value)
-    if (index > -1) {
-      products.value[index] = {
-        ...products.value[index],
-        name: productForm.value.name,
-        category: productForm.value.category,
-        sku: productForm.value.sku,
-        price: productForm.value.price,
-        stock: productForm.value.stock,
-        description: productForm.value.description,
-        specifications: productForm.value.specifications.filter(spec => spec.name && spec.value),
-        status: productForm.value.stock === 0 ? 'out_of_stock' : productForm.value.status as any
-      }
-    }
-  } else {
-    // Add new product
-    const newProduct: Product = {
-      id: productForm.value.sku || `PRD${Date.now()}`,
-      name: productForm.value.name,
-      sku: productForm.value.sku || `PRD${Date.now()}`,
-      category: productForm.value.category,
-      price: productForm.value.price,
-      stock: productForm.value.stock,
-      status: productForm.value.stock === 0 ? 'out_of_stock' : productForm.value.status as any,
-      image: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/6687b03202-5912a40fe3b90038b9ed.png',
-      description: productForm.value.description,
-      specifications: productForm.value.specifications.filter(spec => spec.name && spec.value)
-    }
-    products.value.push(newProduct)
+// API Functions
+const fetchCategories = async () => {
+  categoriesLoading.value = true
+  try {
+    const response = await apiService.getCategories()
+    categories.value = response.filter(cat => cat.isActive)
+  } catch (err) {
+    console.error('Failed to fetch categories:', err)
+  } finally {
+    categoriesLoading.value = false
+  }
+}
+
+const fetchProducts = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    const allProducts = await apiService.getProducts()
+    products.value = allProducts
+  } catch (err) {
+    error.value = 'Failed to fetch products'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+const validateForm = (): boolean => {
+  if (!productForm.value.name.trim()) {
+    alert('Product name is required')
+    return false
   }
   
-  goBack()
-  alert(isEditing.value ? 'Produk berhasil diupdate!' : 'Produk berhasil ditambahkan!')
+  if (!productForm.value.category) {
+    alert('Category is required')
+    return false
+  }
+  
+  if (productForm.value.price <= 0) {
+    alert('Price must be greater than 0')
+    return false
+  }
+  
+  if (productForm.value.stock < 0) {
+    alert('Stock cannot be negative')
+    return false
+  }
+  
+  return true
+}
+
+const generateSKU = (): string => {
+  const timestamp = Date.now().toString().slice(-6)
+  const random = Math.random().toString(36).substring(2, 5).toUpperCase()
+  return `PRD${timestamp}${random}`
+}
+
+const saveProduct = async () => {
+  if (!validateForm()) return
+  
+  saving.value = true
+  try {
+    // Auto-generate SKU if not provided
+    const finalSku = productForm.value.sku.trim() || generateSKU()
+    
+    const productData: CreateProductRequest = {
+      name: productForm.value.name,
+      description: productForm.value.description,
+      price: productForm.value.price,
+      stockQuantity: productForm.value.stock,
+      brand: 'Unknown',
+      model: 'Unknown',
+      sku: finalSku,
+      specifications: productForm.value.specifications
+        .filter(spec => spec.name && spec.value)
+        .map(spec => `${spec.name}: ${spec.value}`)
+        .join('\n'),
+      imageUrls: selectedFiles.value.length > 0 ? selectedFiles.value.map(file => file.name) : [],
+      categoryId: parseInt(productForm.value.category)
+    }
+    
+    if (isEditing.value && editingProductId.value) {
+      await apiService.updateProduct(editingProductId.value, {
+        ...productData,
+        isActive: productForm.value.status === 'active'
+      })
+      alert('Product updated successfully!')
+    } else {
+      await apiService.createProduct(productData)
+      alert('Product created successfully!')
+    }
+    
+    goBack()
+    fetchProducts() // Refresh list
+  } catch (err) {
+    alert('Failed to save product')
+    console.error(err)
+  } finally {
+    saving.value = false
+  }
 }
 
 const saveDraft = () => {
@@ -732,7 +870,35 @@ const goToPage = (page: number) => {
   currentPage.value = page
 }
 
+// File handling functions
+const triggerFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) {
+    const files = Array.from(target.files)
+    selectedFiles.value = [...selectedFiles.value, ...files]
+  }
+}
+
+const removeFile = (index: number) => {
+  selectedFiles.value.splice(index, 1)
+}
+
+// Add debounced version for search
+const debouncedFetchProducts = debounce(fetchProducts, 300)
+
+// Add watchers for real-time filtering
+watch([searchQuery, categoryFilter, statusFilter], () => {
+  debouncedFetchProducts()
+})
+
 onMounted(() => {
-  console.log('Admin Product Management loaded')
+  fetchCategories()
+  fetchProducts()
 })
 </script>

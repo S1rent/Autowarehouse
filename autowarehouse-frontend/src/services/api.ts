@@ -220,6 +220,25 @@ export interface UpdateCategoryRequest {
   sortOrder?: number
 }
 
+export interface CreateProductRequest {
+  name: string
+  description: string
+  price: number
+  originalPrice?: number
+  stockQuantity: number
+  brand: string
+  model: string
+  sku?: string
+  specifications?: string
+  features?: string
+  imageUrls: string[]
+  categoryId: number
+}
+
+export interface UpdateProductRequest extends CreateProductRequest {
+  isActive?: boolean
+}
+
 // Cart Types
 export interface CartItem {
   id: number
@@ -363,6 +382,52 @@ class ApiService {
 
   async getOnSaleProducts(limit: number = 10): Promise<Product[]> {
     const response = await api.get<Product[]>(`/products/featured/on-sale?limit=${limit}`)
+    return response.data
+  }
+
+  // Admin Product APIs
+  async createProduct(productData: CreateProductRequest): Promise<Product> {
+    const response = await api.post<Product>('/products/admin', productData)
+    return response.data
+  }
+
+  async updateProduct(productId: number, productData: UpdateProductRequest): Promise<Product> {
+    const response = await api.put<Product>(`/products/admin/${productId}`, productData)
+    return response.data
+  }
+
+  async deleteProduct(productId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/products/admin/${productId}`)
+    return response.data
+  }
+
+  async updateProductStock(productId: number, stockQuantity: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/products/admin/${productId}/stock`, { stockQuantity })
+    return response.data
+  }
+
+  async activateProduct(productId: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/products/admin/${productId}/activate`)
+    return response.data
+  }
+
+  async deactivateProduct(productId: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/products/admin/${productId}/deactivate`)
+    return response.data
+  }
+
+  async getAdminProductStats(): Promise<ProductStats> {
+    const response = await api.get<ProductStats>('/products/admin/stats')
+    return response.data
+  }
+
+  async getLowStockProducts(threshold: number = 10): Promise<Product[]> {
+    const response = await api.get<Product[]>(`/products/admin/low-stock?threshold=${threshold}`)
+    return response.data
+  }
+
+  async getOutOfStockProducts(): Promise<Product[]> {
+    const response = await api.get<Product[]>('/products/admin/out-of-stock')
     return response.data
   }
 
