@@ -630,20 +630,8 @@ const productForm = ref<ProductForm>({
 const filteredProducts = computed(() => {
   let filtered = products.value
 
-  if (searchQuery.value) {
-    filtered = filtered.filter(product => 
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-
-  if (categoryFilter.value) {
-    filtered = filtered.filter(product => 
-      product.categoryName.toLowerCase() === categoryFilter.value.toLowerCase()
-    )
-  }
-
-  if (statusFilter.value) {
+  // Only apply status filter client-side since backend doesn't support it
+  if (statusFilter.value && statusFilter.value.trim() !== '') {
     filtered = filtered.filter(product => getProductStatus(product) === statusFilter.value)
   }
 
@@ -653,8 +641,15 @@ const filteredProducts = computed(() => {
   return filtered.slice(start, end)
 })
 
-const totalProducts = computed(() => products.value.length)
-const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage))
+const totalProducts = computed(() => {
+  // If status filter is applied, count filtered products
+  if (statusFilter.value && statusFilter.value.trim() !== '') {
+    return products.value.filter(product => getProductStatus(product) === statusFilter.value).length
+  }
+  return products.value.length
+})
+
+const totalPages = computed(() => Math.ceil(totalProducts.value / itemsPerPage))
 const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage + 1)
 const endIndex = computed(() => Math.min(currentPage.value * itemsPerPage, totalProducts.value))
 
@@ -814,7 +809,25 @@ const fetchProducts = async () => {
   loading.value = true
   error.value = null
   try {
-    const allProducts = await apiService.getProducts()
+    // Build filter parameters
+    const filters: any = {}
+    
+    if (searchQuery.value.trim()) {
+      filters.search = searchQuery.value.trim()
+    }
+    
+    if (categoryFilter.value) {
+      // Find category ID by name
+      const category = categories.value.find(cat => cat.name === categoryFilter.value)
+      if (category) {
+        filters.category = category.id
+      }
+    }
+    
+    // Note: statusFilter is handled client-side since backend doesn't have a direct status filter
+    // The backend returns active products by default, and we filter by stock status on frontend
+    
+    const allProducts = await apiService.getProducts(filters)
     products.value = allProducts
   } catch (err) {
     error.value = 'Failed to fetch products'
@@ -1002,8 +1015,14 @@ const removeExistingImage = (index: number) => {
 const debouncedFetchProducts = debounce(fetchProducts, 300)
 
 // Add watchers for real-time filtering
-watch([searchQuery, categoryFilter, statusFilter], () => {
+watch([searchQuery, categoryFilter], () => {
+  currentPage.value = 1 // Reset to first page when search/category filters change
   debouncedFetchProducts()
+})
+
+// Watch status filter separately since it's client-side only
+watch(statusFilter, () => {
+  currentPage.value = 1 // Reset to first page when status filter changes
 })
 
 onMounted(() => {
