@@ -1,20 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <AdminNavbar />
     <!-- Admin Sidebar -->
     <div class="flex">
       <!-- Sidebar -->
-      <div class="w-64 bg-white shadow-lg min-h-screen">
-        <div class="p-6">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <i class="fa-solid fa-store text-white"></i>
-            </div>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900">Autowarehouse</h1>
-              <p class="text-sm text-gray-500">Admin Panel</p>
-            </div>
-          </div>
-        </div>
+      <!-- <div class="w-64 bg-white shadow-lg min-h-screen">
         
         <nav class="mt-6">
           <div class="px-6 py-2">
@@ -67,40 +57,10 @@
             Notifications
           </router-link>
         </nav>
-        
-        <div class="absolute bottom-0 w-64 p-6">
-          <div class="flex items-center space-x-3">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Admin" class="w-10 h-10 rounded-full">
-            <div>
-              <p class="text-sm font-medium text-gray-900">Admin User</p>
-              <p class="text-xs text-gray-500">admin@autowarehouse.com</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </div> -->
 
       <!-- Main Content -->
       <div class="flex-1">
-        <!-- Top Header -->
-        <header class="bg-white shadow-sm border-b">
-          <div class="px-6 py-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p class="text-gray-600">Welcome back, Admin!</p>
-              </div>
-              <div class="flex items-center space-x-4">
-                <button class="relative p-2 text-gray-400 hover:text-gray-600">
-                  <i class="fa-solid fa-bell text-xl"></i>
-                  <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                </button>
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <i class="fa-solid fa-user text-white text-sm"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
 
         <!-- Dashboard Content -->
         <main class="p-6">
@@ -350,6 +310,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import AdminNavbar from '../../components/AdminNavbar.vue'
 
 // Sample data
 const stats = ref({

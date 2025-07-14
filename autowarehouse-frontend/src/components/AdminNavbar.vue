@@ -95,66 +95,6 @@
 
             <!-- Admin Dropdown -->
             <div v-if="adminMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-              <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-                Admin Panel
-              </div>
-              <router-link 
-                to="/admin/dashboard" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-chart-line mr-2"></i>
-                Dashboard
-              </router-link>
-              <router-link 
-                to="/admin/products" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-box mr-2"></i>
-                Product Management
-              </router-link>
-              <router-link 
-                to="/admin/categories" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-tags mr-2"></i>
-                Category Management
-              </router-link>
-              <router-link 
-                to="/admin/orders" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-shopping-cart mr-2"></i>
-                Order Management
-              </router-link>
-              <router-link 
-                to="/admin/auctions" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-gavel mr-2"></i>
-                Auction Management
-              </router-link>
-              <router-link 
-                to="/admin/customer-service" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="adminMenuOpen = false"
-              >
-                <i class="fa-solid fa-headset mr-2"></i>
-                Customer Service
-              </router-link>
-              <div class="border-t border-gray-100"></div>
-              <button 
-                @click="viewAsUser"
-                class="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-              >
-                <i class="fa-solid fa-eye mr-2"></i>
-                View as User
-              </button>
-              <div class="border-t border-gray-100"></div>
               <button 
                 @click="logout"
                 class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
