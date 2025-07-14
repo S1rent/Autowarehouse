@@ -515,6 +515,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import AdminNavbar from '../../components/AdminNavbar.vue'
 import { apiService, type Product, type Category, type CreateProductRequest, type UpdateProductRequest } from '@/services/api'
 import { debounce } from '@/utils/debounce'
+import { uploadProductImages, deleteProductImages, validateProductImageFile, type UploadResult } from '@/services/firebase'
 
 interface Specification {
   name: string
@@ -733,6 +734,7 @@ const resetForm = () => {
     auctionDuration: 7,
     status: 'active'
   }
+  selectedFiles.value = []
   editingProductId.value = null
   isEditing.value = false
 }
@@ -812,6 +814,28 @@ const saveProduct = async () => {
     // Auto-generate SKU if not provided
     const finalSku = productForm.value.sku.trim() || generateSKU()
     
+    // Upload images to Firebase if any files selected
+    let imageUrls: string[] = []
+    if (selectedFiles.value.length > 0) {
+      try {
+        // Validate all files first
+        for (const file of selectedFiles.value) {
+          const validationError = validateProductImageFile(file)
+          if (validationError) {
+            throw new Error(validationError)
+          }
+        }
+        
+        // Upload all images
+        const uploadResults = await uploadProductImages(selectedFiles.value)
+        imageUrls = uploadResults.map(result => result.url)
+        
+        console.log('Images uploaded successfully:', imageUrls)
+      } catch (uploadError) {
+        throw new Error(`Image upload failed: ${uploadError}`)
+      }
+    }
+    
     const productData: CreateProductRequest = {
       name: productForm.value.name,
       description: productForm.value.description,
@@ -824,7 +848,7 @@ const saveProduct = async () => {
         .filter(spec => spec.name && spec.value)
         .map(spec => `${spec.name}: ${spec.value}`)
         .join('\n'),
-      imageUrls: selectedFiles.value.length > 0 ? selectedFiles.value.map(file => file.name) : [],
+      imageUrls: imageUrls,
       categoryId: parseInt(productForm.value.category)
     }
     
@@ -842,7 +866,7 @@ const saveProduct = async () => {
     goBack()
     fetchProducts() // Refresh list
   } catch (err) {
-    alert('Failed to save product')
+    alert(`Failed to save product: ${err}`)
     console.error(err)
   } finally {
     saving.value = false

@@ -167,6 +167,7 @@ public class ProductResource {
             product.stockQuantity = request.stockQuantity;
             product.brand = request.brand;
             product.model = request.model;
+            product.sku = request.sku;
             product.specifications = request.specifications;
             product.features = request.features;
             product.imageUrls = request.imageUrls;
@@ -196,6 +197,7 @@ public class ProductResource {
             updatedProduct.stockQuantity = request.stockQuantity;
             updatedProduct.brand = request.brand;
             updatedProduct.model = request.model;
+            updatedProduct.sku = request.sku;
             updatedProduct.specifications = request.specifications;
             updatedProduct.features = request.features;
             updatedProduct.imageUrls = request.imageUrls;
@@ -338,13 +340,26 @@ public class ProductResource {
         public Integer stockQuantity;
         public String brand;
         public String model;
+        public String sku;
         public String specifications;
         public String features;
         public List<String> imageUrls;
         public Long categoryId;
     }
 
-    public static class UpdateProductRequest extends CreateProductRequest {
+    public static class UpdateProductRequest {
+        public String name;
+        public String description;
+        public BigDecimal price;
+        public BigDecimal originalPrice;
+        public Integer stockQuantity;
+        public String brand;
+        public String model;
+        public String sku;
+        public String specifications;
+        public String features;
+        public List<String> imageUrls;
+        public Long categoryId;
         public Boolean isActive;
     }
 
