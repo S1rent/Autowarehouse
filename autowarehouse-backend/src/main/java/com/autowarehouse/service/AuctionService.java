@@ -58,7 +58,7 @@ public class AuctionService {
         auction.description = updatedAuction.description;
         auction.startingBid = updatedAuction.startingBid;
         auction.reservePrice = updatedAuction.reservePrice;
-        auction.bidIncrement = updatedAuction.bidIncrement;
+        auction.minimumBidIncrement = updatedAuction.minimumBidIncrement;
         auction.startTime = updatedAuction.startTime;
         auction.endTime = updatedAuction.endTime;
         auction.product = updatedAuction.product;
@@ -160,7 +160,7 @@ public class AuctionService {
         }
 
         // Validate bid amount
-        BigDecimal minimumBid = auction.currentBid.add(auction.bidIncrement);
+        BigDecimal minimumBid = auction.currentBid.add(auction.minimumBidIncrement);
         if (bidAmount.compareTo(minimumBid) < 0) {
             throw new IllegalArgumentException("Bid must be at least " + minimumBid);
         }

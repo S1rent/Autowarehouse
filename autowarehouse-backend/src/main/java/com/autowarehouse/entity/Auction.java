@@ -55,9 +55,6 @@ public class Auction extends PanacheEntityBase {
     @Column(name = "starting_bid", precision = 12, scale = 2)
     public BigDecimal startingBid;
 
-    @Column(name = "bid_increment", precision = 12, scale = 2)
-    public BigDecimal bidIncrement;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     public Category category;
