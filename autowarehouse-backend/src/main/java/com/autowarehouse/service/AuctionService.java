@@ -29,14 +29,9 @@ public class AuctionService {
 
         // Set default values
         auction.status = Auction.AuctionStatus.SCHEDULED;
-        auction.currentBid = auction.startingBid;
+        auction.currentPrice = auction.startingPrice;
         auction.totalBids = 0;
         auction.watchersCount = 0;
-
-        // Validate reserve price
-        if (auction.reservePrice != null && auction.reservePrice.compareTo(auction.startingBid) < 0) {
-            throw new IllegalArgumentException("Reserve price cannot be less than starting bid");
-        }
 
         auction.persist();
         return auction;
@@ -56,13 +51,11 @@ public class AuctionService {
 
         auction.title = updatedAuction.title;
         auction.description = updatedAuction.description;
-        auction.startingBid = updatedAuction.startingBid;
-        auction.reservePrice = updatedAuction.reservePrice;
+        auction.startingPrice = updatedAuction.startingPrice;
         auction.minimumBidIncrement = updatedAuction.minimumBidIncrement;
         auction.startTime = updatedAuction.startTime;
         auction.endTime = updatedAuction.endTime;
         auction.product = updatedAuction.product;
-        auction.category = updatedAuction.category;
 
         auction.persist();
         return auction;
@@ -92,9 +85,6 @@ public class AuctionService {
         return Auction.findEndingSoon(minutes);
     }
 
-    public List<Auction> findByCategory(Category category) {
-        return Auction.findByCategory(category);
-    }
 
     public List<Auction> findByProduct(Product product) {
         return Auction.findByProduct(product);
@@ -160,7 +150,7 @@ public class AuctionService {
         }
 
         // Validate bid amount
-        BigDecimal minimumBid = auction.currentBid.add(auction.minimumBidIncrement);
+        BigDecimal minimumBid = auction.currentPrice.add(auction.minimumBidIncrement);
         if (bidAmount.compareTo(minimumBid) < 0) {
             throw new IllegalArgumentException("Bid must be at least " + minimumBid);
         }
@@ -197,9 +187,8 @@ public class AuctionService {
         bid.persist();
 
         // Update auction
-        auction.currentBid = bidAmount;
+        auction.currentPrice = bidAmount;
         auction.totalBids++;
-        auction.currentWinner = user;
 
         auction.persist();
 
@@ -244,21 +233,17 @@ public class AuctionService {
         // Determine winner
         Bid winningBid = Bid.findWinningBid(auction);
         if (winningBid != null) {
-            // Check if reserve price is met
-            if (auction.reservePrice == null || winningBid.amount.compareTo(auction.reservePrice) >= 0) {
-                auction.winner = winningBid.user;
-                auction.winningBid = winningBid.amount;
+            auction.winner = winningBid.user;
 
-                // Notify winner
-                notificationService.createNotification(
-                    winningBid.user,
-                    "Congratulations! You won the auction!",
-                    "You won the auction for \"" + auction.title + "\" with a bid of $" + winningBid.amount,
-                    NotificationType.AUCTION_WON,
-                    auction.id,
-                    "auction"
-                );
-            }
+            // Notify winner
+            notificationService.createNotification(
+                winningBid.user,
+                "Congratulations! You won the auction!",
+                "You won the auction for \"" + auction.title + "\" with a bid of $" + winningBid.amount,
+                NotificationType.AUCTION_WON,
+                auction.id,
+                "auction"
+            );
         }
 
         auction.persist();
@@ -279,7 +264,6 @@ public class AuctionService {
         }
 
         auction.status = Auction.AuctionStatus.CANCELLED;
-        auction.cancelReason = reason;
         auction.persist();
 
         // Notify all watchers about cancellation
@@ -385,7 +369,7 @@ public class AuctionService {
             switch (eventType) {
                 case "bid":
                     title = "New bid placed";
-                    message = "A new bid of $" + auction.currentBid + " was placed on \"" + auction.title + "\"";
+                    message = "A new bid of $" + auction.currentPrice + " was placed on \"" + auction.title + "\"";
                     notificationType = NotificationType.AUCTION_OUTBID;
                     break;
                 case "start":

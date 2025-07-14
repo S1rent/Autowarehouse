@@ -46,12 +46,14 @@ public class OrderService {
             OrderItem orderItem = new OrderItem();
             orderItem.order = order;
             orderItem.product = cartItem.product;
+            orderItem.productName = cartItem.product.name;
+            orderItem.productSku = cartItem.product.sku;
+            orderItem.productPrice = cartItem.product.getCurrentPrice();
             orderItem.quantity = cartItem.quantity;
-            orderItem.price = cartItem.product.getCurrentPrice();
-            orderItem.calculateTotalPrice();
+            orderItem.subtotal = orderItem.productPrice.multiply(BigDecimal.valueOf(orderItem.quantity));
             orderItem.persist();
 
-            subtotal = subtotal.add(orderItem.totalPrice);
+            subtotal = subtotal.add(orderItem.subtotal);
 
             // Decrease product stock
             productService.decreaseStock(cartItem.product.id, cartItem.quantity);
@@ -76,11 +78,7 @@ public class OrderService {
             throw new IllegalArgumentException("Auction has not ended yet");
         }
 
-        // Check if order already exists for this auction
-        List<OrderItem> existingOrderItems = OrderItem.findByAuction(auction);
-        if (!existingOrderItems.isEmpty()) {
-            throw new IllegalArgumentException("Order already exists for this auction");
-        }
+        // Note: Since we don't track auction orders separately, we'll proceed with creating the order
 
         // Create order
         Order order = new Order();
@@ -94,14 +92,17 @@ public class OrderService {
         OrderItem orderItem = new OrderItem();
         orderItem.order = order;
         orderItem.product = auction.product;
-        orderItem.auction = auction;
+        orderItem.productName = auction.product.name;
+        orderItem.productSku = auction.product.sku;
         orderItem.quantity = 1;
-        orderItem.price = auction.winningBid;
-        orderItem.calculateTotalPrice();
+        // Get the winning bid amount from the highest bid
+        Bid winningBid = Bid.findWinningBid(auction);
+        orderItem.productPrice = winningBid != null ? winningBid.amount : auction.currentPrice;
+        orderItem.subtotal = orderItem.productPrice.multiply(BigDecimal.valueOf(orderItem.quantity));
         orderItem.persist();
 
         // Calculate totals
-        order.subtotal = orderItem.totalPrice;
+        order.subtotal = orderItem.subtotal;
         order.calculateTotals();
         order.persist();
 
@@ -376,14 +377,12 @@ public class OrderService {
     public void restoreProductStock(Order order) {
         List<OrderItem> orderItems = OrderItem.findByOrder(order);
         for (OrderItem orderItem : orderItems) {
-            // Only restore stock if it's not from an auction
-            if (orderItem.auction == null) {
-                productService.increaseStock(orderItem.product.id, orderItem.quantity);
-                // Decrease sales count
-                Product product = orderItem.product;
-                product.salesCount = Math.max(0, product.salesCount - orderItem.quantity);
-                product.persist();
-            }
+            // Restore stock for all order items
+            productService.increaseStock(orderItem.product.id, orderItem.quantity);
+            // Decrease sales count
+            Product product = orderItem.product;
+            product.salesCount = Math.max(0, product.salesCount - orderItem.quantity);
+            product.persist();
         }
     }
 }

@@ -46,28 +46,6 @@ public class Auction extends PanacheEntityBase {
     @NotNull
     public BigDecimal minimumBidIncrement = new BigDecimal("1000.00");
 
-    @Column(name = "reserve_price", precision = 12, scale = 2)
-    public BigDecimal reservePrice;
-
-    @Column(name = "current_bid", precision = 12, scale = 2)
-    public BigDecimal currentBid;
-
-    @Column(name = "starting_bid", precision = 12, scale = 2)
-    public BigDecimal startingBid;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    public Category category;
-
-    @Column(name = "cancel_reason")
-    public String cancelReason;
-
-    @Column(name = "winning_bid", precision = 12, scale = 2)
-    public BigDecimal winningBid;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "current_winner_id")
-    public User currentWinner;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -152,9 +130,6 @@ public class Auction extends PanacheEntityBase {
                    AuctionStatus.LIVE, soon).list();
     }
 
-    public static List<Auction> findByCategory(Category category) {
-        return find("category = ?1 order by createdAt desc", category).list();
-    }
 
     public static List<Auction> findByStatus(AuctionStatus status) {
         return find("status = ?1 order by createdAt desc", status).list();
