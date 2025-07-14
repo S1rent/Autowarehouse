@@ -319,7 +319,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import AdminNavbar from '../../components/AdminNavbar.vue'
 import { apiService, type Category as ApiCategory } from '../../services/api'
 import { uploadCategoryImage, validateImageFile, deleteCategoryImage, type UploadProgress } from '../../services/firebase'
@@ -363,7 +363,6 @@ const categoryForm = ref<CategoryForm>({
   status: 'active'
 })
 
-
 const categories = ref<Category[]>([])
 
 // Helper function to generate slug from name
@@ -389,10 +388,41 @@ const transformApiCategory = (apiCategory: ApiCategory): Category => {
 }
 
 // API Functions
-const fetchCategories = async () => {
+const fetchCategories = async (search?: string, status?: string) => {
   try {
     loading.value = true
-    const apiCategories = await apiService.getCategories()
+    
+    // Build query parameters
+    const params = new URLSearchParams()
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim())
+    }
+    
+    if (status) {
+      // Convert frontend status to backend boolean
+      if (status === 'active') {
+        params.append('active', 'true')
+      } else if (status === 'inactive') {
+        params.append('active', 'false')
+      }
+    }
+    
+    // Use direct fetch since apiService.getCategories doesn't support query params
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
+    const url = `${baseUrl}/categories${params.toString() ? '?' + params.toString() : ''}`
+    
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const apiCategories = await response.json()
     categories.value = apiCategories.map(transformApiCategory)
   } catch (error) {
     console.error('Error fetching categories:', error)
@@ -433,22 +463,8 @@ const fetchStats = async () => {
   }
 }
 
-const filteredCategories = computed(() => {
-  let filtered = categories.value
-
-  if (searchQuery.value) {
-    filtered = filtered.filter(category =>
-      category.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-
-  if (statusFilter.value) {
-    filtered = filtered.filter(category => category.status === statusFilter.value)
-  }
-
-  return filtered
-})
+// Since we're now filtering on the backend, filteredCategories just returns categories
+const filteredCategories = computed(() => categories.value)
 
 const getStatusClass = (status: string) => {
   return status === 'active' 
@@ -638,6 +654,25 @@ const deleteCategory = async (categoryId: string) => {
     }
   }
 }
+
+// Debounced function for API calls
+let debounceTimer: NodeJS.Timeout | null = null
+
+const debouncedFetchCategories = (search: string, status: string) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+  
+  debounceTimer = setTimeout(async () => {
+    console.log('Filter changed:', { search, status })
+    await fetchCategories(search, status)
+  }, 300)
+}
+
+// Watch for filter changes and refetch data from backend
+watch([searchQuery, statusFilter], ([newSearch, newStatus]) => {
+  debouncedFetchCategories(newSearch, newStatus)
+})
 
 onMounted(async () => {
   console.log('Admin Category Management loaded')

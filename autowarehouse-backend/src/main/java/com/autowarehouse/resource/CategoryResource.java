@@ -21,14 +21,20 @@ public class CategoryResource {
     CategoryService categoryService;
 
     @GET
-    public Response getAllCategories(@QueryParam("active") @DefaultValue("true") boolean activeOnly) {
+    public Response getAllCategories(
+            @QueryParam("active") Boolean active,
+            @QueryParam("search") String search) {
         try {
             List<Category> categories;
-            if (activeOnly) {
-                categories = categoryService.getActiveCategories();
+            
+            // If we have search or specific active filter, use the new filter method
+            if (search != null || active != null) {
+                categories = categoryService.filterCategories(search, active);
             } else {
-                categories = categoryService.getAllCategories();
+                // Default behavior: return active categories only
+                categories = categoryService.getActiveCategories();
             }
+            
             return Response.ok(categories).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

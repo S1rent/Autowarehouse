@@ -194,4 +194,28 @@ public class CategoryService {
         }
         return Category.searchByName(query.trim());
     }
+
+    public List<Category> filterCategories(String search, Boolean isActive) {
+        String queryStr = "1=1";
+        
+        if (search != null && !search.trim().isEmpty()) {
+            queryStr += " AND (lower(name) like lower(?1) OR lower(description) like lower(?1))";
+        }
+        
+        if (isActive != null) {
+            queryStr += " AND isActive = " + (search != null && !search.trim().isEmpty() ? "?2" : "?1");
+        }
+        
+        queryStr += " ORDER BY sortOrder, name";
+        
+        if (search != null && !search.trim().isEmpty() && isActive != null) {
+            return Category.find(queryStr, "%" + search.trim() + "%", isActive).list();
+        } else if (search != null && !search.trim().isEmpty()) {
+            return Category.find(queryStr, "%" + search.trim() + "%").list();
+        } else if (isActive != null) {
+            return Category.find(queryStr, isActive).list();
+        } else {
+            return Category.find(queryStr).list();
+        }
+    }
 }
