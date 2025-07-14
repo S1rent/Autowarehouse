@@ -63,7 +63,7 @@ public class Category extends PanacheEntityBase {
     public List<Category> children;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"category"})
+    @JsonIgnore
     public List<Product> products;
 
     // Constructors
