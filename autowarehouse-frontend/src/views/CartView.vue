@@ -277,49 +277,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <div class="flex items-center space-x-2 mb-4">
-              <i class="fa-solid fa-store text-blue-400 text-xl"></i>
-              <span class="text-xl font-bold">Autowarehouse</span>
-            </div>
-            <p class="text-gray-400 text-sm">Your trusted online shopping destination with quality products and excellent service.</p>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-4">Quick Links</h4>
-            <ul class="space-y-2 text-sm text-gray-400">
-              <li><span class="hover:text-white cursor-pointer">About Us</span></li>
-              <li><span class="hover:text-white cursor-pointer">Contact</span></li>
-              <li><span class="hover:text-white cursor-pointer">FAQ</span></li>
-              <li><span class="hover:text-white cursor-pointer">Shipping Info</span></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-4">Categories</h4>
-            <ul class="space-y-2 text-sm text-gray-400">
-              <li><span class="hover:text-white cursor-pointer">Electronics</span></li>
-              <li><span class="hover:text-white cursor-pointer">Hardware</span></li>
-              <li><span class="hover:text-white cursor-pointer">Gaming</span></li>
-              <li><span class="hover:text-white cursor-pointer">Accessories</span></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-4">Follow Us</h4>
-            <div class="flex space-x-4">
-              <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-facebook text-xl"></i></span>
-              <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-twitter text-xl"></i></span>
-              <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-instagram text-xl"></i></span>
-              <span class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-brands fa-youtube text-xl"></i></span>
-            </div>
-          </div>
-        </div>
-        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>© 2024 Autowarehouse. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
+    <Footer />
   </div>
 </template>
 
@@ -332,6 +290,7 @@ import { useSavedItemsStore } from '@/stores/savedItems'
 import { useNotifications } from '@/composables/useNotifications'
 import { useCartPersistence } from '@/composables/useCartPersistence'
 import UserNavbar from '../components/UserNavbar.vue'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()

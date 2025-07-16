@@ -34,7 +34,7 @@
       </div>
 
       <!-- Wishlist Items -->
-      <div v-if="wishlistItems.length > 0" class="space-y-6">
+      <div v-if="wishlistItems.length > 0" class="space-y-8 mb-16">
         <div 
           v-for="item in wishlistItems" 
           :key="item.id"
@@ -124,7 +124,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white mt-16">
+    <!-- <footer class="bg-gray-900 text-white mt-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -166,7 +166,8 @@
           <p>© 2024 Autowarehouse. All rights reserved.</p>
         </div>
       </div>
-    </footer>
+    </footer> -->
+    <Footer />
   </div>
 </template>
 
@@ -177,6 +178,7 @@ import UserNavbar from '../components/UserNavbar.vue'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const wishlistStore = useWishlistStore()

@@ -15,7 +15,7 @@
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
-      <div class="flex gap-8">
+      <div class="flex gap-8 mb-8">
         
         <!-- Sidebar Filter -->
         <aside class="w-80 bg-white rounded-lg shadow-md p-6 h-fit">
@@ -193,6 +193,7 @@
         </main>
       </div>
     </div>
+    <Footer/>
   </div>
 </template>
 
@@ -208,6 +209,7 @@ import ProductCard from '../components/ProductCard.vue'
 import ProductListItem from '../components/ProductListItem.vue'
 import { apiService, type ProductFilters, type Category, type Product } from '@/services/api'
 import { debounce } from '@/utils/debounce'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const productsStore = useProductsStore()

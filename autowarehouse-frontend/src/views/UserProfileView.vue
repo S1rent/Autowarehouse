@@ -392,6 +392,8 @@
         </div>
       </div>
     </main>
+
+    <Footer/>
   </div>
 </template>
 
@@ -402,6 +404,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const wishlistStore = useWishlistStore()

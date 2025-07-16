@@ -141,6 +141,7 @@
         </div>
       </div>
     </main>
+    <Footer/>
   </div>
 </template>
 
@@ -148,6 +149,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import UserNavbar from '../components/UserNavbar.vue'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const chatMessages = ref(null)

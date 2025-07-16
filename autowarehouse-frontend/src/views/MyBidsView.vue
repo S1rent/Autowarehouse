@@ -167,6 +167,7 @@
         </div>
       </div>
     </main>
+    <Footer/>
   </div>
 </template>
 
@@ -175,6 +176,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import UserNavbar from '../components/UserNavbar.vue'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 

@@ -211,6 +211,7 @@
         </div>
       </div>
     </main>
+    <Footer/>
   </div>
 </template>
 
@@ -218,6 +219,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import UserNavbar from '../components/UserNavbar.vue'
+import Footer from '../components/Footer.vue'
 
 const route = useRoute()
 const bidAmount = ref<number>(0)
