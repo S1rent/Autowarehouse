@@ -45,6 +45,30 @@ export const useOrderStore = defineStore('order', () => {
       error.value = null
       const order = await apiService.getOrder(orderId) as OrderDetail
       
+      // Fetch product images for each order item
+      if (order.items) {
+        const itemsWithImages = await Promise.all(
+          order.items.map(async (item) => {
+            try {
+              // Fetch product data to get real images from Firebase Storage
+              const product = await apiService.getProduct(item.productId)
+              return {
+                ...item,
+                productImages: product.imageUrls || []
+              }
+            } catch (productErr) {
+              console.warn(`Could not fetch product ${item.productId}:`, productErr)
+              // Return item without images if product fetch fails
+              return {
+                ...item,
+                productImages: []
+              }
+            }
+          })
+        )
+        order.items = itemsWithImages
+      }
+      
       // Fetch status history if available
       try {
         const statusHistory = await apiService.getOrderStatusHistory(orderId)

@@ -1,35 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-shopping-bag text-white text-sm"></i>
-              </div>
-            </div>
-            <h1 class="text-xl font-semibold text-gray-900">Autowarehouse</h1>
-          </div>
-          
-          <nav class="hidden md:flex space-x-6">
-            <router-link to="/" class="text-gray-600 hover:text-blue-600 transition-colors">Dashboard</router-link>
-            <router-link to="/order-history" class="text-blue-600 font-medium">Riwayat Pesanan</router-link>
-            <router-link to="/profile" class="text-gray-600 hover:text-blue-600 transition-colors">Profil</router-link>
-          </nav>
-          
-          <div class="flex items-center space-x-4">
-            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <i class="fa-regular fa-bell"></i>
-            </button>
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <i class="fas fa-user text-white text-sm"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <UserNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -105,55 +76,71 @@
             </div>
           </div>
         </section>
-      </template>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column -->
-        <div class="lg:col-span-2 space-y-8">
-          <!-- Order Items -->
-          <section class="bg-white rounded-xl shadow-sm">
-            <div class="px-6 py-4 border-b border-gray-100">
-              <h2 class="text-lg font-semibold text-gray-900">Produk yang Dibeli</h2>
-            </div>
-            <div class="p-6 space-y-4">
-              <div 
-                v-for="item in order.items" 
-                :key="item.id"
-                class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg"
-              >
-                <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-box text-gray-400"></i>
-                </div>
-                <div class="flex-1">
-                  <h3 class="font-medium text-gray-900">{{ item.productName }}</h3>
-                  <p class="text-sm text-gray-600">SKU: {{ item.productSku }}</p>
-                  <div class="flex items-center justify-between mt-2">
-                    <span class="text-sm text-gray-600">Qty: {{ item.quantity }}</span>
-                    <span class="font-semibold text-gray-900">Rp {{ item.subtotal.toLocaleString() }}</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Left Column -->
+          <div class="lg:col-span-2 space-y-8">
+            <!-- Order Items -->
+            <section class="bg-white rounded-xl shadow-sm">
+              <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-lg font-semibold text-gray-900">Produk yang Dibeli</h2>
+              </div>
+              <div class="p-6 space-y-4">
+                <div v-if="order.items && order.items.length > 0">
+                  <div 
+                    v-for="item in order.items" 
+                    :key="item.id"
+                    class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    @click="navigateToProduct(item.productId)"
+                  >
+                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                      <img 
+                        v-if="item.productImages && item.productImages.length > 0" 
+                        :src="item.productImages[0]" 
+                        :alt="item.productName"
+                        class="w-full h-full object-cover rounded-lg"
+                        @error="handleImageError"
+                      />
+                      <i v-else class="fa-solid fa-box text-gray-400"></i>
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="font-medium text-gray-900 hover:text-blue-600">{{ item.productName }}</h3>
+                      <p class="text-sm text-gray-600">SKU: {{ item.productSku }}</p>
+                      <div class="flex items-center justify-between mt-2">
+                        <span class="text-sm text-gray-600">Qty: {{ item.quantity }}</span>
+                        <span class="font-semibold text-gray-900">Rp {{ item.subtotal.toLocaleString() }}</span>
+                      </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                    </div>
                   </div>
                 </div>
+                <div v-else class="text-center py-8 text-gray-500">
+                  <i class="fa-solid fa-box-open text-3xl mb-2"></i>
+                  <p>Detail produk tidak tersedia</p>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <!-- Order Status Timeline -->
-          <section class="bg-white rounded-xl shadow-sm">
-            <div class="px-6 py-4 border-b border-gray-100">
-              <h2 class="text-lg font-semibold text-gray-900">Status Pengiriman</h2>
-            </div>
-            <div class="p-6">
-              <OrderStatusTimeline 
-                :status-history="order.statusHistory"
-                :current-status="order.status"
-                :tracking-number="order.trackingNumber"
-              />
-            </div>
-          </section>
-        </div>
+            <!-- Order Status Timeline -->
+            <section class="bg-white rounded-xl shadow-sm">
+              <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-lg font-semibold text-gray-900">Status Pengiriman</h2>
+              </div>
+              <div class="p-6">
+                <OrderStatusTimeline 
+                  :status-history="order.statusHistory"
+                  :current-status="order.status"
+                  :tracking-number="order.trackingNumber"
+                />
+              </div>
+            </section>
+          </div>
 
-        <!-- Right Column -->
-        <div class="space-y-8">
-          <!-- Payment Info -->
+          <!-- Right Column -->
+          <div class="space-y-8">
+            <!-- Payment Info -->
           <section class="bg-white rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-100">
               <h2 class="text-lg font-semibold text-gray-900">Informasi Pembayaran</h2>
@@ -242,8 +229,9 @@
               </button>
             </div>
           </section>
+          </div>
         </div>
-      </div>
+      </template>
     </main>
 
     <!-- Footer -->
@@ -262,6 +250,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import { useAuthStore } from '@/stores/auth'
+import UserNavbar from '@/components/UserNavbar.vue'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 
 const route = useRoute()
@@ -411,9 +400,136 @@ const writeReview = () => {
   console.log('Write review for order:', order.value.orderNumber)
 }
 
-const downloadInvoice = () => {
-  // Download invoice logic
-  console.log('Download invoice for order:', order.value.orderNumber)
+const navigateToProduct = (productId) => {
+  if (productId) {
+    router.push(`/product/${productId}`)
+  }
+}
+
+const handleImageError = (event) => {
+  // Hide the broken image and show the fallback icon
+  event.target.style.display = 'none'
+  event.target.nextElementSibling?.classList.remove('hidden')
+}
+
+const downloadInvoice = async () => {
+  if (!order.value) return
+  
+  try {
+    // Import jsPDF dynamically
+    const { jsPDF } = await import('jspdf')
+    
+    // Create new PDF document
+    const doc = new jsPDF()
+    
+    // Set font
+    doc.setFont('helvetica')
+    
+    // Header
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text('INVOICE', 20, 30)
+    
+    // Company info
+    doc.setFontSize(12)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Autowarehouse', 20, 45)
+    doc.text('Jakarta, Indonesia', 20, 52)
+    doc.text('Email: info@autowarehouse.com', 20, 59)
+    
+    // Invoice details
+    doc.setTextColor(40, 40, 40)
+    doc.text(`Invoice #: ${order.value.orderNumber}`, 120, 45)
+    doc.text(`Date: ${formatDate(order.value.createdAt)}`, 120, 52)
+    doc.text(`Status: ${getStatusText(order.value.status)}`, 120, 59)
+    
+    // Customer info
+    doc.setFontSize(14)
+    doc.text('Bill To:', 20, 80)
+    doc.setFontSize(12)
+    const customerName = shippingInfo.value?.name || 'Customer'
+    doc.text(customerName, 20, 90)
+    if (shippingInfo.value?.phone) {
+      doc.text(shippingInfo.value.phone, 20, 97)
+    }
+    if (shippingInfo.value?.address) {
+      const addressLines = doc.splitTextToSize(shippingInfo.value.address, 80)
+      doc.text(addressLines, 20, 104)
+    }
+    
+    // Items table header
+    let yPos = 130
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Item', 20, yPos)
+    doc.text('Qty', 120, yPos)
+    doc.text('Price', 140, yPos)
+    doc.text('Total', 170, yPos)
+    
+    // Draw line under header
+    doc.line(20, yPos + 3, 190, yPos + 3)
+    yPos += 15
+    
+    // Items
+    if (order.value.items && order.value.items.length > 0) {
+      order.value.items.forEach((item) => {
+        doc.setFontSize(10)
+        const itemName = doc.splitTextToSize(item.productName, 90)
+        doc.text(itemName, 20, yPos)
+        doc.text(item.quantity.toString(), 120, yPos)
+        doc.text(`Rp ${item.productPrice.toLocaleString()}`, 140, yPos)
+        doc.text(`Rp ${item.subtotal.toLocaleString()}`, 170, yPos)
+        yPos += itemName.length * 5 + 5
+      })
+    }
+    
+    // Totals
+    yPos += 10
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(11)
+    doc.text('Subtotal:', 120, yPos)
+    doc.text(`Rp ${order.value.subtotal.toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    doc.text('Shipping:', 120, yPos)
+    doc.text(`Rp ${order.value.shippingCost.toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    doc.text('Tax:', 120, yPos)
+    doc.text(`Rp ${(order.value.taxAmount || 0).toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    // Total line
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('TOTAL:', 120, yPos)
+    doc.text(`Rp ${order.value.totalAmount.toLocaleString()}`, 170, yPos)
+    
+    // Payment info
+    yPos += 20
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`Payment Method: ${order.value.paymentMethod || 'Bank Transfer'}`, 20, yPos)
+    doc.text(`Payment Status: ${order.value.paymentStatus === 'PAID' ? 'Paid' : 'Pending'}`, 20, yPos + 7)
+    
+    // Footer
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Thank you for your business!', 20, 280)
+    doc.text('This is a computer generated invoice.', 20, 285)
+    
+    // Save the PDF
+    doc.save(`Invoice-${order.value.orderNumber}.pdf`)
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    alert('Gagal mengunduh invoice. Silakan coba lagi.')
+  }
 }
 
 const contactCustomerService = () => {

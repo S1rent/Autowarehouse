@@ -241,11 +241,11 @@ const formatDate = (dateString: string): string => {
 
 <style scoped>
 .order-status-timeline {
-  @apply relative;
+  position: relative;
 }
 
 /* Ensure timeline line doesn't show for single items */
 .order-status-timeline .relative:only-child .absolute {
-  @apply hidden;
+  display: none;
 }
 </style>

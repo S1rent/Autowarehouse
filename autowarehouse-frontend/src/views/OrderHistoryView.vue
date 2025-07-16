@@ -87,96 +87,149 @@
         </div>
       </section>
 
-      <!-- Orders Table -->
-      <section class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-900">Daftar Pesanan</h2>
+      <!-- Orders List - Card Layout for Better UX -->
+      <section class="space-y-4">
+        <!-- Loading state -->
+        <div v-if="orderStore.isLoading" class="bg-white rounded-xl shadow-sm p-8 text-center">
+          <div class="flex items-center justify-center">
+            <i class="fa-solid fa-spinner fa-spin text-blue-600 mr-3 text-xl"></i>
+            <span class="text-gray-600 text-lg">Memuat pesanan...</span>
+          </div>
         </div>
         
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Pesanan</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <!-- Loading state -->
-              <tr v-if="orderStore.isLoading">
-                <td colspan="5" class="px-6 py-12 text-center">
-                  <div class="flex items-center justify-center">
-                    <i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i>
-                    <span class="text-gray-600">Memuat pesanan...</span>
-                  </div>
-                </td>
-              </tr>
-              
-              <!-- Error state -->
-              <tr v-else-if="orderStore.error">
-                <td colspan="5" class="px-6 py-12 text-center">
-                  <div class="text-red-600">
-                    <i class="fa-solid fa-exclamation-triangle mb-2"></i>
-                    <p>{{ orderStore.error }}</p>
-                    <button 
-                      @click="loadOrders" 
-                      class="mt-2 text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Coba lagi
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              
-              <!-- Empty state -->
-              <tr v-else-if="paginatedOrders.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center">
-                  <div class="text-gray-500">
-                    <i class="fa-solid fa-shopping-cart text-4xl mb-4"></i>
-                    <p class="text-lg font-medium">Belum ada pesanan</p>
-                    <p class="text-sm">Pesanan Anda akan muncul di sini setelah checkout</p>
-                  </div>
-                </td>
-              </tr>
-              
-              <!-- Orders data -->
-              <tr 
-                v-else
-                v-for="order in paginatedOrders" 
-                :key="order.id"
-                class="hover:bg-gray-50 transition-colors"
-              >
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="font-medium text-gray-900">{{ order.orderNumber }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                  {{ formatDate(order.createdAt) }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <span :class="getStatusClass(order.status)" class="inline-flex px-3 py-1 text-xs font-medium rounded-full">
-                      <i :class="getStatusIcon(order.status)" class="mr-1"></i>
+        <!-- Error state -->
+        <div v-else-if="orderStore.error" class="bg-white rounded-xl shadow-sm p-8 text-center">
+          <div class="text-red-600">
+            <i class="fa-solid fa-exclamation-triangle text-3xl mb-4"></i>
+            <h3 class="text-lg font-semibold mb-2">Gagal memuat pesanan</h3>
+            <p class="mb-4">{{ orderStore.error }}</p>
+            <button 
+              @click="loadOrders" 
+              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <i class="fa-solid fa-refresh mr-2"></i>
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+        
+        <!-- Empty state -->
+        <div v-else-if="paginatedOrders.length === 0" class="bg-white rounded-xl shadow-sm p-12 text-center">
+          <div class="text-gray-500">
+            <i class="fa-solid fa-shopping-cart text-6xl mb-6 text-gray-300"></i>
+            <h3 class="text-xl font-semibold mb-2">Belum ada pesanan</h3>
+            <p class="text-gray-400 mb-6">Pesanan Anda akan muncul di sini setelah checkout</p>
+            <router-link 
+              to="/products" 
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+            >
+              <i class="fa-solid fa-shopping-bag mr-2"></i>
+              Mulai Belanja
+            </router-link>
+          </div>
+        </div>
+        
+        <!-- Orders Cards -->
+        <div v-else class="space-y-4">
+          <div 
+            v-for="order in paginatedOrders" 
+            :key="order.id"
+            class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
+          >
+            <div class="p-6">
+              <!-- Order Header -->
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                <div class="mb-3 sm:mb-0">
+                  <div class="flex items-center space-x-3 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ order.orderNumber }}</h3>
+                    <span :class="getStatusClass(order.status)" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full">
+                      <i :class="getStatusIcon(order.status)" class="mr-1.5"></i>
                       {{ getStatusText(order.status) }}
                     </span>
                   </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
-                  Rp {{ order.totalAmount.toLocaleString() }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <button 
-                    @click="viewOrderDetail(order.id)"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                  <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span class="flex items-center">
+                      <i class="fa-solid fa-calendar mr-1.5"></i>
+                      {{ formatDate(order.createdAt) }}
+                    </span>
+                    <span class="flex items-center">
+                      <i class="fa-solid fa-credit-card mr-1.5"></i>
+                      {{ order.paymentStatus === 'PAID' ? 'Lunas' : 'Belum Bayar' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <div class="text-right">
+                    <p class="text-sm text-gray-500">Total Pembayaran</p>
+                    <p class="text-xl font-bold text-gray-900">Rp {{ order.totalAmount.toLocaleString('id-ID') }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Items Preview (if available) -->
+              <div v-if="order.items && order.items.length > 0" class="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium text-gray-700">Produk dalam pesanan:</span>
+                  <span class="text-sm text-gray-500">{{ order.items.length }} item</span>
+                </div>
+                <div class="space-y-2">
+                  <div 
+                    v-for="(item, index) in order.items.slice(0, 2)" 
+                    :key="item.id"
+                    class="flex items-center space-x-3"
                   >
-                    Lihat Detail
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                      <i class="fa-solid fa-box text-gray-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
+                      <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × Rp {{ item.productPrice.toLocaleString('id-ID') }}</p>
+                    </div>
+                  </div>
+                  <div v-if="order.items.length > 2" class="text-xs text-gray-500 text-center pt-1">
+                    +{{ order.items.length - 2 }} produk lainnya
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button 
+                  @click="viewOrderDetail(order.id)"
+                  class="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-eye mr-2"></i>
+                  Lihat Detail
+                </button>
+                
+                <button 
+                  v-if="order.status === 'DELIVERED'"
+                  @click="writeReview(order.id)"
+                  class="flex-1 sm:flex-none border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-star mr-2"></i>
+                  Tulis Review
+                </button>
+                
+                <!-- <button 
+                  v-if="['PENDING', 'CONFIRMED'].includes(order.status)"
+                  @click="cancelOrder(order.id)"
+                  class="flex-1 sm:flex-none border border-red-200 text-red-600 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-times mr-2"></i>
+                  Batalkan
+                </button> -->
+                
+                <button 
+                  @click="downloadInvoice(order.id)"
+                  class="flex-1 sm:flex-none border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-download mr-2"></i>
+                  Invoice
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Pagination -->
@@ -370,6 +423,152 @@ const getStatusText = (status) => {
 
 const viewOrderDetail = (orderId) => {
   router.push(`/order/${orderId}`)
+}
+
+const writeReview = (orderId) => {
+  // Navigate to review page or show review modal
+  console.log('Write review for order:', orderId)
+  // TODO: Implement review functionality
+}
+
+const cancelOrder = async (orderId) => {
+  if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+    try {
+      // TODO: Implement cancel order API call
+      console.log('Cancel order:', orderId)
+      // await orderStore.cancelOrder(orderId)
+      // await loadOrders() // Refresh orders
+    } catch (error) {
+      console.error('Failed to cancel order:', error)
+    }
+  }
+}
+
+const downloadInvoice = async (orderId) => {
+  try {
+    // First, fetch the order detail to get complete information
+    const orderDetail = await orderStore.fetchOrder(orderId)
+    const order = orderStore.currentOrder
+    
+    if (!order) {
+      alert('Gagal mengambil data pesanan')
+      return
+    }
+
+    // Import jsPDF dynamically
+    const { jsPDF } = await import('jspdf')
+    
+    // Create new PDF document
+    const doc = new jsPDF()
+    
+    // Set font
+    doc.setFont('helvetica')
+    
+    // Header
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text('INVOICE', 20, 30)
+    
+    // Company info
+    doc.setFontSize(12)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Autowarehouse', 20, 45)
+    doc.text('Jakarta, Indonesia', 20, 52)
+    doc.text('Email: info@autowarehouse.com', 20, 59)
+    
+    // Invoice details
+    doc.setTextColor(40, 40, 40)
+    doc.text(`Invoice #: ${order.orderNumber}`, 120, 45)
+    doc.text(`Date: ${formatDate(order.createdAt)}`, 120, 52)
+    doc.text(`Status: ${getStatusText(order.status)}`, 120, 59)
+    
+    // Customer info
+    doc.setFontSize(14)
+    doc.text('Bill To:', 20, 80)
+    doc.setFontSize(12)
+    const customerName = authStore.user ? `${authStore.user.firstName} ${authStore.user.lastName}` : 'Customer'
+    doc.text(customerName, 20, 90)
+    if (authStore.user?.phoneNumber) {
+      doc.text(authStore.user.phoneNumber, 20, 97)
+    }
+    if (order.shippingAddress) {
+      const addressLines = doc.splitTextToSize(order.shippingAddress, 80)
+      doc.text(addressLines, 20, 104)
+    }
+    
+    // Items table header
+    let yPos = 130
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Item', 20, yPos)
+    doc.text('Qty', 120, yPos)
+    doc.text('Price', 140, yPos)
+    doc.text('Total', 170, yPos)
+    
+    // Draw line under header
+    doc.line(20, yPos + 3, 190, yPos + 3)
+    yPos += 15
+    
+    // Items
+    if (order.items && order.items.length > 0) {
+      order.items.forEach((item) => {
+        doc.setFontSize(10)
+        const itemName = doc.splitTextToSize(item.productName, 90)
+        doc.text(itemName, 20, yPos)
+        doc.text(item.quantity.toString(), 120, yPos)
+        doc.text(`Rp ${item.productPrice.toLocaleString()}`, 140, yPos)
+        doc.text(`Rp ${item.subtotal.toLocaleString()}`, 170, yPos)
+        yPos += itemName.length * 5 + 5
+      })
+    }
+    
+    // Totals
+    yPos += 10
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(11)
+    doc.text('Subtotal:', 120, yPos)
+    doc.text(`Rp ${order.subtotal.toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    doc.text('Shipping:', 120, yPos)
+    doc.text(`Rp ${order.shippingCost.toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    doc.text('Tax:', 120, yPos)
+    doc.text(`Rp ${(order.taxAmount || 0).toLocaleString()}`, 170, yPos)
+    yPos += 8
+    
+    // Total line
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('TOTAL:', 120, yPos)
+    doc.text(`Rp ${order.totalAmount.toLocaleString()}`, 170, yPos)
+    
+    // Payment info
+    yPos += 20
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`Payment Method: ${order.paymentMethod || 'Bank Transfer'}`, 20, yPos)
+    doc.text(`Payment Status: ${order.paymentStatus === 'PAID' ? 'Paid' : 'Pending'}`, 20, yPos + 7)
+    
+    // Footer
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Thank you for your business!', 20, 280)
+    doc.text('This is a computer generated invoice.', 20, 285)
+    
+    // Save the PDF
+    doc.save(`Invoice-${order.orderNumber}.pdf`)
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    alert('Gagal mengunduh invoice. Silakan coba lagi.')
+  }
 }
 
 const loadOrders = async () => {

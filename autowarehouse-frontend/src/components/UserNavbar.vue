@@ -62,6 +62,18 @@
             </span>
           </router-link>
 
+          <!-- Saved Items -->
+          <!-- <router-link 
+            to="/saved-items" 
+            class="relative text-gray-700 hover:text-blue-600 p-2 transition-colors"
+            title="Saved Items"
+          >
+            <i class="fa-solid fa-bookmark text-lg"></i>
+            <span v-if="savedItemsCount > 0" class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {{ savedItemsCount }}
+            </span>
+          </router-link> -->
+
           <!-- Wishlist -->
           <router-link 
             to="/wishlist" 
@@ -218,6 +230,14 @@
             Cart ({{ cartCount }})
           </router-link>
           <router-link 
+            to="/saved-items" 
+            class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"
+            @click="mobileMenuOpen = false"
+          >
+            <i class="fa-solid fa-bookmark mr-3"></i>
+            Saved Items ({{ savedItemsCount }})
+          </router-link>
+          <router-link 
             to="/wishlist" 
             class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"
             @click="mobileMenuOpen = false"
@@ -268,11 +288,13 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
+import { useSavedItemsStore } from '@/stores/savedItems'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
+const savedItemsStore = useSavedItemsStore()
 const mobileMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 
@@ -282,6 +304,7 @@ const userEmail = computed(() => authStore.user?.email || '')
 
 // Get counts from stores
 const cartCount = computed(() => cartStore.totalQuantity)
+const savedItemsCount = computed(() => savedItemsStore.itemCount)
 const wishlistCount = computed(() => wishlistStore.wishlistCount)
 const notificationCount = ref(0) // TODO: Connect to notification store when implemented
 
@@ -290,7 +313,8 @@ const loadData = async () => {
   if (authStore.user?.id) {
     await Promise.all([
       wishlistStore.loadWishlist(),
-      cartStore.fetchCartItems()
+      cartStore.fetchCartItems(),
+      savedItemsStore.fetchSavedItems()
     ])
   }
 }
@@ -305,6 +329,7 @@ watch(() => authStore.user?.id, (newUserId) => {
     // Clear data when user logs out
     wishlistStore.clearLocalWishlist()
     cartStore.resetCart()
+    savedItemsStore.resetSavedItems()
   }
 })
 

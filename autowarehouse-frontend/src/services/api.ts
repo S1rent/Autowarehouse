@@ -204,6 +204,7 @@ export interface OrderItem {
   productName: string
   productSku: string
   productPrice: number
+  productImages?: string[]
   quantity: number
   subtotal: number
 }

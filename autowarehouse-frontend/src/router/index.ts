@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/CartView.vue')
   },
   {
+    path: '/saved-items',
+    name: 'SavedItems',
+    component: () => import('../views/SavedItemsView.vue')
+  },
+  {
     path: '/checkout',
     name: 'Checkout',
     component: () => import('../views/CheckoutView.vue')
@@ -186,7 +191,7 @@ router.beforeEach((to, from, next) => {
   
   // Routes that require authentication
   const protectedRoutes = [
-    'Cart', 'Checkout', 'Wishlist', 'MyBids', 'BidHistory', 
+    'Cart', 'SavedItems', 'Checkout', 'Wishlist', 'MyBids', 'BidHistory', 
     'OrderHistory', 'OrderDetail', 'UserProfile', 'UserNotifications',
     'AuctionWon'
   ]
