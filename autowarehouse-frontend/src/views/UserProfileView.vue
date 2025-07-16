@@ -519,6 +519,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useOrderStore } from '@/stores/order'
+import { useNotifications } from '@/composables/useNotifications'
 import { apiService } from '@/services/api'
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
@@ -528,6 +529,7 @@ const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
+const { success, error, warning } = useNotifications()
 
 // State
 const isEditingPersonal = ref(false)
@@ -561,7 +563,7 @@ const toggleEditPersonal = async () => {
       isUpdatingProfile.value = true
       
       if (!authStore.user?.id) {
-        alert('User not found. Please login again.')
+        error('Authentication Error', 'User not found. Please login again.')
         return
       }
 
@@ -573,7 +575,8 @@ const toggleEditPersonal = async () => {
       const profileData = {
         firstName,
         lastName,
-        phoneNumber: user.phone || ''
+        phoneNumber: user.phone || '',
+        address: user.address || ''
       }
 
       const updatedUser = await apiService.updateUserProfile(authStore.user.id, profileData)
@@ -589,11 +592,11 @@ const toggleEditPersonal = async () => {
       // Reload user data
       loadUserData()
       
-      alert('Personal information updated successfully!')
+      success('Profile Updated', 'Personal information updated successfully!')
       isEditingPersonal.value = false
-    } catch (error: any) {
-      console.error('Error updating profile:', error)
-      alert(error.response?.data?.message || 'Failed to update profile. Please try again.')
+    } catch (err: any) {
+      console.error('Error updating profile:', err)
+      error('Update Failed', err.response?.data?.message || 'Failed to update profile. Please try again.')
     } finally {
       isUpdatingProfile.value = false
     }
@@ -605,37 +608,37 @@ const toggleEditPersonal = async () => {
 const changePhoto = () => {
   // Implement photo change logic
   console.log('Change photo clicked')
-  alert('Photo change functionality would be implemented here')
+  warning('Feature Coming Soon', 'Photo change functionality will be available soon')
 }
 
 const downloadData = () => {
   console.log('Download data clicked')
-  alert('Data download would be implemented here')
+  warning('Feature Coming Soon', 'Data download functionality will be available soon')
 }
 
 const openSecurity = () => {
   console.log('Security clicked')
-  alert('Security settings would be implemented here')
+  warning('Feature Coming Soon', 'Security settings will be available soon')
 }
 
 const openNotifications = () => {
   console.log('Notifications clicked')
-  alert('Notification settings would be implemented here')
+  warning('Feature Coming Soon', 'Notification settings will be available soon')
 }
 
 const updatePassword = async () => {
   if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-    alert('Please fill in all password fields')
+    warning('Validation Error', 'Please fill in all password fields')
     return
   }
   
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    alert('New passwords do not match')
+    error('Validation Error', 'New passwords do not match')
     return
   }
 
   if (passwordForm.newPassword.length < 6) {
-    alert('New password must be at least 6 characters long')
+    warning('Validation Error', 'New password must be at least 6 characters long')
     return
   }
   
@@ -644,15 +647,15 @@ const updatePassword = async () => {
     
     await apiService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
     
-    alert('Password updated successfully!')
+    success('Password Updated', 'Password updated successfully!')
     
     // Clear form
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-  } catch (error: any) {
-    console.error('Error changing password:', error)
-    alert(error.response?.data?.message || 'Failed to change password. Please try again.')
+  } catch (err: any) {
+    console.error('Error changing password:', err)
+    error('Password Change Failed', err.response?.data?.message || 'Failed to change password. Please try again.')
   } finally {
     isChangingPassword.value = false
   }
@@ -661,7 +664,7 @@ const updatePassword = async () => {
 const logout = () => {
   if (confirm('Are you sure you want to logout?')) {
     console.log('Logging out')
-    alert('Logout successful!')
+    success('Logout Successful', 'You have been logged out successfully!')
     router.push('/login')
   }
 }
@@ -669,7 +672,7 @@ const logout = () => {
 const deactivateAccount = () => {
   if (confirm('Are you sure you want to deactivate your account? This action can be reversed later.')) {
     console.log('Deactivating account')
-    alert('Account deactivation would be implemented here')
+    warning('Feature Coming Soon', 'Account deactivation functionality will be available soon')
   }
 }
 
@@ -678,10 +681,10 @@ const clearWishlist = async () => {
   if (confirm('Are you sure you want to clear your entire wishlist?')) {
     try {
       await wishlistStore.clearWishlist()
-      alert('Wishlist cleared successfully!')
-    } catch (error) {
-      console.error('Error clearing wishlist:', error)
-      alert('Failed to clear wishlist. Please try again.')
+      success('Wishlist Cleared', 'Your wishlist has been cleared successfully!')
+    } catch (err) {
+      console.error('Error clearing wishlist:', err)
+      error('Clear Failed', 'Failed to clear wishlist. Please try again.')
     }
   }
 }
@@ -694,19 +697,19 @@ const addToCart = async (productId: number) => {
     }
     
     await cartStore.addToCart(productId, 1)
-    alert('Product added to cart!')
-  } catch (error) {
-    console.error('Error adding to cart:', error)
-    alert('Failed to add product to cart. Please try again.')
+    success('Added to Cart', 'Product has been added to your cart!')
+  } catch (err) {
+    console.error('Error adding to cart:', err)
+    error('Add to Cart Failed', 'Failed to add product to cart. Please try again.')
   }
 }
 
 const removeFromWishlist = async (productId: number) => {
   try {
     await wishlistStore.removeFromWishlist(productId)
-  } catch (error) {
-    console.error('Error removing from wishlist:', error)
-    alert('Failed to remove product from wishlist. Please try again.')
+  } catch (err) {
+    console.error('Error removing from wishlist:', err)
+    error('Remove Failed', 'Failed to remove product from wishlist. Please try again.')
   }
 }
 
@@ -741,10 +744,10 @@ const reorderItems = async (orderId: number) => {
   try {
     // Implementation for reordering items
     console.log('Reordering items from order:', orderId)
-    alert('Reorder functionality would be implemented here')
-  } catch (error) {
-    console.error('Error reordering items:', error)
-    alert('Failed to reorder items. Please try again.')
+    warning('Feature Coming Soon', 'Reorder functionality will be available soon')
+  } catch (err) {
+    console.error('Error reordering items:', err)
+    error('Reorder Failed', 'Failed to reorder items. Please try again.')
   }
 }
 
@@ -791,12 +794,21 @@ const getOrderStatusText = (status: string) => {
 }
 
 // Load user data from auth store
-const loadUserData = () => {
+const loadUserData = async () => {
   if (authStore.user) {
     user.name = `${authStore.user.firstName} ${authStore.user.lastName}`.trim() || ''
     user.email = authStore.user.email || ''
     user.phone = authStore.user.phoneNumber || ''
-    user.address = '' // Address not available in current user model
+    
+    // Load full user profile to get address
+    try {
+      const fullProfile = await apiService.getUserProfile(authStore.user.id)
+      user.address = fullProfile.address || ''
+      user.phone = fullProfile.phoneNumber || ''
+    } catch (err) {
+      console.error('Error loading user profile:', err)
+      user.address = ''
+    }
   }
 }
 

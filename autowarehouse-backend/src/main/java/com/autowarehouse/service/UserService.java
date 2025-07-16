@@ -107,16 +107,30 @@ public class UserService {
     }
 
     @Transactional
-    public User updateProfile(Long userId, String firstName, String lastName, String phoneNumber) {
+    public User updateProfile(Long userId, String firstName, String lastName, String phoneNumber, String address) {
         User user = User.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
 
+        // Debug logging
+        System.out.println("Updating profile for user ID: " + userId);
+        System.out.println("firstName: " + firstName);
+        System.out.println("lastName: " + lastName);
+        System.out.println("phoneNumber: " + phoneNumber);
+        System.out.println("address: " + address);
+        System.out.println("Current phoneNumber in DB: " + user.phoneNumber);
+
         user.firstName = firstName;
         user.lastName = lastName;
         user.phoneNumber = phoneNumber;
+        user.address = address;
+        
+        System.out.println("After setting phoneNumber: " + user.phoneNumber);
+        
         user.persist();
+        
+        System.out.println("After persist phoneNumber: " + user.phoneNumber);
         
         return user;
     }

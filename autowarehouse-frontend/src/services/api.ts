@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
@@ -59,6 +59,7 @@ export interface User {
   firstName: string
   lastName: string
   phoneNumber?: string
+  address?: string
   role: 'ADMIN' | 'CUSTOMER'
   isActive: boolean
   isEmailVerified: boolean
@@ -102,6 +103,7 @@ export interface UpdateProfileRequest {
   firstName: string
   lastName: string
   phoneNumber?: string
+  address?: string
 }
 
 // Product Types

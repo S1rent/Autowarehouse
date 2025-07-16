@@ -101,6 +101,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
+import { useNotifications } from '@/composables/useNotifications'
 import type { Product } from '@/services/api'
 
 interface Props {
@@ -112,6 +113,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
+const { success, error } = useNotifications()
 
 // Local state for wishlist status
 const isInWishlist = ref(false)
@@ -147,22 +149,22 @@ const toggleWishlist = async () => {
     try {
       await wishlistStore.toggleWishlist(props.product.id)
       
-      // Show success alert
+      // Show success notification
       if (wasInWishlist) {
-        alert('Produk berhasil dihapus dari wishlist!')
+        success('Wishlist Updated', 'Produk berhasil dihapus dari wishlist!')
       } else {
-        alert('Produk berhasil ditambahkan ke wishlist!')
+        success('Wishlist Updated', 'Produk berhasil ditambahkan ke wishlist!')
       }
-    } catch (error) {
+    } catch (err) {
       // Revert optimistic update on error
       isInWishlist.value = wasInWishlist
-      console.error('Error toggling wishlist:', error)
-      alert('Gagal mengubah wishlist. Silakan coba lagi.')
+      console.error('Error toggling wishlist:', err)
+      error('Wishlist Error', 'Gagal mengubah wishlist. Silakan coba lagi.')
     }
     
-  } catch (error) {
-    console.error('Error toggling wishlist:', error)
-    alert('Gagal mengubah wishlist. Silakan coba lagi.')
+  } catch (err) {
+    console.error('Error toggling wishlist:', err)
+    error('Wishlist Error', 'Gagal mengubah wishlist. Silakan coba lagi.')
   }
 }
 

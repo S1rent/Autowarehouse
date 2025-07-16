@@ -307,6 +307,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
+import { useNotifications } from '@/composables/useNotifications'
 import UserNavbar from '../components/UserNavbar.vue'
 import { apiService, type Product } from '@/services/api'
 import Footer from '../components/Footer.vue'
@@ -316,6 +317,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
+const { success, error: showError } = useNotifications()
 
 // State
 const quantity = ref(1)
@@ -493,10 +495,10 @@ const addToCart = async () => {
     await cartStore.addToCart(transformedProduct.value.id, quantity.value)
     
     // Show success message
-    alert(`${transformedProduct.value.name} added to cart!`)
+    success('Added to Cart', `${transformedProduct.value.name} added to cart!`)
   } catch (error) {
     console.error('Error adding to cart:', error)
-    alert('Failed to add product to cart. Please try again.')
+    showError('Add to Cart Failed', 'Failed to add product to cart. Please try again.')
   }
 }
 
@@ -513,16 +515,16 @@ const toggleWishlist = async () => {
     
     await wishlistStore.toggleWishlist(transformedProduct.value.id)
     
-    // Show success alert
+    // Show success message
     if (isCurrentlyInWishlist) {
-      alert('Produk berhasil dihapus dari wishlist!')
+      success('Wishlist Updated', 'Product removed from wishlist!')
     } else {
-      alert('Produk berhasil ditambahkan ke wishlist!')
+      success('Wishlist Updated', 'Product added to wishlist!')
     }
     
   } catch (error) {
     console.error('Error toggling wishlist:', error)
-    alert('Gagal mengubah wishlist. Silakan coba lagi.')
+    showError('Wishlist Error', 'Failed to update wishlist. Please try again.')
   }
 }
 

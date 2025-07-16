@@ -323,6 +323,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import { useAuthStore } from '@/stores/auth'
+import { useNotifications } from '@/composables/useNotifications'
 import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
@@ -432,15 +433,17 @@ const writeReview = (orderId) => {
 }
 
 const cancelOrder = async (orderId) => {
-  if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-    try {
-      // TODO: Implement cancel order API call
-      console.log('Cancel order:', orderId)
-      // await orderStore.cancelOrder(orderId)
-      // await loadOrders() // Refresh orders
-    } catch (error) {
-      console.error('Failed to cancel order:', error)
-    }
+  const { success, error: showError } = useNotifications()
+  
+  try {
+    // TODO: Implement cancel order API call
+    console.log('Cancel order:', orderId)
+    // await orderStore.cancelOrder(orderId)
+    // await loadOrders() // Refresh orders
+    success('Order Cancelled', 'Your order has been cancelled successfully')
+  } catch (error) {
+    console.error('Failed to cancel order:', error)
+    showError('Cancel Failed', 'Failed to cancel order. Please try again.')
   }
 }
 
@@ -451,7 +454,8 @@ const downloadInvoice = async (orderId) => {
     const order = orderStore.currentOrder
     
     if (!order) {
-      alert('Gagal mengambil data pesanan')
+      const { error: showError } = useNotifications()
+      showError('Download Failed', 'Failed to get order data')
       return
     }
 
@@ -567,7 +571,8 @@ const downloadInvoice = async (orderId) => {
     
   } catch (error) {
     console.error('Error generating PDF:', error)
-    alert('Gagal mengunduh invoice. Silakan coba lagi.')
+    const { error: showError } = useNotifications()
+    showError('Download Failed', 'Failed to download invoice. Please try again.')
   }
 }
 

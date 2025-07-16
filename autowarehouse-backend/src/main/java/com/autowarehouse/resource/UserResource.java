@@ -110,7 +110,7 @@ public class UserResource {
                         .build();
             }
             
-            User user = userService.updateProfile(id, request.firstName, request.lastName, request.phoneNumber);
+            User user = userService.updateProfile(id, request.firstName, request.lastName, request.phoneNumber, request.address);
             return Response.ok(new UserResponse(user)).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -285,6 +285,7 @@ public class UserResource {
         public String firstName;
         public String lastName;
         public String phoneNumber;
+        public String address;
         public String role;
         public Boolean isActive;
         public Boolean isEmailVerified;
@@ -295,6 +296,7 @@ public class UserResource {
             this.firstName = user.firstName;
             this.lastName = user.lastName;
             this.phoneNumber = user.phoneNumber;
+            this.address = user.address;
             this.role = user.role;
             this.isActive = user.isActive;
             this.isEmailVerified = user.isEmailVerified;

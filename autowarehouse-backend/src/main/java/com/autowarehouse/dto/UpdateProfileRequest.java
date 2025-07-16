@@ -17,13 +17,17 @@ public class UpdateProfileRequest {
     @Size(max = 20, message = "Phone number must not exceed 20 characters")
     public String phoneNumber;
     
+    @Size(max = 500, message = "Address must not exceed 500 characters")
+    public String address;
+    
     // Default constructor
     public UpdateProfileRequest() {}
     
     // Constructor with parameters
-    public UpdateProfileRequest(String firstName, String lastName, String phoneNumber) {
+    public UpdateProfileRequest(String firstName, String lastName, String phoneNumber, String address) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
+        this.address = address;
     }
 }

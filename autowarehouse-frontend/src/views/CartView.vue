@@ -458,18 +458,15 @@ const decreaseQuantity = async (itemId: number) => {
 }
 
 const removeItem = async (itemId: number) => {
-  const { warning } = useNotifications()
+  const { warning, success } = useNotifications()
   
   // Get item name for confirmation
   const item = cartItems.value.find(item => item.id === itemId)
   const itemName = item?.productName || 'this item'
   
-  // Show confirmation dialog
-  const confirmed = confirm(`Are you sure you want to remove "${itemName}" from your cart?`)
-  if (!confirmed) return
-  
   try {
     await cartStore.removeItem(itemId)
+    success('Item Removed', `"${itemName}" has been removed from your cart`)
   } catch (error) {
     console.error('Error removing item:', error)
     warning('Remove Failed', 'Failed to remove item from cart. Please try again.')
@@ -548,12 +545,14 @@ const proceedToCheckout = () => {
   )
   
   if (hasStockIssues) {
-    alert('Some items in your cart have stock issues. Please review and update your cart.')
+    const { warning } = useNotifications()
+    warning('Stock Issues', 'Some items in your cart have stock issues. Please review and update your cart.')
     return
   }
   
   if (selectedItems.value.length === 0) {
-    alert('Please select items to checkout.')
+    const { warning } = useNotifications()
+    warning('No Items Selected', 'Please select items to checkout.')
     return
   }
   

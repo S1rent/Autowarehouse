@@ -49,6 +49,10 @@ public class User extends PanacheEntityBase {
     @Size(max = 20)
     public String phoneNumber;
 
+    @Column(name = "address")
+    @Size(max = 500)
+    public String address;
+
     @Column(nullable = false)
     // @Roles // Temporarily disabled
     public String role = "CUSTOMER";
