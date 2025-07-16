@@ -510,6 +510,60 @@ public class OrderService {
         statusHistory.persist();
     }
 
+    @Transactional
+    public OrderStatusHistory addStatusHistoryEntry(Long orderId, Order.OrderStatus status, String changedBy, String notes, String trackingNumber) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        OrderStatusHistory statusHistory = new OrderStatusHistory();
+        statusHistory.setOrder(order);
+        statusHistory.setStatus(status);
+        statusHistory.setPreviousStatus(order.status);
+        statusHistory.setChangedAt(LocalDateTime.now());
+        statusHistory.setChangedBy(changedBy);
+        statusHistory.setNotes(notes);
+        
+        if (trackingNumber != null && !trackingNumber.isEmpty()) {
+            statusHistory.setTrackingNumber(trackingNumber);
+            if (status == Order.OrderStatus.SHIPPED) {
+                statusHistory.setEstimatedDelivery(calculateEstimatedDelivery());
+            }
+        }
+        
+        if (status == Order.OrderStatus.DELIVERED) {
+            statusHistory.setActualDelivery(LocalDateTime.now());
+        }
+        
+        statusHistory.persist();
+        return statusHistory;
+    }
+
+    public List<OrderStatusHistory> getDetailedOrderStatusHistory(Long orderId) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        
+        List<OrderStatusHistory> history = OrderStatusHistory.find("order = ?1 order by changedAt asc", order).list();
+        
+        // If no history exists, create initial entry
+        if (history.isEmpty()) {
+            OrderStatusHistory initialHistory = new OrderStatusHistory();
+            initialHistory.setOrder(order);
+            initialHistory.setStatus(order.status);
+            initialHistory.setPreviousStatus(null);
+            initialHistory.setChangedAt(order.createdAt);
+            initialHistory.setChangedBy("SYSTEM");
+            initialHistory.setNotes("Order created");
+            initialHistory.persist();
+            history.add(initialHistory);
+        }
+        
+        return history;
+    }
+
     public List<OrderStatusHistory> getOrderStatusHistory(Long orderId) {
         Order order = Order.findById(orderId);
         if (order == null) {

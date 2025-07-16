@@ -195,6 +195,7 @@ export interface OrderDetail extends Order {
   shippedAt?: string
   deliveredAt?: string
   items?: OrderItem[]
+  statusHistory?: any[]
 }
 
 export interface OrderItem {
@@ -702,6 +703,11 @@ class ApiService {
 
   async getUserOrders(userId: number): Promise<Order[]> {
     const response = await api.get<Order[]>(`/orders/user/${userId}`)
+    return response.data
+  }
+
+  async getOrderStatusHistory(orderId: number): Promise<any[]> {
+    const response = await api.get<any[]>(`/orders/${orderId}/status-history`)
     return response.data
   }
 

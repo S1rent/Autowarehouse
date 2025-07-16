@@ -92,8 +92,12 @@
               <div class="flex items-center space-x-4">
                 <button 
                   @click="showCreateModal = true"
-                  
-                  lcton ss="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <i class="fa-solid fa-plus mr-2"></i>
+                  Add Category
+                </button>
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <i class="fa-solid fa-user text-white text-sm"></i>
                 </div>
               </div>
@@ -104,43 +108,35 @@
         <!-- Content -->
         <main class="p-6">
           <!-- Stats Cards -->
-          <div Statr Cdrdsrid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <diStttr Cd hsmi -c>ls1md:gicolsga6mb-8"> mb-8">
-            <diSttt wCdmdsri-c>ls1md:gicolsga6
-            <di hsms Cards -c>ls1md:gicolsga6mb-8"> mb-8">
-            <diStwtr Cgrdsrmd-losm-1amd:grdol4ga6 mb-8
-            <diStttr Cd hshc>sm:gicolsga6m8">m8
-         <  << Sttt wCdmdsri-cdls1md:gicolsga6iv class="fldx items-centdiljustify-between">s="flex items-centeiljustify-between">s="fldx items-centdiljustify-between">s="flex items-centeiljustify-between">s="flex items-center justify-between">
-            <diclstr=Cd hsmi "c>ls1md:gicolsga6mbt8"e mb-8">xt sm text-gray-600">T tlllCs="gories</-ol}</>p>
-            <txhite-tmiwgmi-c>-g1m:g0</a
-                </divbg-hit 
-         <<<<  d v         -2x items-centdiljustihy1b2tween">s="fle  items-benteigjusu1fy-betwee1">s="fldx items0cen0d2ljustify-betweeg">s="fblxgitems-cenlliljus ify-between">s="flexmitess-centeinjuseifynbetweenjfytcentjrfjrfjrfjrfer">
-                                         i  i  i ifa-so=id fa"tagsaisoliblue-tags 
-                   p   /dd gay6T tlllCs="goies</-l}>p
-dgy9sta.l
-    /
-                 w-12 h-12 bg-blu1210022bglblgllg  0ex itlmsicenten justify<cenijrfjrfjrfjrfe"
-                   i     icifs-=o"t-sfa"tamsats-libgue-tagr 
-                     -/d0
-  /c
-te/
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Total Categories</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-tags text-blue-600"></i>
+                </div>
+              </div>
+            </div>
 
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Active Categories</p>
                   <p class="text-2xl font-bold text-green-600">{{ stats.active }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-check-circlActivet-green-600"></i>
-                </div>een6acive
+                  <i class="fa-solid fa-check-circle text-green-600"></i>
+                </div>
               </div>
-            </div>gren
--checkcirclegren
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-              div>
+            </div>
 
             <div class="bg-white rounded-xl shadow-sm p-6">
               <div class="flex items-center justify-between">
-                <  <div>
-                  <p class="text-sm text-gray-600">Total Products</p>                  <p class="text-sm text-gray-600">Total Products</p>
+                <div>
+                  <p class="text-sm text-gray-600">Total Products</p>
                   <p class="text-2xl font-bold text-purple-600">{{ stats.products }}</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -162,179 +158,46 @@ te/
             </div>
           </div>
 
-          <!-- Category Tree View -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Category Tree -->
-            <div class="lg:col-span-2">
-              <div class="bg-white rounded-xl shadow-sm">
-                <div class="px-6 py-4 border-b border-gray-200">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Category Hierarchy</h3>
-                    <div class="flex items-center space-x-2">
-                      <button 
-                        @click="expandAll"
-                        class="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-                      >
-                        <i class="fa-solid fa-expand mr-1"></i>
-                        Expand All
-                      </button>
-                      <button 
-                        @click="collapseAll"
-                        class="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-                      >
-                        <i class="fa-solid fa-compress mr-1"></i>
-                        Collapse All
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <div class="space-y-2">
-                    <div 
-                      v-for="category in categories" 
-                      :key="category.id"
-                      class="category-item"
-                    >
-                      <!-- Parent Category -->
-                      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div class="flex items-center space-x-3">
-                          <button 
-                            @click="toggleCategory(category.id)"
-                            class="text-gray-400 hover:text-gray-600"
-                          >
-                            <i :class="category.expanded ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'"></i>
-                          </button>
-                          <div 
-                            :class="getCategoryIconClass(category.icon)"
-                            class="w-8 h-8 rounded-lg flex items-center justify-center"
-                          >
-                            <i :class="category.icon" class="text-sm"></i>
-                          </div>
-                          <div>
-                            <h4 class="font-medium text-gray-900">{{ category.name }}</h4>
-                            <p class="text-sm text-gray-500">{{ category.productCount }} products</p>
-                          </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                          <span 
-                            :class="category.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                          >
-                            {{ category.status }}
-                          </span>
-                          <button 
-                            @click="editCategory(category)"
-                            class="text-blue-600 hover:text-blue-900"
-                          >
-                            <i class="fa-solid fa-edit"></i>
-                          </button>
-                          <button 
-                            @click="deleteCategory(category.id)"
-                            class="text-red-600 hover:text-red-900"
-                          >
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      <!-- Subcategories -->
-                      <div v-if="category.expanded && category.subcategories" class="ml-8 mt-2 space-y-2">
-                        <div 
-                          v-for="subcategory in category.subcategories" 
-                          :key="subcategory.id"
-                          class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div class="flex items-center space-x-3">
-                            <div class="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
-                              <i class="fa-solid fa-tag text-gray-500 text-xs"></i>
-                            </div>
-                            <div>
-                              <h5 class="font-medium text-gray-900">{{ subcategory.name }}</h5>
-                              <p class="text-sm text-gray-500">{{ subcategory.productCount }} products</p>
-                            </div>
-                          </div>
-                          <div class="flex items-center space-x-2">
-                            <span 
-                              :class="subcategory.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                              class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                            >
-                              {{ subcategory.status }}
-                            </span>
-                            <button 
-                              @click="editCategory(subcategory)"
-                              class="text-blue-600 hover:text-blue-900"
-                            >
-                              <i class="fa-solid fa-edit"></i>
-                            </button>
-                            <button 
-                              @click="deleteCategory(subcategory.id)"
-                              class="text-red-600 hover:text-red-900"
-                            >
-                              <i class="fa-solid fa-trash"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <!-- Category List -->
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Categories</h3>
             </div>
-
-            <!-- Category Details -->
-            <div class="lg:col-span-1">
-              <div class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div class="space-y-3">
-                  <button 
-                    @click="showCreateModal = true"
-                    class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <i class="fa-solid fa-plus mr-2"></i>
-                    Add New Category
-                  </button>
-                  <button 
-                    @click="bulkImport"
-                    class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <i class="fa-solid fa-upload mr-2"></i>
-                    Bulk Import
-                  </button>
-                  <button 
-                    @click="exportCategories"
-                    class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <i class="fa-solid fa-download mr-2"></i>
-                    Export Categories
-                  </button>
-                </div>
-              </div>
-
-              <!-- Category Analytics -->
-              <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Categories</h3>
-                <div class="space-y-4">
-                  <div 
-                    v-for="top in topCategories" 
-                    :key="top.id"
-                    class="flex items-center justify-between"
-                  >
-                    <div class="flex items-center space-x-3">
-                      <div 
-                        :class="getCategoryIconClass(top.icon)"
-                        class="w-8 h-8 rounded-lg flex items-center justify-center"
-                      >
-                        <i :class="top.icon" class="text-sm"></i>
-                      </div>
-                      <div>
-                        <p class="font-medium text-gray-900">{{ top.name }}</p>
-                        <p class="text-sm text-gray-500">{{ top.productCount }} products</p>
-                      </div>
+            <div class="p-6">
+              <div class="space-y-4">
+                <div 
+                  v-for="category in categories" 
+                  :key="category.id"
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                >
+                  <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <i class="fa-solid fa-tag text-blue-600"></i>
                     </div>
-                    <div class="text-right">
-                      <p class="font-semibold text-gray-900">{{ top.revenue }}%</p>
-                      <p class="text-sm text-gray-500">of revenue</p>
+                    <div>
+                      <h4 class="font-medium text-gray-900">{{ category.name }}</h4>
+                      <p class="text-sm text-gray-500">{{ category.description || 'No description' }}</p>
                     </div>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <span 
+                      :class="category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                    >
+                      {{ category.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                    <button 
+                      @click="editCategory(category)"
+                      class="text-blue-600 hover:text-blue-900"
+                    >
+                      <i class="fa-solid fa-edit"></i>
+                    </button>
+                    <button 
+                      @click="deleteCategory(category.id)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -364,36 +227,6 @@ te/
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Parent Category</label>
-            <select 
-              v-model="categoryForm.parentId"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">None (Root Category)</option>
-              <option 
-                v-for="category in categories" 
-                :key="category.id"
-                :value="category.id"
-              >
-                {{ category.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
-            <select 
-              v-model="categoryForm.icon"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="fa-solid fa-laptop">Electronics</option>
-              <option value="fa-solid fa-car">Automotive</option>
-              <option value="fa-solid fa-gamepad">Gaming</option>
-              <option value="fa-solid fa-tools">Tools</option>
-              <option value="fa-solid fa-home">Home & Garden</option>
-              <option value="fa-solid fa-tshirt">Fashion</option>
-            </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -434,113 +267,86 @@ te/
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { apiService, type Category, type CreateCategoryRequest, type UpdateCategoryRequest } from '@/services/api'
-
-// Extended Category interface for UI
-interface CategoryWithUI extends Category {
-  expanded?: boolean
-  icon?: string
-  status?: string
-  productCount?: number
-  subcategories?: CategoryWithUI[]
-}
+import { apiService, type Category } from '@/services/api'
 
 // State
 const showCreateModal = ref(false)
-const editingCategory = ref<CategoryWithUI | null>(null)
+const editingCategory = ref<Category | null>(null)
 const loading = ref(false)
 const error = ref('')
 
 // Categories data
-const categories = ref<CategoryWithUI[]>([])
-const expandedCategories = ref<Set<number>>(new Set())
+const categories = ref<Category[]>([])
 
 // Category form
 const categoryForm = ref({
   name: '',
   description: '',
-  slug: '',
-  parentId: undefined as number | undefined,
-  imageUrl: '',
-  isActive: true,
-  sortOrder: 0
+  isActive: true
 })
-
-// Helper function to get icon for category
-const getIconForCategory = (categoryName: string): string => {
-  const iconMap: Record<string, string> = {
-    'Memory': 'fa-solid fa-microchip',
-    'Storage': 'fa-solid fa-hdd',
-    'Electronics': 'fa-solid fa-laptop',
-    'Automotive': 'fa-solid fa-car',
-    'Gaming': 'fa-solid fa-gamepad',
-    'Tools': 'fa-solid fa-tools',
-    'Home': 'fa-solid fa-home',
-    'Fashion': 'fa-solid fa-tshirt'
-  }
-  
-  // Find matching icon or default
-  for (const [key, icon] of Object.entries(iconMap)) {
-    if (categoryName.toLowerCase().includes(key.toLowerCase())) {
-      return icon
-    }
-  }
-  
-  return 'fa-solid fa-tag'
-}
 
 // Computed properties
 const stats = computed(() => {
   const total = categories.value.length
   const active = categories.value.filter(c => c.isActive).length
-  const rootCategories = categories.value.filter(c => !c.parentId)
-  const subcategories = categories.value.filter(c => c.parentId)
+  const subcategories = categories.value.filter(c => c.parentId).length
   
   return {
     total,
     active,
     products: 0, // This would need to be calculated from products API
-    subcategories: subcategories.length
+    subcategories
   }
 })
 
-const rootCategories = computed(() => {
-  return categories.value
-    .filter(c => !c.parentId)
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
-})
-
-const getSubcategories = (parentId: number) => {
-  return categories.value
-    .filter(c => c.parentId === parentId)
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+// Methods
+const loadCategories = async () => {
+  try {
+    loading.value = true
+    categories.value = await apiService.getCategories()
+  } catch (err) {
+    error.value = 'Failed to load categories'
+    console.error('Error loading categories:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
-const topCategories = computed(() => {
-  return rootCategories.value.slice(0, 4).map(category => ({
-    id: category.id,
+const editCategory = (category: Category) => {
+  editingCategory.value = category
+  categoryForm.value = {
     name: category.name,
-    icon: getIconForCategory(category.name),
-    productCount: 0, // This would need to be calculated from products API
-    revenue: 0 // This would need to be calculated from orders API
-  }))
-})
-
-//    categories.value.splice(mainIndex, 1)
-      return  
-    // Remove from subcategories
-    categories.value.forEach(category => {
-      if (category.subcategories) {
-        const subIndex = category.subcategories.findIndex(s => s.id === categoryId)
-        if (subIndex > -1) {
-          category.subcategories.splice(subIndex, 1)
-        }
+    description: category.description || '',
+    isActive: category.isActive
   }
 }
 
-const saveCategory = () => {
-  console.log('Saving category:', categoryForm.value)
-  closeModal()
+const deleteCategory = async (categoryId: number) => {
+  if (confirm('Are you sure you want to delete this category?')) {
+    try {
+      await apiService.deleteCategory(categoryId)
+      await loadCategories()
+    } catch (err) {
+      console.error('Error deleting category:', err)
+    }
+  }
+}
+
+const saveCategory = async () => {
+  try {
+    if (editingCategory.value) {
+      await apiService.updateCategory(editingCategory.value.id, categoryForm.value)
+    } else {
+      await apiService.createCategory({
+        ...categoryForm.value,
+        slug: categoryForm.value.name.toLowerCase().replace(/\s+/g, '-')
+      })
+    }
+    await loadCategories()
+    closeModal()
+  } catch (err) {
+    console.error('Error saving category:', err)
+  }
 }
 
 const closeModal = () => {
@@ -548,51 +354,16 @@ const closeModal = () => {
   editingCategory.value = null
   categoryForm.value = {
     name: '',
-    parentId: '',
-    icon: 'fa-solid fa-laptop',
     description: '',
     isActive: true
   }
 }
 
-const bulkImport = () => {
-  console.log('Bulk import categories')
-}
-n
-const exportCategories = () => {
-  console.log('Export categories')
-}
-aretIdaretId
-onMoi( eg('Admin Caicoranagement loaded')
-})dsciptiondsciption
-</script>aus=== 'civ'
+onMounted(() => {
+  loadCategories()
+})
+</script>
+
 <style scoped>
 /* Custom styles */
 </style>
-// Rmove fom maicaegoiescnst mIndex = cateories.findIndex(c>c.id === cagoryId)f(mnInx > -1) {
-      cies.vlu.splice(mainnex, 1  return}
-    
-    mvefrom sub
-   cgois.vau.forEach(caegry => {  f(categry.subc { onssubIndx=catgysbctegors.finIndex(s=>s.i=== Id)    if (ubIndx > -1) {
-          catgy.subcategis.spic(subIdx1    }    }
-})console.g('Sv ctgory:',cagoyFm)
-closeModal()
-}coscloeModa =()=>{showCreMdal = faleeditingCul
-   = {
-    : '', parentId:'',  icon:'fa-solidfa-laptop',dscrpo: '',
-    isAciv: t
- }
-}
-constbulkImport=()=>{
-consol.log('Bulkmpories')
-}
-constexportCategories=()=>{
-onsollog('Exor cis')
-}
-
-onMoud(() => {
-  conslog('AdmnC Management ldd')
-</script>
-
-<stylecopd>*usomstyls*/
-</syl>

@@ -136,36 +136,17 @@
             </div>
           </section>
 
-          <!-- Shipping Status -->
+          <!-- Order Status Timeline -->
           <section class="bg-white rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-100">
               <h2 class="text-lg font-semibold text-gray-900">Status Pengiriman</h2>
             </div>
             <div class="p-6">
-              <div class="relative">
-                <div class="absolute left-4 top-8 bottom-0 w-0.5 bg-gray-200"></div>
-                
-                <div 
-                  v-for="(status, index) in shippingStatus" 
-                  :key="index"
-                  :class="['relative flex items-start space-x-4', index < shippingStatus.length - 1 ? 'pb-8' : '']"
-                >
-                  <div :class="[
-                    'w-8 h-8 rounded-full flex items-center justify-center',
-                    status.completed ? 'bg-green-500' : 'bg-gray-300'
-                  ]">
-                    <i :class="[
-                      'text-sm',
-                      status.completed ? 'fa-solid fa-check text-white' : 'fa-solid fa-clock text-gray-500'
-                    ]"></i>
-                  </div>
-                  <div class="flex-1">
-                    <h3 class="font-medium text-gray-900">{{ status.title }}</h3>
-                    <p class="text-sm text-gray-600">{{ status.date }}</p>
-                    <p class="text-sm text-gray-500 mt-1">{{ status.description }}</p>
-                  </div>
-                </div>
-              </div>
+              <OrderStatusTimeline 
+                :status-history="order.statusHistory"
+                :current-status="order.status"
+                :tracking-number="order.trackingNumber"
+              />
             </div>
           </section>
         </div>
@@ -281,6 +262,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import { useAuthStore } from '@/stores/auth'
+import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 
 const route = useRoute()
 const router = useRouter()

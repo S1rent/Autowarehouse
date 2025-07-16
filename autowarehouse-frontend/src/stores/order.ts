@@ -43,7 +43,18 @@ export const useOrderStore = defineStore('order', () => {
     try {
       isLoading.value = true
       error.value = null
-      currentOrder.value = await apiService.getOrder(orderId) as OrderDetail
+      const order = await apiService.getOrder(orderId) as OrderDetail
+      
+      // Fetch status history if available
+      try {
+        const statusHistory = await apiService.getOrderStatusHistory(orderId)
+        order.statusHistory = statusHistory
+      } catch (historyErr) {
+        console.warn('Could not fetch order status history:', historyErr)
+        // Continue without status history
+      }
+      
+      currentOrder.value = order
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch order'
       console.error('Error fetching order:', err)
