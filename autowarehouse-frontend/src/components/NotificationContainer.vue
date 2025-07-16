@@ -1,29 +1,29 @@
 <template>
-  <div class="fixed top-4 right-4 z-50 space-y-2">
+  <div class="fixed top-4 right-4 z-50 space-y-3">
     <transition-group name="notification" tag="div">
       <div
         v-for="notification in notifications"
         :key="notification.id"
         :class="getNotificationClass(notification.type)"
-        class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+        class="min-w-80 max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
       >
         <div class="p-4">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <i :class="getIconClass(notification.type)" class="text-lg"></i>
             </div>
-            <div class="ml-3 w-0 flex-1 pt-0.5">
-              <p class="text-sm font-medium text-gray-900">
+            <div class="ml-3 flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 break-words">
                 {{ notification.title }}
               </p>
-              <p v-if="notification.message" class="mt-1 text-sm text-gray-500">
+              <p v-if="notification.message" class="mt-1 text-sm text-gray-500 break-words">
                 {{ notification.message }}
               </p>
             </div>
-            <div class="ml-4 flex-shrink-0 flex">
+            <div class="ml-4 flex-shrink-0">
               <button
                 @click="removeNotification(notification.id)"
-                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 p-1"
               >
                 <span class="sr-only">Close</span>
                 <i class="fa-solid fa-times text-sm"></i>

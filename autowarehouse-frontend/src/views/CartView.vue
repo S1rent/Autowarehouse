@@ -136,7 +136,7 @@
                     <i class="fa-solid fa-trash"></i>
                   </button>
                 </div>
-                <button 
+                <!-- <button 
                   @click="saveForLater(item.id)"
                   class="text-blue-600 hover:text-blue-700 text-sm px-2 py-1 rounded transition-colors"
                   title="Save for later"
@@ -144,7 +144,7 @@
                 >
                   <i class="fa-solid fa-bookmark mr-1"></i>
                   Save for Later
-                </button>
+                </button> -->
               </div>
             </div>
           </div>

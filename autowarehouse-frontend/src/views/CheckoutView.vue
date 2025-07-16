@@ -334,7 +334,7 @@ const handleCheckout = async () => {
     })
 
     // Redirect to order confirmation
-    router.push(`/orders/${order.id}`)
+    router.push(`/order/${order.id}`)
   } catch (err: any) {
     error.value = err.message || 'Failed to create order'
   }
