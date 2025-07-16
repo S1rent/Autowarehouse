@@ -278,12 +278,21 @@ public class OrderService {
 
     @Transactional
     public void updateOrderStatus(Long orderId, Order.OrderStatus newStatus) {
+        updateOrderStatus(orderId, newStatus, "SYSTEM", null);
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, Order.OrderStatus newStatus, String changedBy, String notes) {
         Order order = Order.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
         }
 
         Order.OrderStatus oldStatus = order.status;
+        
+        // Create status history entry
+        createStatusHistory(order, newStatus, oldStatus, changedBy, notes);
+        
         order.updateStatus(newStatus);
         order.persist();
 
@@ -474,5 +483,81 @@ public class OrderService {
             product.salesCount = Math.max(0, product.salesCount - orderItem.quantity);
             product.persist();
         }
+    }
+
+    // Order Status History Methods
+    @Transactional
+    public void createStatusHistory(Order order, Order.OrderStatus newStatus, Order.OrderStatus previousStatus, String changedBy, String notes) {
+        OrderStatusHistory statusHistory = new OrderStatusHistory();
+        statusHistory.setOrder(order);
+        statusHistory.setStatus(newStatus);
+        statusHistory.setPreviousStatus(previousStatus);
+        statusHistory.setChangedAt(LocalDateTime.now());
+        statusHistory.setChangedBy(changedBy);
+        statusHistory.setNotes(notes);
+        
+        // Set tracking number if status is shipped
+        if (newStatus == Order.OrderStatus.SHIPPED && order.trackingNumber != null) {
+            statusHistory.setTrackingNumber(order.trackingNumber);
+            statusHistory.setEstimatedDelivery(calculateEstimatedDelivery());
+        }
+        
+        // Set actual delivery time if status is delivered
+        if (newStatus == Order.OrderStatus.DELIVERED) {
+            statusHistory.setActualDelivery(LocalDateTime.now());
+        }
+        
+        statusHistory.persist();
+    }
+
+    public List<OrderStatusHistory> getOrderStatusHistory(Long orderId) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        
+        return OrderStatusHistory.find("order = ?1 order by changedAt asc", order).list();
+    }
+
+    public List<OrderStatusHistory> getOrderStatusHistory(Order order) {
+        return OrderStatusHistory.find("order = ?1 order by changedAt asc", order).list();
+    }
+
+    private LocalDateTime calculateEstimatedDelivery() {
+        // Default estimation: 3-5 business days from now
+        return LocalDateTime.now().plusDays(4);
+    }
+
+    // Order Actions Methods
+    @Transactional
+    public void cancelOrderWithReason(Long orderId, String reason, String cancelledBy) {
+        updateOrderStatus(orderId, Order.OrderStatus.CANCELLED, cancelledBy, "Order cancelled: " + reason);
+    }
+
+    @Transactional
+    public void shipOrderWithTracking(Long orderId, String trackingNumber, String shippedBy) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (!order.canBeShipped()) {
+            throw new IllegalArgumentException("Order cannot be shipped in current state");
+        }
+
+        order.trackingNumber = trackingNumber;
+        order.persist();
+
+        updateOrderStatus(orderId, Order.OrderStatus.SHIPPED, shippedBy, "Order shipped with tracking: " + trackingNumber);
+    }
+
+    @Transactional
+    public void confirmOrder(Long orderId, String confirmedBy) {
+        updateOrderStatus(orderId, Order.OrderStatus.CONFIRMED, confirmedBy, "Order confirmed and ready for processing");
+    }
+
+    @Transactional
+    public void deliverOrderWithConfirmation(Long orderId, String deliveredBy) {
+        updateOrderStatus(orderId, Order.OrderStatus.DELIVERED, deliveredBy, "Order successfully delivered");
     }
 }

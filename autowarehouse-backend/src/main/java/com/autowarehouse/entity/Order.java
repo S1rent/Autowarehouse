@@ -95,6 +95,9 @@ public class Order extends PanacheEntityBase {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     public List<OrderItem> items;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public List<OrderStatusHistory> statusHistory;
+
     // Constructors
     public Order() {}
 
@@ -104,6 +107,11 @@ public class Order extends PanacheEntityBase {
         this.subtotal = subtotal;
         this.totalAmount = totalAmount;
         this.shippingAddress = shippingAddress;
+    }
+
+    // Getter for id (needed for relationships)
+    public Long getId() {
+        return id;
     }
 
     // Enums

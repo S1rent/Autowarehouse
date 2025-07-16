@@ -68,6 +68,7 @@ com\autowarehouse\service\ProductService.class
 com\autowarehouse\entity\Category.class
 com\autowarehouse\resource\SavedItemResource$CartItemResponse.class
 com\autowarehouse\resource\UserResource$UserResponse.class
+com\autowarehouse\entity\OrderStatusHistory.class
 com\autowarehouse\resource\SavedItemResource.class
 com\autowarehouse\resource\ProductResource$UpdateProductRequest.class
 com\autowarehouse\entity\User.class

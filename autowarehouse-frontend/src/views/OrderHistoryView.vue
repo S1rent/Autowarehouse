@@ -27,9 +27,10 @@
             >
               <option value="">Semua Status</option>
               <option value="pending">Pending</option>
-              <option value="processing">Diproses</option>
+              <option value="confirmed">Dikonfirmasi</option>
               <option value="shipped">Dikirim</option>
-              <option value="completed">Selesai</option>
+              <option value="delivered">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
             </select>
           </div>
         </div>
@@ -104,8 +105,47 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
+              <!-- Loading state -->
+              <tr v-if="orderStore.isLoading">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div class="flex items-center justify-center">
+                    <i class="fa-solid fa-spinner fa-spin text-blue-600 mr-2"></i>
+                    <span class="text-gray-600">Memuat pesanan...</span>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Error state -->
+              <tr v-else-if="orderStore.error">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div class="text-red-600">
+                    <i class="fa-solid fa-exclamation-triangle mb-2"></i>
+                    <p>{{ orderStore.error }}</p>
+                    <button 
+                      @click="loadOrders" 
+                      class="mt-2 text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Coba lagi
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Empty state -->
+              <tr v-else-if="paginatedOrders.length === 0">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div class="text-gray-500">
+                    <i class="fa-solid fa-shopping-cart text-4xl mb-4"></i>
+                    <p class="text-lg font-medium">Belum ada pesanan</p>
+                    <p class="text-sm">Pesanan Anda akan muncul di sini setelah checkout</p>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Orders data -->
               <tr 
-                v-for="order in filteredOrders" 
+                v-else
+                v-for="order in paginatedOrders" 
                 :key="order.id"
                 class="hover:bg-gray-50 transition-colors"
               >
@@ -113,7 +153,7 @@
                   <div class="font-medium text-gray-900">{{ order.orderNumber }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                  {{ formatDate(order.date) }}
+                  {{ formatDate(order.createdAt) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
@@ -124,7 +164,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
-                  Rp {{ order.total.toLocaleString() }}
+                  Rp {{ order.totalAmount.toLocaleString() }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <button 
@@ -228,9 +268,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useOrderStore } from '@/stores/order'
+import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
+const orderStore = useOrderStore()
+const authStore = useAuthStore()
 
 // Reactive data
 const searchQuery = ref('')
@@ -238,79 +282,24 @@ const statusFilter = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 5
 
-const stats = ref({
-  total: 24,
-  pending: 3,
-  shipped: 5,
-  completed: 16
+// Computed properties
+const stats = computed(() => {
+  const orders = orderStore.userOrders
+  return {
+    total: orders.length,
+    pending: orders.filter(order => order.status === 'PENDING').length,
+    shipped: orders.filter(order => order.status === 'SHIPPED').length,
+    completed: orders.filter(order => order.status === 'DELIVERED').length
+  }
 })
 
-const orders = ref([
-  {
-    id: 1,
-    orderNumber: '#ORD-2024-001',
-    date: '2024-01-15',
-    status: 'completed',
-    total: 750000
-  },
-  {
-    id: 2,
-    orderNumber: '#ORD-2024-002',
-    date: '2024-01-18',
-    status: 'shipped',
-    total: 425000
-  },
-  {
-    id: 3,
-    orderNumber: '#ORD-2024-003',
-    date: '2024-01-20',
-    status: 'processing',
-    total: 1250000
-  },
-  {
-    id: 4,
-    orderNumber: '#ORD-2024-004',
-    date: '2024-01-22',
-    status: 'pending',
-    total: 320000
-  },
-  {
-    id: 5,
-    orderNumber: '#ORD-2024-005',
-    date: '2024-01-25',
-    status: 'completed',
-    total: 890000
-  },
-  {
-    id: 6,
-    orderNumber: '#ORD-2024-006',
-    date: '2024-01-28',
-    status: 'shipped',
-    total: 675000
-  },
-  {
-    id: 7,
-    orderNumber: '#ORD-2024-007',
-    date: '2024-02-01',
-    status: 'processing',
-    total: 540000
-  },
-  {
-    id: 8,
-    orderNumber: '#ORD-2024-008',
-    date: '2024-02-03',
-    status: 'pending',
-    total: 280000
-  }
-])
-
-// Computed properties
 const filteredOrders = computed(() => {
-  let filtered = orders.value
+  let filtered = orderStore.userOrders
 
   // Filter by status
   if (statusFilter.value) {
-    filtered = filtered.filter(order => order.status === statusFilter.value)
+    const filterStatus = statusFilter.value.toUpperCase()
+    filtered = filtered.filter(order => order.status === filterStatus)
   }
 
   // Filter by search query
@@ -321,6 +310,12 @@ const filteredOrders = computed(() => {
   }
 
   return filtered
+})
+
+const paginatedOrders = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredOrders.value.slice(start, end)
 })
 
 const totalPages = computed(() => {
@@ -339,30 +334,36 @@ const formatDate = (dateString) => {
 
 const getStatusClass = (status) => {
   const classes = {
-    'completed': 'bg-green-100 text-green-800',
-    'shipped': 'bg-blue-100 text-blue-800',
-    'processing': 'bg-purple-100 text-purple-800',
-    'pending': 'bg-yellow-100 text-yellow-800'
+    'DELIVERED': 'bg-green-100 text-green-800',
+    'SHIPPED': 'bg-blue-100 text-blue-800',
+    'CONFIRMED': 'bg-purple-100 text-purple-800',
+    'PENDING': 'bg-yellow-100 text-yellow-800',
+    'CANCELLED': 'bg-red-100 text-red-800',
+    'REFUNDED': 'bg-gray-100 text-gray-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
 const getStatusIcon = (status) => {
   const icons = {
-    'completed': 'fa-solid fa-check-circle',
-    'shipped': 'fa-solid fa-truck',
-    'processing': 'fa-solid fa-cog',
-    'pending': 'fa-solid fa-clock'
+    'DELIVERED': 'fa-solid fa-check-circle',
+    'SHIPPED': 'fa-solid fa-truck',
+    'CONFIRMED': 'fa-solid fa-cog',
+    'PENDING': 'fa-solid fa-clock',
+    'CANCELLED': 'fa-solid fa-times-circle',
+    'REFUNDED': 'fa-solid fa-undo'
   }
   return icons[status] || 'fa-solid fa-circle'
 }
 
 const getStatusText = (status) => {
   const texts = {
-    'completed': 'Selesai',
-    'shipped': 'Dikirim',
-    'processing': 'Diproses',
-    'pending': 'Pending'
+    'DELIVERED': 'Selesai',
+    'SHIPPED': 'Dikirim',
+    'CONFIRMED': 'Dikonfirmasi',
+    'PENDING': 'Pending',
+    'CANCELLED': 'Dibatalkan',
+    'REFUNDED': 'Dikembalikan'
   }
   return texts[status] || status
 }
@@ -371,8 +372,21 @@ const viewOrderDetail = (orderId) => {
   router.push(`/order/${orderId}`)
 }
 
+const loadOrders = async () => {
+  if (!authStore.user?.id) {
+    router.push('/login')
+    return
+  }
+  
+  try {
+    await orderStore.fetchUserOrders()
+  } catch (error) {
+    console.error('Failed to load orders:', error)
+  }
+}
+
 onMounted(() => {
-  console.log('Order History page loaded')
+  loadOrders()
 })
 </script>
 

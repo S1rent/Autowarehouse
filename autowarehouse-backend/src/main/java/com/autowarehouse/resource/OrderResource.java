@@ -2,17 +2,22 @@ package com.autowarehouse.resource;
 
 import com.autowarehouse.entity.Order;
 import com.autowarehouse.entity.OrderItem;
+import com.autowarehouse.entity.OrderStatusHistory;
+import com.autowarehouse.entity.User;
 import com.autowarehouse.service.OrderService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/orders")
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,6 +26,15 @@ public class OrderResource {
 
     @Inject
     OrderService orderService;
+
+    @Context
+    SecurityContext securityContext;
+
+    private User getCurrentUser() {
+        // This would typically get the current user from the security context
+        // For now, return null - this should be implemented based on your auth system
+        return null;
+    }
 
     @POST
     @Path("/create")
@@ -169,29 +183,62 @@ public class OrderResource {
     }
 
     @PUT
-    @Path("/admin/{id}/ship")
-    @RolesAllowed("ADMIN")
-    public Response shipOrder(@PathParam("id") Long id, @Valid ShipOrderRequest request) {
+    @Path("/{id}/status")
+    @RolesAllowed({"ADMIN", "STAFF"})
+    public Response updateOrderStatus(@PathParam("id") Long id, Map<String, String> statusUpdate) {
         try {
-            orderService.shipOrder(id, request.trackingNumber);
-            return Response.ok(new SuccessResponse("Order shipped successfully")).build();
+            String statusStr = statusUpdate.get("status");
+            if (statusStr == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("error", "Status is required"))
+                        .build();
+            }
+
+            Order.OrderStatus status = Order.OrderStatus.valueOf(statusStr.toUpperCase());
+            String changedBy = statusUpdate.get("changedBy");
+            String notes = statusUpdate.get("notes");
+            
+            orderService.updateOrderStatus(id, status, changedBy != null ? changedBy : "ADMIN", notes);
+
+            return Response.ok(Map.of("message", "Order status updated successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(e.getMessage()))
+                    .entity(Map.of("error", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Failed to update order status"))
                     .build();
         }
     }
 
-    @PUT
-    @Path("/admin/{id}/deliver")
-    @RolesAllowed("ADMIN")
-    public Response deliverOrder(@PathParam("id") Long id) {
+    @GET
+    @Path("/{id}/status-history")
+    @RolesAllowed({"USER", "ADMIN", "STAFF"})
+    public Response getOrderStatusHistory(@PathParam("id") Long id) {
         try {
-            orderService.deliverOrder(id);
-            return Response.ok(new SuccessResponse("Order delivered successfully")).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(e.getMessage()))
+            Order order = orderService.findById(id);
+            if (order == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Order not found"))
+                        .build();
+            }
+
+            // Check if user can access this order
+            if (!securityContext.isUserInRole("ADMIN") && !securityContext.isUserInRole("STAFF")) {
+                User currentUser = getCurrentUser();
+                if (currentUser == null || !order.user.id.equals(currentUser.id)) {
+                    return Response.status(Response.Status.FORBIDDEN)
+                            .entity(Map.of("error", "Access denied"))
+                            .build();
+                }
+            }
+
+            List<OrderStatusHistory> statusHistory = orderService.getOrderStatusHistory(id);
+            return Response.ok(statusHistory).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Failed to get order status history"))
                     .build();
         }
     }
