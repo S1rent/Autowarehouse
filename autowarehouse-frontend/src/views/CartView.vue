@@ -15,8 +15,23 @@
 
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-        <p class="text-gray-600">Review your items before checkout</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+            <p class="text-gray-600">Review your items before checkout</p>
+          </div>
+          <div v-if="cartItems.length > 0" class="flex items-center space-x-4">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                :checked="allItemsSelected"
+                @change="toggleSelectAll"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              >
+              <span class="text-sm text-gray-700">Select All ({{ cartItems.length }} items)</span>
+            </label>
+          </div>
+        </div>
       </div>
 
       <!-- Cart Content -->
@@ -26,9 +41,21 @@
           <div 
             v-for="item in cartItems" 
             :key="item.id"
-            class="bg-white rounded-xl shadow-sm border p-6 transition-all duration-300"
+            class="bg-white rounded-xl shadow-sm border p-6 transition-all duration-300 cursor-pointer"
+            :class="{ 'ring-2 ring-blue-500 bg-blue-50': item.isSelected }"
+            @click="navigateToProduct(item.productId, $event)"
           >
             <div class="flex items-center space-x-6">
+              <div class="flex-shrink-0">
+                <label class="flex items-center cursor-pointer" @click.stop>
+                  <input 
+                    type="checkbox" 
+                    :checked="item.isSelected"
+                    @change="toggleItemSelection(item.id)"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  >
+                </label>
+              </div>
               <div class="flex-shrink-0">
                 <img 
                   :src="item.productImages?.[0] || '/placeholder-product.jpg'" 
@@ -39,13 +66,29 @@
               <div class="flex-1 min-w-0">
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ item.productName }}</h3>
                 <p class="text-gray-500 text-sm mb-2">{{ item.productBrand }} - {{ item.productSku }}</p>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-4 mb-2">
                   <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(item.productPrice) }}</span>
                   <span 
                     v-if="item.originalPrice && item.originalPrice > item.productPrice"
                     class="text-sm text-gray-500 line-through"
                   >
                     Rp {{ formatPrice(item.originalPrice) }}
+                  </span>
+                </div>
+                <!-- Stock Status -->
+                <div class="flex items-center space-x-2">
+                  <span 
+                    :class="getStockBadgeClass(item)"
+                    class="text-xs px-2 py-1 rounded-full"
+                  >
+                    {{ getStockText(item) }}
+                  </span>
+                  <span v-if="item.availableStock < 10 && item.availableStock > 0" class="text-xs text-orange-600">
+                    Only {{ item.availableStock }} left
+                  </span>
+                  <span v-if="item.quantity > item.availableStock" class="text-xs text-red-600">
+                    <i class="fa-solid fa-exclamation-triangle mr-1"></i>
+                    Exceeds available stock
                   </span>
                 </div>
               </div>
@@ -121,19 +164,31 @@
               </div>
             </div> -->
             
+            <!-- Selected Items Info -->
+            <div v-if="selectedItems.length > 0" class="mb-4 p-3 bg-blue-50 rounded-lg">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-blue-700 font-medium">Selected for checkout:</span>
+                <span class="text-blue-900 font-semibold">{{ selectedItems.length }} of {{ cartItems.length }} items</span>
+              </div>
+            </div>
+
             <!-- Price Breakdown -->
             <div class="space-y-3 mb-6">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Subtotal ({{ totalItems }} items)</span>
-                <span class="text-gray-900">Rp {{ formatPrice(subtotal) }}</span>
+                <span class="text-gray-600">Subtotal ({{ selectedItems.length }} selected items)</span>
+                <span class="text-gray-900">Rp {{ formatPrice(selectedSubtotal) }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Shipping</span>
-                <span class="text-gray-900">Rp {{ formatPrice(shippingCost) }}</span>
+                <span class="text-gray-900">Rp {{ formatPrice(selectedShippingCost) }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Tax</span>
-                <span class="text-gray-900">Rp {{ formatPrice(tax) }}</span>
+                <span class="text-gray-900">Rp {{ formatPrice(selectedTax) }}</span>
+              </div>
+              <div v-if="selectedSavings > 0" class="flex justify-between text-sm">
+                <span class="text-green-600">You Save</span>
+                <span class="text-green-600">-Rp {{ formatPrice(selectedSavings) }}</span>
               </div>
               <div v-if="discount > 0" class="flex justify-between text-sm">
                 <span class="text-green-600">Coupon Discount</span>
@@ -142,7 +197,7 @@
               <div class="border-t pt-3">
                 <div class="flex justify-between">
                   <span class="text-lg font-semibold text-gray-900">Total</span>
-                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(total) }}</span>
+                  <span class="text-lg font-bold text-gray-900">Rp {{ formatPrice(selectedTotal) }}</span>
                 </div>
               </div>
             </div>
@@ -295,18 +350,87 @@ const total = computed(() => {
   return subtotal.value + shippingCost.value + tax.value - discount.value
 })
 
+// Selection computed properties
+const allItemsSelected = computed(() => {
+  return cartItems.value.length > 0 && cartItems.value.every(item => item.isSelected)
+})
+
+const selectedItems = computed(() => {
+  return cartItems.value.filter(item => item.isSelected)
+})
+
+// Selected items calculations
+const selectedSubtotal = computed(() => {
+  return selectedItems.value.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0)
+})
+
+const selectedShippingCost = computed(() => {
+  return selectedSubtotal.value > 10000000 ? 0 : 50000 // Free shipping over 10M
+})
+
+const selectedTax = computed(() => {
+  return Math.round(selectedSubtotal.value * 0.11) // 11% tax
+})
+
+const selectedSavings = computed(() => {
+  return selectedItems.value.reduce((sum, item) => sum + (item.savings || 0), 0)
+})
+
+const selectedTotal = computed(() => {
+  return selectedSubtotal.value + selectedShippingCost.value + selectedTax.value - selectedSavings.value - discount.value
+})
+
 // Methods
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('id-ID').format(price)
 }
 
+const toggleSelectAll = async () => {
+  if (!authStore.user?.id) return
+  
+  try {
+    const selectAll = !allItemsSelected.value
+    await cartStore.selectAll(selectAll)
+  } catch (error) {
+    console.error('Error toggling select all:', error)
+  }
+}
+
+const toggleItemSelection = async (itemId: number) => {
+  try {
+    await cartStore.toggleSelection(itemId)
+  } catch (error) {
+    console.error('Error toggling item selection:', error)
+  }
+}
+
+const navigateToProduct = (productId: number, event: Event) => {
+  // Check if the click was on a button or interactive element
+  const target = event.target as HTMLElement
+  if (target.closest('button') || target.closest('input') || target.closest('label')) {
+    // If clicked on a button, input, or label, don't navigate
+    event.stopPropagation()
+    return
+  }
+  
+  // Navigate to product detail page
+  router.push(`/product/${productId}`)
+}
+
 const increaseQuantity = async (itemId: number) => {
   const item = cartItems.value.find(item => item.id === itemId)
   if (item) {
+    // Check stock availability before increasing
+    if (item.quantity >= item.availableStock) {
+      alert(`Cannot add more items. Only ${item.availableStock} available in stock.`)
+      return
+    }
+    
     try {
       await cartStore.updateQuantity(itemId, item.quantity + 1)
     } catch (error) {
       console.error('Error updating quantity:', error)
+      alert('Failed to update quantity. Please try again.')
     }
   }
 }
@@ -353,8 +477,51 @@ const removeCoupon = () => {
   showCouponInput.value = false
 }
 
+const getStockBadgeClass = (item: any) => {
+  if (!item.isProductActive) {
+    return 'bg-gray-100 text-gray-800'
+  }
+  if (item.availableStock === 0) {
+    return 'bg-red-100 text-red-800'
+  }
+  if (item.availableStock < 10) {
+    return 'bg-orange-100 text-orange-800'
+  }
+  return 'bg-green-100 text-green-800'
+}
+
+const getStockText = (item: any) => {
+  if (!item.isProductActive) {
+    return 'Inactive'
+  }
+  if (item.availableStock === 0) {
+    return 'Out of Stock'
+  }
+  if (item.availableStock < 10) {
+    return 'Low Stock'
+  }
+  return 'In Stock'
+}
+
 const proceedToCheckout = () => {
-  // Implement checkout logic
+  // Check if any selected items have stock issues
+  const hasStockIssues = selectedItems.value.some(item => 
+    !item.isProductActive || 
+    item.availableStock === 0 || 
+    item.quantity > item.availableStock
+  )
+  
+  if (hasStockIssues) {
+    alert('Some items in your cart have stock issues. Please review and update your cart.')
+    return
+  }
+  
+  if (selectedItems.value.length === 0) {
+    alert('Please select items to checkout.')
+    return
+  }
+  
+  // Proceed to checkout
   console.log('Proceeding to checkout...')
   router.push('/checkout')
 }

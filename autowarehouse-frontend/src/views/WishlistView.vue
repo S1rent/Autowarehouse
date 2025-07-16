@@ -254,7 +254,11 @@ const addToCart = async (itemId: number) => {
   try {
     addingToCartItems.value.add(itemId)
     
+    // Add to cart
     await cartStore.addToCart(itemId, 1)
+    
+    // Remove from wishlist after successfully adding to cart
+    await wishlistStore.removeFromWishlist(itemId)
     
     addedToCartItems.value.add(itemId)
     setTimeout(() => {
@@ -293,6 +297,9 @@ const addAllToCart = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
     }
   }
+  
+  // Note: Individual addToCart calls already remove items from wishlist
+  // so no need to manually clear wishlist here
 }
 
 const navigateToProduct = (productId: number, event: Event) => {
