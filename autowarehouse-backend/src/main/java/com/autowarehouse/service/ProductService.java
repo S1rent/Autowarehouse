@@ -146,7 +146,8 @@ public class ProductService {
     }
 
     public List<Product> findProductsWithFilters(Long categoryId, String brand, BigDecimal minPrice, 
-                                               BigDecimal maxPrice, String search, Boolean onSale, String status) {
+                                               BigDecimal maxPrice, String search, Boolean onSale, String status,
+                                               String sortBy, String sortOrder) {
         try {
             // If only search is provided with no status or "Semua Status" (empty string), use searchAllProducts
             if (search != null && !search.trim().isEmpty() && 
@@ -245,7 +246,23 @@ public class ProductService {
             }
 
             // Add ordering
-            queryBuilder.append(" order by createdAt desc");
+            if (sortBy != null && !sortBy.trim().isEmpty()) {
+                String orderDirection = (sortOrder != null && sortOrder.equalsIgnoreCase("desc")) ? "desc" : "asc";
+                
+                switch (sortBy.toLowerCase()) {
+                    case "name":
+                        queryBuilder.append(" order by lower(name) ").append(orderDirection);
+                        break;
+                    case "price":
+                        queryBuilder.append(" order by price ").append(orderDirection);
+                        break;
+                    default:
+                        queryBuilder.append(" order by createdAt desc");
+                        break;
+                }
+            } else {
+                queryBuilder.append(" order by createdAt desc");
+            }
 
             System.out.println("Query: " + queryBuilder.toString());
             System.out.println("Parameters: " + parameters);

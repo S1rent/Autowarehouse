@@ -24,22 +24,22 @@
           <!-- Kategori Filter -->
           <div class="mb-6">
             <h4 class="font-semibold text-dark mb-3">Kategori</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.categories" value="smartphone" class="mr-2 text-primary">
-                <span class="text-gray-700">Smartphone (45)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.categories" value="laptop" class="mr-2 text-primary">
-                <span class="text-gray-700">Laptop (32)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.categories" value="tablet" class="mr-2 text-primary">
-                <span class="text-gray-700">Tablet (18)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.categories" value="kamera" class="mr-2 text-primary">
-                <span class="text-gray-700">Kamera (24)</span>
+            <div v-if="categoriesLoading" class="text-sm text-gray-500">
+              Loading categories...
+            </div>
+            <div v-else class="space-y-2">
+              <label 
+                v-for="category in availableCategories" 
+                :key="category.id"
+                class="flex items-center"
+              >
+                <input 
+                  type="checkbox" 
+                  v-model="filters.categories" 
+                  :value="category.id" 
+                  class="mr-2 text-primary"
+                >
+                <span class="text-gray-700">{{ category.name }}</span>
               </label>
             </div>
           </div>
@@ -79,57 +79,6 @@
             </div>
           </div>
           
-          <!-- Brand Filter -->
-          <div class="mb-6">
-            <h4 class="font-semibold text-dark mb-3">Brand</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.brands" value="apple" class="mr-2 text-primary">
-                <span class="text-gray-700">Apple (12)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.brands" value="samsung" class="mr-2 text-primary">
-                <span class="text-gray-700">Samsung (15)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.brands" value="dell" class="mr-2 text-primary">
-                <span class="text-gray-700">Dell (8)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.brands" value="sony" class="mr-2 text-primary">
-                <span class="text-gray-700">Sony (6)</span>
-              </label>
-            </div>
-          </div>
-          
-          <!-- Rating Filter -->
-          <div class="mb-6">
-            <h4 class="font-semibold text-dark mb-3">Rating</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.ratings" value="5" class="mr-2 text-primary">
-                <div class="flex text-yellow-400 mr-2">
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                </div>
-                <span class="text-gray-700">(4.5+)</span>
-              </label>
-              <label class="flex items-center">
-                <input type="checkbox" v-model="filters.ratings" value="4" class="mr-2 text-primary">
-                <div class="flex text-yellow-400 mr-2">
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-solid fa-star"></i>
-                  <i class="fa-regular fa-star"></i>
-                </div>
-                <span class="text-gray-700">(4.0+)</span>
-              </label>
-            </div>
-          </div>
           
           <button 
             @click="applyFilters"
@@ -142,12 +91,32 @@
         <!-- Product Listing -->
         <main class="flex-1">
           
+          <!-- Search Bar -->
+          <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="relative">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Cari produk berdasarkan nama, deskripsi, atau SKU..."
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                @input="debouncedSearch"
+              >
+              <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div v-if="productsStore.isLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <i class="fa-solid fa-spinner fa-spin text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+
           <!-- Header & Sort -->
           <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
               <div>
                 <h1 class="text-2xl font-bold text-dark">Produk Elektronik</h1>
-                <p class="text-gray-600">Menampilkan {{ filteredProducts.length }} produk</p>
+                <p class="text-gray-600">
+                  Menampilkan {{ filteredProducts.length }} produk
+                  <span v-if="searchQuery" class="text-primary">untuk "{{ searchQuery }}"</span>
+                </p>
               </div>
               <div class="flex items-center space-x-4">
                 <span class="text-gray-600">Urutkan:</span>
@@ -155,11 +124,10 @@
                   v-model="sortBy"
                   class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="popular">Terpopuler</option>
-                  <option value="price-low">Harga Terendah</option>
-                  <option value="price-high">Harga Tertinggi</option>
-                  <option value="newest">Terbaru</option>
-                  <option value="rating">Rating Tertinggi</option>
+                  <option value="name-asc">Nama (A-Z)</option>
+                  <option value="name-desc">Nama (Z-A)</option>
+                  <option value="price-asc">Harga (Rendah ke Tinggi)</option>
+                  <option value="price-desc">Harga (Tinggi ke Rendah)</option>
                 </select>
                 <div class="flex border border-gray-300 rounded-lg">
                   <button 
@@ -181,8 +149,8 @@
             </div>
           </div>
           
-          <!-- Product Grid -->
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Product Grid/List -->
+          <div v-if="viewMode === 'grid'" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             <div 
               v-for="product in filteredProducts" 
@@ -200,7 +168,7 @@
                   class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
                 >
                   <i 
-                    class="fa-regular fa-heart text-gray-600"
+                    :class="wishlistStore.isInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
                   ></i>
                 </button>
                 <span 
@@ -259,6 +227,110 @@
             
           </div>
 
+          <!-- Product List View -->
+          <div v-else class="space-y-4">
+            
+            <div 
+              v-for="product in filteredProducts" 
+              :key="product.id"
+              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              <div class="flex">
+                <!-- Product Image -->
+                <div class="relative w-48 h-32 flex-shrink-0">
+                  <img 
+                    :src="product.imageUrls?.[0] || '/placeholder-product.jpg'" 
+                    :alt="product.name"
+                    class="w-full h-full object-cover"
+                  >
+                  <button 
+                    @click="toggleWishlist(product.id)"
+                    class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+                  >
+                    <i 
+                      :class="wishlistStore.isInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+                      class="text-xs"
+                    ></i>
+                  </button>
+                  <span 
+                    v-if="product.isOnSale"
+                    class="bg-red-500 text-white absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+                  >
+                    Sale
+                  </span>
+                </div>
+
+                <!-- Product Info -->
+                <div class="flex-1 p-4">
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-dark text-lg mb-1">{{ product.name }}</h3>
+                      <p class="text-sm text-gray-600 mb-2">{{ product.brand }} - {{ product.model }}</p>
+                      <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
+                      
+                      <!-- Rating -->
+                      <div class="flex items-center mb-3">
+                        <div class="flex text-yellow-400 text-sm mr-2">
+                          <i 
+                            v-for="i in 5" 
+                            :key="i"
+                            :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                          ></i>
+                        </div>
+                        <span class="text-sm text-gray-600">({{ product.rating }}) {{ product.reviewCount }} ulasan</span>
+                      </div>
+
+                      <!-- Specifications (if available) -->
+                      <div v-if="product.specifications" class="mb-3">
+                        <p class="text-xs text-gray-500 line-clamp-2">{{ product.specifications }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Price and Actions -->
+                    <div class="ml-4 text-right">
+                      <div class="mb-3">
+                        <div class="text-xl font-bold text-primary">Rp {{ formatPrice(product.price) }}</div>
+                        <div 
+                          v-if="product.originalPrice"
+                          class="text-sm text-gray-500 line-through"
+                        >
+                          Rp {{ formatPrice(product.originalPrice) }}
+                        </div>
+                      </div>
+
+                      <!-- Stock Status -->
+                      <div class="mb-3">
+                        <span 
+                          :class="getStockClass(product.stockQuantity)"
+                          class="text-xs px-2 py-1 rounded"
+                        >
+                          Stok: {{ product.stockQuantity }}
+                        </span>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      <div class="flex flex-col space-y-2">
+                        <button 
+                          @click="addToCart(product.id)"
+                          class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          <i class="fa-solid fa-shopping-cart mr-1"></i>Keranjang
+                        </button>
+                        <button 
+                          @click="viewProduct(product.id)"
+                          class="border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm"
+                        >
+                          <i class="fa-solid fa-eye mr-1"></i>Detail
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+
           <!-- Pagination -->
           <div class="mt-8 flex justify-center">
             <div class="flex space-x-2">
@@ -286,49 +358,92 @@ import { useRouter } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
 import UserNavbar from '../components/UserNavbar.vue'
-import type { ProductFilters } from '@/services/api'
+import { apiService, type ProductFilters, type Category } from '@/services/api'
+import { debounce } from '@/utils/debounce'
 
 const router = useRouter()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
 
 // State
 const searchQuery = ref('')
-const sortBy = ref('popular')
-const viewMode = ref('grid')
+const sortBy = ref('name-asc')
+const viewMode = ref(localStorage.getItem('products-view-mode') || 'grid')
 const itemsPerPage = 12
+
+// Categories
+const availableCategories = ref<Category[]>([])
+const categoriesLoading = ref(false)
 
 // Filters
 const filters = reactive({
-  categories: [] as string[],
-  brands: [] as string[],
-  ratings: [] as string[],
+  categories: [] as number[],
   priceRange: '',
   priceMin: null as number | null,
   priceMax: null as number | null
 })
 
-// Initialize on mount
-onMounted(async () => {
-  await loadProducts()
-})
+// Load categories function
+const loadCategories = async () => {
+  try {
+    categoriesLoading.value = true
+    const categories = await apiService.getCategories()
+    availableCategories.value = categories.filter(cat => cat.isActive)
+  } catch (error) {
+    console.error('Error loading categories:', error)
+  } finally {
+    categoriesLoading.value = false
+  }
+}
 
-// Watch for filter changes
-watch([filters, sortBy, searchQuery], () => {
-  loadProducts()
-}, { deep: true })
+// Parse price range
+const parsePriceRange = () => {
+  if (!filters.priceRange) return { min: undefined, max: undefined }
+  
+  if (filters.priceRange === '0-5000000') {
+    return { min: 0, max: 5000000 }
+  } else if (filters.priceRange === '5000000-15000000') {
+    return { min: 5000000, max: 15000000 }
+  } else if (filters.priceRange === '15000000+') {
+    return { min: 15000000, max: undefined }
+  }
+  
+  return { min: undefined, max: undefined }
+}
+
+// Parse sorting parameter
+const parseSortBy = () => {
+  switch (sortBy.value) {
+    case 'name-asc':
+      return { sortBy: 'name', sortOrder: 'asc' }
+    case 'name-desc':
+      return { sortBy: 'name', sortOrder: 'desc' }
+    case 'price-asc':
+      return { sortBy: 'price', sortOrder: 'asc' }
+    case 'price-desc':
+      return { sortBy: 'price', sortOrder: 'desc' }
+    default:
+      return { sortBy: 'name', sortOrder: 'asc' }
+  }
+}
 
 // Load products function
 const loadProducts = async () => {
   try {
+    const priceRange = parsePriceRange()
+    const sorting = parseSortBy()
+    
     const productFilters: ProductFilters = {
       search: searchQuery.value || undefined,
-      brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
-      minPrice: filters.priceMin || undefined,
-      maxPrice: filters.priceMax || undefined,
-      onSale: filters.priceRange === 'sale' ? true : undefined,
+      category: filters.categories.length > 0 ? filters.categories[0] : undefined, // Use first selected category
+      minPrice: filters.priceMin || priceRange.min,
+      maxPrice: filters.priceMax || priceRange.max,
+      sortBy: sorting.sortBy,
+      sortOrder: sorting.sortOrder,
       page: productsStore.currentPage,
       size: itemsPerPage
     }
@@ -338,6 +453,33 @@ const loadProducts = async () => {
     console.error('Error loading products:', error)
   }
 }
+
+// Debounced search function
+const debouncedSearch = debounce(() => {
+  loadProducts()
+}, 500)
+
+// Initialize on mount
+onMounted(async () => {
+  await loadCategories()
+  await loadProducts()
+  await wishlistStore.loadWishlist()
+})
+
+// Watch for filter changes (excluding searchQuery since it's handled by debounced search)
+watch([filters, sortBy], () => {
+  loadProducts()
+}, { deep: true })
+
+// Watch for search query changes with debounce
+watch(searchQuery, () => {
+  debouncedSearch()
+})
+
+// Watch for view mode changes and save to localStorage
+watch(viewMode, (newMode) => {
+  localStorage.setItem('products-view-mode', newMode)
+})
 
 // Computed
 const filteredProducts = computed(() => {
@@ -380,9 +522,17 @@ const getStockClass = (stock: number) => {
   return 'bg-red-100 text-red-800'
 }
 
-const toggleWishlist = (productId: number) => {
-  console.log('Toggle wishlist:', productId)
-  // TODO: Implement wishlist functionality
+const toggleWishlist = async (productId: number) => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await wishlistStore.toggleWishlist(productId)
+  } catch (error) {
+    console.error('Error toggling wishlist:', error)
+  }
 }
 
 const addToCart = async (productId: number) => {
@@ -400,7 +550,7 @@ const addToCart = async (productId: number) => {
 }
 
 const viewProduct = (productId: number) => {
-  router.push(`/products/${productId}`)
+  router.push(`/product/${productId}`)
 }
 
 const applyFilters = () => {
@@ -410,5 +560,32 @@ const applyFilters = () => {
 </script>
 
 <style scoped>
-/* Custom styles if needed */
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Ensure proper spacing and alignment in list view */
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Smooth transitions for view mode toggle */
+.transition-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Responsive adjustments for list view */
+@media (max-width: 768px) {
+  .w-48 {
+    width: 120px;
+  }
+  
+  .h-32 {
+    height: 80px;
+  }
+}
 </style>

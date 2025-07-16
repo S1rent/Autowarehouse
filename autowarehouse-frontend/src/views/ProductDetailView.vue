@@ -2,21 +2,45 @@
   <div class="bg-gray-50 font-inter min-h-screen">
     <UserNavbar />
 
-    <!-- Breadcrumb -->
-    <section class="bg-gray-100 py-4">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center space-x-2 text-sm">
-          <router-link to="/" class="text-blue-600 hover:underline">Home</router-link>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-          <router-link to="/products" class="text-blue-600 hover:underline">Products</router-link>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-          <span class="text-gray-600">{{ product.category }}</span>
-        </div>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex justify-center items-center min-h-screen">
+      <div class="text-center">
+        <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+        <p class="text-gray-600">Loading product details...</p>
       </div>
-    </section>
+    </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Error State -->
+    <div v-else-if="error" class="flex justify-center items-center min-h-screen">
+      <div class="text-center">
+        <i class="fa-solid fa-exclamation-triangle text-4xl text-red-600 mb-4"></i>
+        <p class="text-red-600 mb-4">{{ error }}</p>
+        <button 
+          @click="loadProduct" 
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Content -->
+    <div v-else-if="transformedProduct">
+      <!-- Breadcrumb -->
+      <section class="bg-gray-100 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center space-x-2 text-sm">
+            <router-link to="/" class="text-blue-600 hover:underline">Home</router-link>
+            <i class="fa-solid fa-chevron-right text-gray-400"></i>
+            <router-link to="/products" class="text-blue-600 hover:underline">Products</router-link>
+            <i class="fa-solid fa-chevron-right text-gray-400"></i>
+            <span class="text-gray-600">{{ transformedProduct.category }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         
         <!-- Product Images -->
@@ -24,13 +48,13 @@
           <div class="aspect-square bg-white rounded-lg shadow-md overflow-hidden">
             <img 
               :src="selectedImage" 
-              :alt="product.name"
+              :alt="transformedProduct.name"
               class="w-full h-full object-cover"
             >
           </div>
           <div class="grid grid-cols-4 gap-2">
             <div 
-              v-for="(image, index) in product.images" 
+              v-for="(image, index) in transformedProduct.images" 
               :key="index"
               @click="selectedImage = image"
               class="aspect-square bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer border-2 transition-colors"
@@ -38,7 +62,7 @@
             >
               <img 
                 :src="image" 
-                :alt="`${product.name} ${index + 1}`"
+                :alt="`${transformedProduct.name} ${index + 1}`"
                 class="w-full h-full object-cover"
               >
             </div>
@@ -48,8 +72,8 @@
         <!-- Product Info -->
         <div class="space-y-6">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
-            <p class="text-gray-600 mb-4">{{ product.brand }} - {{ product.description }}</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ transformedProduct.name }}</h1>
+            <p class="text-gray-600 mb-4">{{ transformedProduct.brand }} - {{ transformedProduct.description }}</p>
             
             <!-- Rating -->
             <div class="flex items-center space-x-2 mb-4">
@@ -57,59 +81,40 @@
                 <i 
                   v-for="i in 5" 
                   :key="i"
-                  :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                  :class="i <= transformedProduct.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
                 ></i>
               </div>
-              <span class="text-gray-600">({{ product.rating }}) {{ product.reviews.toLocaleString() }} reviews</span>
+              <span class="text-gray-600">({{ transformedProduct.rating }}) {{ transformedProduct.reviews.toLocaleString() }} reviews</span>
             </div>
 
             <!-- Price -->
             <div class="flex items-center space-x-4 mb-6">
-              <span class="text-3xl font-bold text-blue-600">Rp {{ formatPrice(product.price) }}</span>
+              <span class="text-3xl font-bold text-blue-600">Rp {{ formatPrice(transformedProduct.price) }}</span>
               <span 
-                v-if="product.originalPrice"
+                v-if="transformedProduct.originalPrice"
                 class="text-lg text-gray-500 line-through"
               >
-                Rp {{ formatPrice(product.originalPrice) }}
+                Rp {{ formatPrice(transformedProduct.originalPrice) }}
               </span>
               <span 
-                v-if="product.discount"
+                v-if="transformedProduct.discount"
                 class="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full"
               >
-                {{ product.discount }}% off
+                {{ transformedProduct.discount }}% off
               </span>
             </div>
 
             <!-- Stock Status -->
             <div class="mb-6">
               <span 
-                :class="getStockBadgeClass(product.stock)"
+                :class="getStockBadgeClass(transformedProduct.stock)"
                 class="text-sm px-3 py-1 rounded-full"
               >
-                {{ getStockText(product.stock) }}
+                {{ getStockText(transformedProduct.stock) }}
               </span>
             </div>
           </div>
 
-          <!-- Variants -->
-          <div v-if="product.variants" class="space-y-4">
-            <div v-for="variant in product.variants" :key="variant.name">
-              <h4 class="font-medium text-gray-900 mb-2">{{ variant.name }}:</h4>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="option in variant.options"
-                  :key="option"
-                  @click="selectVariant(variant.name, option)"
-                  class="px-4 py-2 border rounded-lg transition-colors"
-                  :class="selectedVariants[variant.name] === option 
-                    ? 'border-blue-600 bg-blue-50 text-blue-600' 
-                    : 'border-gray-300 hover:border-gray-400'"
-                >
-                  {{ option }}
-                </button>
-              </div>
-            </div>
-          </div>
 
           <!-- Quantity -->
           <div class="flex items-center space-x-4">
@@ -125,20 +130,20 @@
               <span class="px-4 py-2 border-x">{{ quantity }}</span>
               <button 
                 @click="increaseQuantity"
-                :disabled="quantity >= product.maxQuantity"
+                :disabled="quantity >= transformedProduct.maxQuantity"
                 class="p-2 hover:bg-gray-100 disabled:opacity-50"
               >
                 <i class="fa-solid fa-plus"></i>
               </button>
             </div>
-            <span class="text-sm text-gray-500">{{ product.maxQuantity }} available</span>
+            <span class="text-sm text-gray-500">{{ transformedProduct.maxQuantity }} available</span>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex space-x-4">
             <button 
               @click="addToCart"
-              :disabled="product.stock === 'out-of-stock'"
+              :disabled="transformedProduct.stock === 'out-of-stock'"
               class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i class="fa-solid fa-shopping-cart mr-2"></i>
@@ -147,9 +152,9 @@
             <button 
               @click="toggleWishlist"
               class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              :class="isInWishlist ? 'text-red-500 border-red-300' : 'text-gray-600'"
+              :class="isInWishlistComputed ? 'text-red-500 border-red-300' : 'text-gray-600'"
             >
-              <i :class="isInWishlist ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+              <i :class="isInWishlistComputed ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
             </button>
           </div>
 
@@ -157,7 +162,7 @@
           <div class="border-t pt-6">
             <h3 class="font-semibold text-gray-900 mb-4">Key Features</h3>
             <ul class="space-y-2">
-              <li v-for="feature in product.features" :key="feature" class="flex items-center">
+              <li v-for="feature in transformedProduct.features" :key="feature" class="flex items-center">
                 <i class="fa-solid fa-check text-green-500 mr-2"></i>
                 <span class="text-gray-700">{{ feature }}</span>
               </li>
@@ -214,7 +219,7 @@
                 ? 'border-blue-600 text-blue-600' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             >
-              Reviews ({{ product.reviews }})
+              Reviews ({{ transformedProduct.reviews }})
             </button>
           </nav>
         </div>
@@ -222,13 +227,13 @@
         <div class="py-8">
           <!-- Description Tab -->
           <div v-if="activeTab === 'description'" class="prose max-w-none">
-            <p class="text-gray-700 leading-relaxed">{{ product.fullDescription }}</p>
+            <p class="text-gray-700 leading-relaxed">{{ transformedProduct.fullDescription }}</p>
           </div>
 
           <!-- Specifications Tab -->
           <div v-if="activeTab === 'specifications'">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div v-for="(value, key) in product.specifications" :key="key" class="flex justify-between py-2 border-b border-gray-200">
+              <div v-for="(value, key) in transformedProduct.specifications" :key="key" class="flex justify-between py-2 border-b border-gray-200">
                 <span class="font-medium text-gray-900">{{ key }}</span>
                 <span class="text-gray-600">{{ value }}</span>
               </div>
@@ -237,28 +242,14 @@
 
           <!-- Reviews Tab -->
           <div v-if="activeTab === 'reviews'" class="space-y-6">
-            <div v-for="review in product.reviewsList" :key="review.id" class="border-b border-gray-200 pb-6">
-              <div class="flex items-center space-x-4 mb-2">
-                <img :src="review.avatar" :alt="review.name" class="w-10 h-10 rounded-full">
-                <div>
-                  <h4 class="font-medium text-gray-900">{{ review.name }}</h4>
-                  <div class="flex items-center space-x-2">
-                    <div class="flex text-yellow-400">
-                      <i 
-                        v-for="i in 5" 
-                        :key="i"
-                        :class="i <= review.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
-                        class="text-sm"
-                      ></i>
-                    </div>
-                    <span class="text-sm text-gray-500">{{ review.date }}</span>
-                  </div>
-                </div>
-              </div>
-              <p class="text-gray-700">{{ review.comment }}</p>
+            <div class="text-center text-gray-500 py-8">
+              <i class="fa-solid fa-comment-slash text-4xl mb-4"></i>
+              <p>Reviews feature coming soon!</p>
+              <p class="text-sm mt-2">We're working on implementing the review system.</p>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
@@ -306,100 +297,141 @@
         </div>
       </div>
     </footer>
-  </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
 import UserNavbar from '../components/UserNavbar.vue'
+import { apiService, type Product } from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
 
 // State
-const searchQuery = ref('')
 const quantity = ref(1)
 const activeTab = ref('description')
 const isInWishlist = ref(false)
 const selectedVariants = reactive({})
+const product = ref<Product | null>(null)
+const isLoading = ref(false)
+const error = ref<string | null>(null)
 
-// Sample product data
-const product = ref({
-  id: 1,
-  name: 'MacBook Pro 14" M3',
-  brand: 'Apple',
-  category: 'Electronics',
-  description: '512GB SSD, 16GB RAM',
-  fullDescription: 'The MacBook Pro 14-inch with M3 chip delivers exceptional performance for professionals and creatives. Featuring a stunning Liquid Retina XDR display, advanced camera and audio, and all-day battery life, it\'s built for those who demand the best.',
-  price: 32000000,
-  originalPrice: 35000000,
-  discount: 9,
-  rating: 5,
-  reviews: 124,
-  stock: 'in-stock',
-  maxQuantity: 5,
-  images: [
-    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=600&h=600&fit=crop'
-  ],
-  variants: [
-    {
-      name: 'Storage',
-      options: ['512GB', '1TB', '2TB']
-    },
-    {
-      name: 'Color',
-      options: ['Space Gray', 'Silver']
-    }
-  ],
-  features: [
-    'Apple M3 chip with 8-core CPU',
-    '14-inch Liquid Retina XDR display',
-    '16GB unified memory',
-    '512GB SSD storage',
-    'Up to 18 hours battery life',
-    'Three Thunderbolt 4 ports'
-  ],
-  specifications: {
-    'Processor': 'Apple M3 8-core CPU',
-    'Memory': '16GB unified memory',
-    'Storage': '512GB SSD',
-    'Display': '14.2-inch Liquid Retina XDR',
-    'Graphics': '10-core GPU',
-    'Weight': '1.55 kg',
-    'Dimensions': '31.26 × 22.12 × 1.55 cm',
-    'Battery': 'Up to 18 hours',
-    'Operating System': 'macOS Sonoma'
-  },
-  reviewsList: [
-    {
-      id: 1,
-      name: 'John Doe',
-      rating: 5,
-      date: '2024-01-15',
-      comment: 'Excellent laptop! The performance is outstanding and the display is beautiful.',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      rating: 4,
-      date: '2024-01-10',
-      comment: 'Great build quality and fast performance. Battery life is impressive.',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face'
-    }
-  ]
+// Get product ID from route
+const productId = computed(() => {
+  const id = route.params.id
+  return typeof id === 'string' ? parseInt(id) : null
 })
 
-const selectedImage = ref(product.value.images[0])
+// Load product data
+const loadProduct = async () => {
+  if (!productId.value) {
+    error.value = 'Invalid product ID'
+    return
+  }
 
-// Initialize selected variants
-product.value.variants?.forEach(variant => {
-  selectedVariants[variant.name] = variant.options[0]
+  try {
+    isLoading.value = true
+    error.value = null
+    product.value = await apiService.getProduct(productId.value)
+  } catch (err) {
+    console.error('Error loading product:', err)
+    error.value = 'Failed to load product details'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Initialize on mount
+onMounted(async () => {
+  await loadProduct()
+  await wishlistStore.loadWishlist()
 })
+
+// Computed properties
+const selectedImage = ref('')
+const productImages = computed(() => {
+  if (!product.value?.imageUrls || product.value.imageUrls.length === 0) {
+    return ['/placeholder-product.jpg']
+  }
+  return product.value.imageUrls
+})
+
+// Watch for product changes to set initial image
+const setInitialImage = () => {
+  if (productImages.value.length > 0) {
+    selectedImage.value = productImages.value[0]
+  }
+}
+
+// Set initial image when product loads
+const productData = computed(() => {
+  if (product.value && selectedImage.value === '') {
+    setInitialImage()
+  }
+  return product.value
+})
+
+// Transform API data to match template expectations
+const transformedProduct = computed(() => {
+  if (!product.value) return null
+
+  return {
+    id: product.value.id,
+    name: product.value.name,
+    brand: product.value.brand,
+    category: product.value.categoryName || 'Electronics',
+    description: product.value.description,
+    fullDescription: product.value.description, // Use description as full description
+    price: product.value.price,
+    originalPrice: product.value.originalPrice,
+    discount: product.value.originalPrice ? 
+      Math.round(((product.value.originalPrice - product.value.price) / product.value.originalPrice) * 100) : 0,
+    rating: product.value.rating || 0,
+    reviews: product.value.reviewCount || 0,
+    stock: getStockStatus(product.value.stockQuantity),
+    maxQuantity: Math.min(product.value.stockQuantity, 10), // Max 10 per order
+    images: productImages.value,
+    features: parseFeatures(product.value.features),
+    specifications: parseSpecifications(product.value.specifications),
+    reviewsList: [] // TODO: Implement reviews API
+  }
+})
+
+// Helper functions
+const getStockStatus = (stockQuantity: number) => {
+  if (stockQuantity === 0) return 'out-of-stock'
+  if (stockQuantity <= 5) return 'low-stock'
+  return 'in-stock'
+}
+
+const parseFeatures = (features: string | undefined) => {
+  if (!features) return []
+  return features.split('\n').filter(f => f.trim().length > 0)
+}
+
+const parseSpecifications = (specifications: string | undefined) => {
+  if (!specifications) return {}
+  
+  const specs: Record<string, string> = {}
+  const lines = specifications.split('\n')
+  
+  lines.forEach(line => {
+    const [key, ...valueParts] = line.split(':')
+    if (key && valueParts.length > 0) {
+      specs[key.trim()] = valueParts.join(':').trim()
+    }
+  })
+  
+  return specs
+}
 
 // Methods
 const formatPrice = (price: number) => {
@@ -433,7 +465,7 @@ const getStockText = (stock: string) => {
 }
 
 const increaseQuantity = () => {
-  if (quantity.value < product.value.maxQuantity) {
+  if (transformedProduct.value && quantity.value < transformedProduct.value.maxQuantity) {
     quantity.value++
   }
 }
@@ -445,23 +477,47 @@ const decreaseQuantity = () => {
 }
 
 const selectVariant = (variantName: string, option: string) => {
-  selectedVariants[variantName] = option
+  (selectedVariants as any)[variantName] = option
 }
 
-const addToCart = () => {
-  // Implement add to cart logic
-  console.log('Adding to cart:', {
-    product: product.value,
-    quantity: quantity.value,
-    variants: selectedVariants
-  })
-  alert('Product added to cart!')
+const addToCart = async () => {
+  if (!transformedProduct.value) return
+  
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await cartStore.addToCart(transformedProduct.value.id, quantity.value)
+    
+    // Show success message
+    alert(`${transformedProduct.value.name} added to cart!`)
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+    alert('Failed to add product to cart. Please try again.')
+  }
 }
 
-const toggleWishlist = () => {
-  isInWishlist.value = !isInWishlist.value
-  console.log('Wishlist toggled:', isInWishlist.value)
+const toggleWishlist = async () => {
+  if (!transformedProduct.value) return
+  
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await wishlistStore.toggleWishlist(transformedProduct.value.id)
+  } catch (error) {
+    console.error('Error toggling wishlist:', error)
+  }
 }
+
+// Computed property for wishlist status
+const isInWishlistComputed = computed(() => {
+  return transformedProduct.value ? wishlistStore.isInWishlist(transformedProduct.value.id) : false
+})
 </script>
 
 <style scoped>

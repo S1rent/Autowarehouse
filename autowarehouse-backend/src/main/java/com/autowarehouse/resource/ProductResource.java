@@ -31,6 +31,8 @@ public class ProductResource {
             @QueryParam("search") String search,
             @QueryParam("onSale") Boolean onSale,
             @QueryParam("status") String status,
+            @QueryParam("sortBy") String sortBy,
+            @QueryParam("sortOrder") String sortOrder,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size) {
         
@@ -38,7 +40,7 @@ public class ProductResource {
             System.out.println("getAllProducts called with search: " + search);
             
             List<Product> products = productService.findProductsWithFilters(
-                categoryId, brand, minPrice, maxPrice, search, onSale, status
+                categoryId, brand, minPrice, maxPrice, search, onSale, status, sortBy, sortOrder
             );
 
             System.out.println("Found " + products.size() + " products");

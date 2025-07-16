@@ -128,6 +128,8 @@ export interface ProductFilters {
   search?: string
   onSale?: boolean
   status?: string
+  sortBy?: string
+  sortOrder?: string
   page?: number
   size?: number
 }
