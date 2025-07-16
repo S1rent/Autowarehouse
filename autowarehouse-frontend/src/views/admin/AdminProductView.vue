@@ -490,15 +490,7 @@
                     >
                     <span class="ml-3 text-sm font-medium text-gray-700">Aktif</span>
                   </label>
-                  <label class="flex items-center">
-                    <input 
-                      v-model="productForm.status"
-                      type="radio" 
-                      value="draft" 
-                      class="w-4 h-4 text-blue-600 focus:ring-blue-600 border-gray-300"
-                    >
-                    <span class="ml-3 text-sm font-medium text-gray-700">Draft</span>
-                  </label>
+                  
                   <label class="flex items-center">
                     <input 
                       v-model="productForm.status"

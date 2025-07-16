@@ -140,78 +140,141 @@ public class ProductService {
                            "%" + query.toLowerCase() + "%").list();
     }
 
+    public List<Product> searchAllProducts(String query) {
+        return Product.find("(lower(name) like ?1 or lower(description) like ?1 or lower(sku) like ?1)", 
+                           "%" + query.toLowerCase() + "%").list();
+    }
+
     public List<Product> findProductsWithFilters(Long categoryId, String brand, BigDecimal minPrice, 
                                                BigDecimal maxPrice, String search, Boolean onSale, String status) {
-        StringBuilder queryBuilder = new StringBuilder("1=1");
-        List<Object> parameters = new ArrayList<>();
-        int paramIndex = 1;
+        try {
+            // If only search is provided with no status or "Semua Status" (empty string), use searchAllProducts
+            if (search != null && !search.trim().isEmpty() && 
+                categoryId == null && brand == null && minPrice == null && 
+                maxPrice == null && onSale == null && 
+                (status == null || status.trim().isEmpty())) {
+                return searchAllProducts(search);
+            }
 
-        // Category filter
-        if (categoryId != null) {
-            queryBuilder.append(" and category.id = ?").append(paramIndex++);
-            parameters.add(categoryId);
-        }
+            // If only search and specific status are provided, use appropriate search method
+            if (search != null && !search.trim().isEmpty() && 
+                categoryId == null && brand == null && minPrice == null && 
+                maxPrice == null && onSale == null && 
+                status != null && !status.trim().isEmpty()) {
+                if (status.toLowerCase().equals("all") || status.toLowerCase().equals("semua")) {
+                    return searchAllProducts(search);
+                } else {
+                    // For specific status filters, continue with complex query
+                }
+            }
 
-        // Brand filter
-        if (brand != null && !brand.trim().isEmpty()) {
-            queryBuilder.append(" and lower(brand) like ?").append(paramIndex++);
-            parameters.add("%" + brand.toLowerCase() + "%");
-        }
+            StringBuilder queryBuilder = new StringBuilder("1=1");
+            List<Object> parameters = new ArrayList<>();
+            int paramIndex = 1;
 
-        // Price range filter
-        if (minPrice != null) {
-            queryBuilder.append(" and price >= ?").append(paramIndex++);
-            parameters.add(minPrice);
-        }
-        if (maxPrice != null) {
-            queryBuilder.append(" and price <= ?").append(paramIndex++);
-            parameters.add(maxPrice);
-        }
+            // Category filter
+            if (categoryId != null) {
+                queryBuilder.append(" and category.id = ?").append(paramIndex++);
+                parameters.add(categoryId);
+            }
 
-        // Search filter
-        if (search != null && !search.trim().isEmpty()) {
-            queryBuilder.append(" and (lower(name) like ?").append(paramIndex)
-                       .append(" or lower(description) like ?").append(paramIndex)
-                       .append(" or lower(sku) like ?").append(paramIndex).append(")");
-            String searchParam = "%" + search.toLowerCase() + "%";
-            parameters.add(searchParam);
-            parameters.add(searchParam);
-            parameters.add(searchParam);
-            paramIndex++;
-        }
+            // Brand filter
+            if (brand != null && !brand.trim().isEmpty()) {
+                queryBuilder.append(" and lower(brand) like ?").append(paramIndex++);
+                parameters.add("%" + brand.toLowerCase() + "%");
+            }
 
-        // On sale filter
-        if (onSale != null && onSale) {
-            queryBuilder.append(" and saleStartDate <= ?").append(paramIndex)
-                       .append(" and saleEndDate >= ?").append(paramIndex + 1);
-            LocalDateTime now = LocalDateTime.now();
-            parameters.add(now);
-            parameters.add(now);
-            paramIndex += 2;
-        }
+            // Price range filter
+            if (minPrice != null) {
+                queryBuilder.append(" and price >= ?").append(paramIndex++);
+                parameters.add(minPrice);
+            }
+            if (maxPrice != null) {
+                queryBuilder.append(" and price <= ?").append(paramIndex++);
+                parameters.add(maxPrice);
+            }
 
-        // Status filter
-        if (status != null && !status.trim().isEmpty()) {
-            switch (status.toLowerCase()) {
-                case "active":
-                    queryBuilder.append(" and isActive = true and stockQuantity > 0");
-                    break;
-                case "inactive":
-                    queryBuilder.append(" and isActive = false");
-                    break;
-                case "out_of_stock":
-                    queryBuilder.append(" and stockQuantity = 0");
-                    break;
-                default:
-                    // No additional filter for "all" or unknown status
-                    break;
+            // Search filter - Fixed parameter indexing
+            if (search != null && !search.trim().isEmpty()) {
+                queryBuilder.append(" and (lower(name) like ?").append(paramIndex)
+                           .append(" or lower(description) like ?").append(paramIndex + 1)
+                           .append(" or lower(sku) like ?").append(paramIndex + 2)
+                           .append(" or lower(brand) like ?").append(paramIndex + 3).append(")");
+                String searchParam = "%" + search.toLowerCase() + "%";
+                parameters.add(searchParam);
+                parameters.add(searchParam);
+                parameters.add(searchParam);
+                parameters.add(searchParam);
+                paramIndex += 4;
+            }
+
+            // On sale filter
+            if (onSale != null && onSale) {
+                queryBuilder.append(" and saleStartDate <= ?").append(paramIndex)
+                           .append(" and saleEndDate >= ?").append(paramIndex + 1);
+                LocalDateTime now = LocalDateTime.now();
+                parameters.add(now);
+                parameters.add(now);
+                paramIndex += 2;
+            }
+
+            // Status filter
+            if (status != null && !status.trim().isEmpty()) {
+                switch (status.toLowerCase()) {
+                    case "active":
+                        queryBuilder.append(" and isActive = true and stockQuantity > 0");
+                        break;
+                    case "inactive":
+                        queryBuilder.append(" and isActive = false");
+                        break;
+                    case "out_of_stock":
+                        queryBuilder.append(" and stockQuantity = 0");
+                        break;
+                    case "all":
+                    case "semua":
+                        // No filter for status - show all products regardless of status
+                        break;
+                    default:
+                        // No additional filter for unknown status
+                        break;
+                }
+            } else {
+                // When status is null or empty (which means "Semua Status" is selected)
+                // Don't add any status filter - show all products regardless of status
+                // This handles the case where frontend sends empty string for "Semua Status"
+            }
+
+            // Add ordering
+            queryBuilder.append(" order by createdAt desc");
+
+            System.out.println("Query: " + queryBuilder.toString());
+            System.out.println("Parameters: " + parameters);
+
+            return Product.find(queryBuilder.toString(), parameters.toArray()).list();
+        } catch (Exception e) {
+            System.err.println("Error in findProductsWithFilters: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Fallback: if search is provided, try simple search
+            if (search != null && !search.trim().isEmpty()) {
+                System.out.println("Falling back to simple search");
+                // Check if status is null/empty (Semua Status) or "all"/"semua" to use searchAllProducts
+                if (status == null || status.trim().isEmpty() || 
+                    status.toLowerCase().equals("all") || status.toLowerCase().equals("semua")) {
+                    return searchAllProducts(search);
+                } else {
+                    return searchProducts(search);
+                }
+            }
+            
+            // If no search, return appropriate products based on status
+            if (status == null || status.trim().isEmpty() || 
+                status.toLowerCase().equals("all") || status.toLowerCase().equals("semua")) {
+                return findAll();
+            } else {
+                return findActiveProducts();
             }
         }
-
-        // Add ordering
-        queryBuilder.append(" order by createdAt desc");
-
-        return Product.find(queryBuilder.toString(), parameters.toArray()).list();
     }
 
     public List<Product> findFeaturedProducts(int limit) {

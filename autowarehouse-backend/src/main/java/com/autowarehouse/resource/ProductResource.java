@@ -35,9 +35,13 @@ public class ProductResource {
             @QueryParam("size") @DefaultValue("20") int size) {
         
         try {
+            System.out.println("getAllProducts called with search: " + search);
+            
             List<Product> products = productService.findProductsWithFilters(
                 categoryId, brand, minPrice, maxPrice, search, onSale, status
             );
+
+            System.out.println("Found " + products.size() + " products");
 
             List<ProductResponse> response = products.stream()
                     .map(ProductResponse::new)
@@ -45,8 +49,10 @@ public class ProductResource {
             
             return Response.ok(response).build();
         } catch (Exception e) {
+            System.err.println("Error in getAllProducts: " + e.getMessage());
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to fetch products"))
+                    .entity(new ErrorResponse("Failed to fetch products: " + e.getMessage()))
                     .build();
         }
     }
