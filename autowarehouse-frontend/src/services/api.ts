@@ -127,6 +127,7 @@ export interface ProductFilters {
   maxPrice?: number
   search?: string
   onSale?: boolean
+  status?: string
   page?: number
   size?: number
 }

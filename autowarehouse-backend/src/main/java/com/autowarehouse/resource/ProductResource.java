@@ -30,26 +30,14 @@ public class ProductResource {
             @QueryParam("maxPrice") BigDecimal maxPrice,
             @QueryParam("search") String search,
             @QueryParam("onSale") Boolean onSale,
+            @QueryParam("status") String status,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size) {
         
         try {
-            List<Product> products;
-            
-            if (search != null && !search.trim().isEmpty()) {
-                products = productService.searchProducts(search);
-            } else if (categoryId != null) {
-                Category category = Category.findById(categoryId);
-                products = productService.findByCategory(category);
-            } else if (brand != null) {
-                products = productService.findByBrand(brand);
-            } else if (minPrice != null && maxPrice != null) {
-                products = productService.findInPriceRange(minPrice, maxPrice);
-            } else if (onSale != null && onSale) {
-                products = productService.findOnSale();
-            } else {
-                products = productService.findActiveProducts();
-            }
+            List<Product> products = productService.findProductsWithFilters(
+                categoryId, brand, minPrice, maxPrice, search, onSale, status
+            );
 
             List<ProductResponse> response = products.stream()
                     .map(ProductResponse::new)

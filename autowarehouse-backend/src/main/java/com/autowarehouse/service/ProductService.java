@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -135,8 +136,82 @@ public class ProductService {
     }
 
     public List<Product> searchProducts(String query) {
-        return Product.find("lower(name) like ?1 or lower(description) like ?1 and isActive = true", 
+        return Product.find("(lower(name) like ?1 or lower(description) like ?1 or lower(sku) like ?1) and isActive = true", 
                            "%" + query.toLowerCase() + "%").list();
+    }
+
+    public List<Product> findProductsWithFilters(Long categoryId, String brand, BigDecimal minPrice, 
+                                               BigDecimal maxPrice, String search, Boolean onSale, String status) {
+        StringBuilder queryBuilder = new StringBuilder("1=1");
+        List<Object> parameters = new ArrayList<>();
+        int paramIndex = 1;
+
+        // Category filter
+        if (categoryId != null) {
+            queryBuilder.append(" and category.id = ?").append(paramIndex++);
+            parameters.add(categoryId);
+        }
+
+        // Brand filter
+        if (brand != null && !brand.trim().isEmpty()) {
+            queryBuilder.append(" and lower(brand) like ?").append(paramIndex++);
+            parameters.add("%" + brand.toLowerCase() + "%");
+        }
+
+        // Price range filter
+        if (minPrice != null) {
+            queryBuilder.append(" and price >= ?").append(paramIndex++);
+            parameters.add(minPrice);
+        }
+        if (maxPrice != null) {
+            queryBuilder.append(" and price <= ?").append(paramIndex++);
+            parameters.add(maxPrice);
+        }
+
+        // Search filter
+        if (search != null && !search.trim().isEmpty()) {
+            queryBuilder.append(" and (lower(name) like ?").append(paramIndex)
+                       .append(" or lower(description) like ?").append(paramIndex)
+                       .append(" or lower(sku) like ?").append(paramIndex).append(")");
+            String searchParam = "%" + search.toLowerCase() + "%";
+            parameters.add(searchParam);
+            parameters.add(searchParam);
+            parameters.add(searchParam);
+            paramIndex++;
+        }
+
+        // On sale filter
+        if (onSale != null && onSale) {
+            queryBuilder.append(" and saleStartDate <= ?").append(paramIndex)
+                       .append(" and saleEndDate >= ?").append(paramIndex + 1);
+            LocalDateTime now = LocalDateTime.now();
+            parameters.add(now);
+            parameters.add(now);
+            paramIndex += 2;
+        }
+
+        // Status filter
+        if (status != null && !status.trim().isEmpty()) {
+            switch (status.toLowerCase()) {
+                case "active":
+                    queryBuilder.append(" and isActive = true and stockQuantity > 0");
+                    break;
+                case "inactive":
+                    queryBuilder.append(" and isActive = false");
+                    break;
+                case "out_of_stock":
+                    queryBuilder.append(" and stockQuantity = 0");
+                    break;
+                default:
+                    // No additional filter for "all" or unknown status
+                    break;
+            }
+        }
+
+        // Add ordering
+        queryBuilder.append(" order by createdAt desc");
+
+        return Product.find(queryBuilder.toString(), parameters.toArray()).list();
     }
 
     public List<Product> findFeaturedProducts(int limit) {

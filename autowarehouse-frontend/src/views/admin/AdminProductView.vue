@@ -628,24 +628,15 @@ const productForm = ref<ProductForm>({
 })
 
 const filteredProducts = computed(() => {
-  let filtered = products.value
-
-  // Only apply status filter client-side since backend doesn't support it
-  if (statusFilter.value && statusFilter.value.trim() !== '') {
-    filtered = filtered.filter(product => getProductStatus(product) === statusFilter.value)
-  }
-
-  // Pagination
+  // Since status filtering is now handled in fetchProducts, 
+  // we only need to handle pagination here
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return filtered.slice(start, end)
+  return products.value.slice(start, end)
 })
 
 const totalProducts = computed(() => {
-  // If status filter is applied, count filtered products
-  if (statusFilter.value && statusFilter.value.trim() !== '') {
-    return products.value.filter(product => getProductStatus(product) === statusFilter.value).length
-  }
+  // Since filtering is now handled in fetchProducts, just return the total
   return products.value.length
 })
 
@@ -809,7 +800,7 @@ const fetchProducts = async () => {
   loading.value = true
   error.value = null
   try {
-    // Build filter parameters
+    // Build filter parameters for backend API
     const filters: any = {}
     
     if (searchQuery.value.trim()) {
@@ -824,14 +815,20 @@ const fetchProducts = async () => {
       }
     }
     
-    // Note: statusFilter is handled client-side since backend doesn't have a direct status filter
-    // The backend returns active products by default, and we filter by stock status on frontend
+    if (statusFilter.value) {
+      filters.status = statusFilter.value
+    }
     
-    const allProducts = await apiService.getProducts(filters)
+    console.log('Fetching products with filters:', filters) // Debug log
+    
+    // Use the unified API endpoint with all filters
+    const allProducts = await apiService.getProducts(Object.keys(filters).length > 0 ? filters : undefined)
+    
+    console.log('Products fetched:', allProducts.length) // Debug log
     products.value = allProducts
   } catch (err) {
     error.value = 'Failed to fetch products'
-    console.error(err)
+    console.error('Error fetching products:', err)
   } finally {
     loading.value = false
   }
@@ -1020,9 +1017,10 @@ watch([searchQuery, categoryFilter], () => {
   debouncedFetchProducts()
 })
 
-// Watch status filter separately since it's client-side only
+// Watch status filter and trigger API call
 watch(statusFilter, () => {
   currentPage.value = 1 // Reset to first page when status filter changes
+  debouncedFetchProducts() // Now triggers API call for status filtering
 })
 
 onMounted(() => {
