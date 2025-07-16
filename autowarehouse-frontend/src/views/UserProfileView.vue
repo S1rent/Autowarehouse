@@ -114,11 +114,15 @@
                 <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
                 <button 
                   @click="toggleEditPersonal"
+                  :disabled="isUpdatingProfile"
                   :class="isEditingPersonal ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'"
-                  class="text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  class="text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i :class="isEditingPersonal ? 'fa-solid fa-save' : 'fa-solid fa-edit'" class="mr-2"></i>
-                  {{ isEditingPersonal ? 'Save' : 'Edit' }}
+                  <i 
+                    :class="isUpdatingProfile ? 'fa-solid fa-spinner fa-spin' : (isEditingPersonal ? 'fa-solid fa-save' : 'fa-solid fa-edit')" 
+                    class="mr-2"
+                  ></i>
+                  {{ isUpdatingProfile ? 'Saving...' : (isEditingPersonal ? 'Save' : 'Edit') }}
                 </button>
               </div>
             </div>
@@ -217,10 +221,14 @@
               <div class="mt-6">
                 <button 
                   @click="updatePassword"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  :disabled="isChangingPassword"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i class="fa-solid fa-lock mr-2"></i>
-                  Update Password
+                  <i 
+                    :class="isChangingPassword ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-lock'" 
+                    class="mr-2"
+                  ></i>
+                  {{ isChangingPassword ? 'Updating...' : 'Update Password' }}
                 </button>
               </div>
             </div>
@@ -511,6 +519,7 @@ import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useOrderStore } from '@/stores/order'
+import { apiService } from '@/services/api'
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
 
@@ -522,6 +531,8 @@ const orderStore = useOrderStore()
 
 // State
 const isEditingPersonal = ref(false)
+const isUpdatingProfile = ref(false)
+const isChangingPassword = ref(false)
 const activeTab = ref('profile')
 
 // User data - will be populated from auth store
@@ -543,13 +554,52 @@ const passwordForm = reactive({
 })
 
 // Methods
-const toggleEditPersonal = () => {
+const toggleEditPersonal = async () => {
   if (isEditingPersonal.value) {
-    // Save logic here
-    console.log('Saving personal information:', user)
-    alert('Personal information updated successfully!')
+    // Save profile changes
+    try {
+      isUpdatingProfile.value = true
+      
+      if (!authStore.user?.id) {
+        alert('User not found. Please login again.')
+        return
+      }
+
+      // Parse name into firstName and lastName
+      const nameParts = user.name.trim().split(' ')
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || ''
+
+      const profileData = {
+        firstName,
+        lastName,
+        phoneNumber: user.phone || ''
+      }
+
+      const updatedUser = await apiService.updateUserProfile(authStore.user.id, profileData)
+      
+      // Update auth store with new data
+      authStore.user = {
+        ...authStore.user!,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNumber: updatedUser.phoneNumber
+      }
+
+      // Reload user data
+      loadUserData()
+      
+      alert('Personal information updated successfully!')
+      isEditingPersonal.value = false
+    } catch (error: any) {
+      console.error('Error updating profile:', error)
+      alert(error.response?.data?.message || 'Failed to update profile. Please try again.')
+    } finally {
+      isUpdatingProfile.value = false
+    }
+  } else {
+    isEditingPersonal.value = true
   }
-  isEditingPersonal.value = !isEditingPersonal.value
 }
 
 const changePhoto = () => {
@@ -573,7 +623,7 @@ const openNotifications = () => {
   alert('Notification settings would be implemented here')
 }
 
-const updatePassword = () => {
+const updatePassword = async () => {
   if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
     alert('Please fill in all password fields')
     return
@@ -583,14 +633,29 @@ const updatePassword = () => {
     alert('New passwords do not match')
     return
   }
+
+  if (passwordForm.newPassword.length < 6) {
+    alert('New password must be at least 6 characters long')
+    return
+  }
   
-  console.log('Updating password')
-  alert('Password updated successfully!')
-  
-  // Clear form
-  passwordForm.currentPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
+  try {
+    isChangingPassword.value = true
+    
+    await apiService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
+    
+    alert('Password updated successfully!')
+    
+    // Clear form
+    passwordForm.currentPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+  } catch (error: any) {
+    console.error('Error changing password:', error)
+    alert(error.response?.data?.message || 'Failed to change password. Please try again.')
+  } finally {
+    isChangingPassword.value = false
+  }
 }
 
 const logout = () => {

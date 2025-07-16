@@ -1,5 +1,7 @@
 package com.autowarehouse.resource;
 
+import com.autowarehouse.dto.UpdateProfileRequest;
+import com.autowarehouse.dto.ChangePasswordRequest;
 import com.autowarehouse.entity.User;
 import com.autowarehouse.entity.UserRole;
 import com.autowarehouse.service.UserService;
@@ -8,8 +10,10 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.List;
 
@@ -87,8 +91,25 @@ public class UserResource {
     @PUT
     @Path("/profile/{id}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public Response updateProfile(@PathParam("id") Long id, @Valid UpdateProfileRequest request) {
+    public Response updateProfile(@PathParam("id") Long id, @Valid UpdateProfileRequest request, @Context SecurityContext securityContext) {
         try {
+            // Extract user from JWT token for security
+            String userEmail = securityContext.getUserPrincipal().getName();
+            User currentUser = userService.findByEmail(userEmail);
+            
+            if (currentUser == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(new ErrorResponse("User not found"))
+                        .build();
+            }
+            
+            // Check if user is trying to update their own profile or if they're admin
+            if (!currentUser.id.equals(id) && !"ADMIN".equals(currentUser.role)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse("You can only update your own profile"))
+                        .build();
+            }
+            
             User user = userService.updateProfile(id, request.firstName, request.lastName, request.phoneNumber);
             return Response.ok(new UserResponse(user)).build();
         } catch (IllegalArgumentException e) {
@@ -101,9 +122,19 @@ public class UserResource {
     @POST
     @Path("/change-password")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
-    public Response changePassword(@Valid ChangePasswordRequest request) {
+    public Response changePassword(@Valid ChangePasswordRequest request, @Context SecurityContext securityContext) {
         try {
-            userService.changePassword(request.userId, request.currentPassword, request.newPassword);
+            // Extract user ID from JWT token for security
+            String userEmail = securityContext.getUserPrincipal().getName();
+            User currentUser = userService.findByEmail(userEmail);
+            
+            if (currentUser == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(new ErrorResponse("User not found"))
+                        .build();
+            }
+            
+            userService.changePassword(currentUser.id, request.currentPassword, request.newPassword);
             return Response.ok(new SuccessResponse("Password changed successfully")).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -230,17 +261,6 @@ public class UserResource {
         public String password;
     }
 
-    public static class UpdateProfileRequest {
-        public String firstName;
-        public String lastName;
-        public String phoneNumber;
-    }
-
-    public static class ChangePasswordRequest {
-        public Long userId;
-        public String currentPassword;
-        public String newPassword;
-    }
 
     public static class ForgotPasswordRequest {
         public String email;

@@ -98,6 +98,12 @@ export interface PasswordResetConfirmRequest {
   newPassword: string
 }
 
+export interface UpdateProfileRequest {
+  firstName: string
+  lastName: string
+  phoneNumber?: string
+}
+
 // Product Types
 export interface Product {
   id: number
@@ -421,8 +427,16 @@ class ApiService {
     return response.data
   }
 
-  async updateUserProfile(userId: number, userData: Partial<User>): Promise<User> {
-    const response = await api.put<User>(`/users/profile/${userId}`, userData)
+  async updateUserProfile(userId: number, profileData: UpdateProfileRequest): Promise<User> {
+    const response = await api.put<User>(`/users/profile/${userId}`, profileData)
+    return response.data
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/users/change-password', {
+      currentPassword,
+      newPassword
+    })
     return response.data
   }
 
