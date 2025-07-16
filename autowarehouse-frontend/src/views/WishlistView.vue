@@ -170,89 +170,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import UserNavbar from '../components/UserNavbar.vue'
+import { useWishlistStore } from '@/stores/wishlist'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 // State
 const searchQuery = ref('')
+const addingToCartItems = ref<Set<number>>(new Set())
+const addedToCartItems = ref<Set<number>>(new Set())
 
-// Sample wishlist items
-const wishlistItems = ref([
-  {
-    id: 1,
-    name: 'Sony WH-1000XM4 Wireless Headphones',
-    description: 'Noise Cancelling, Bluetooth, 30hr Battery',
-    price: 5000000,
-    originalPrice: 5500000,
-    discount: 12,
-    rating: 5,
-    reviews: 2847,
-    stock: 'in-stock',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+// Computed
+const wishlistItems = computed(() => {
+  return wishlistStore.getWishlistProducts.map(product => ({
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    discount: product.isOnSale ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0,
+    rating: product.rating || 4,
+    reviews: product.reviewCount || 0,
+    stock: product.stockQuantity > 0 ? (product.stockQuantity < 10 ? 'low-stock' : 'in-stock') : 'out-of-stock',
+    image: product.imageUrls?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
     removing: false,
-    addingToCart: false,
-    addedToCart: false
-  },
-  {
-    id: 2,
-    name: 'iPhone 15 Pro Max',
-    description: '256GB, Titanium Blue, A17 Pro Chip',
-    price: 20000000,
-    rating: 4,
-    reviews: 1234,
-    stock: 'in-stock',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
-    removing: false,
-    addingToCart: false,
-    addedToCart: false
-  },
-  {
-    id: 3,
-    name: 'ASUS ROG Strix G15 Gaming Laptop',
-    description: 'AMD Ryzen 7, RTX 3070, 16GB RAM, 1TB SSD',
-    price: 18000000,
-    originalPrice: 20000000,
-    discount: 13,
-    rating: 5,
-    reviews: 892,
-    stock: 'in-stock',
-    image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&h=300&fit=crop',
-    removing: false,
-    addingToCart: false,
-    addedToCart: false
-  },
-  {
-    id: 4,
-    name: 'Apple Watch Series 9',
-    description: '45mm, GPS + Cellular, Midnight Aluminum',
-    price: 6000000,
-    rating: 4,
-    reviews: 3421,
-    stock: 'low-stock',
-    image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=400&h=300&fit=crop',
-    removing: false,
-    addingToCart: false,
-    addedToCart: false
-  },
-  {
-    id: 5,
-    name: 'AirPods Pro (2nd Generation)',
-    description: 'Active Noise Cancellation, MagSafe Charging Case',
-    price: 3500000,
-    originalPrice: 4000000,
-    discount: 11,
-    rating: 5,
-    reviews: 5678,
-    stock: 'in-stock',
-    image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=300&fit=crop',
-    removing: false,
-    addingToCart: false,
-    addedToCart: false
+    addingToCart: addingToCartItems.value.has(product.id),
+    addedToCart: addedToCartItems.value.has(product.id)
+  }))
+})
+
+// Load wishlist on component mount
+onMounted(async () => {
+  if (authStore.user?.id) {
+    await wishlistStore.loadWishlist()
   }
-])
+})
 
 // Methods
 const formatPrice = (price: number) => {
@@ -285,39 +244,54 @@ const getStockText = (stock: string) => {
   }
 }
 
-const addToCart = (itemId: number) => {
-  const item = wishlistItems.value.find(item => item.id === itemId)
-  if (item) {
-    item.addingToCart = true
+const addToCart = async (itemId: number) => {
+  if (!authStore.user?.id) {
+    router.push('/login')
+    return
+  }
+
+  try {
+    addingToCartItems.value.add(itemId)
+    
+    await cartStore.addToCart(itemId, 1)
+    
+    addedToCartItems.value.add(itemId)
     setTimeout(() => {
-      item.addingToCart = false
-      item.addedToCart = true
-      setTimeout(() => {
-        item.addedToCart = false
-      }, 2000)
-    }, 500)
+      addedToCartItems.value.delete(itemId)
+    }, 2000)
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  } finally {
+    addingToCartItems.value.delete(itemId)
   }
 }
 
-const removeFromWishlist = (itemId: number) => {
-  const item = wishlistItems.value.find(item => item.id === itemId)
-  if (item) {
-    item.removing = true
-    setTimeout(() => {
-      const index = wishlistItems.value.findIndex(item => item.id === itemId)
-      if (index > -1) {
-        wishlistItems.value.splice(index, 1)
-      }
-    }, 300)
+const removeFromWishlist = async (itemId: number) => {
+  if (!authStore.user?.id) {
+    router.push('/login')
+    return
+  }
+
+  try {
+    await wishlistStore.removeFromWishlist(itemId)
+  } catch (error) {
+    console.error('Error removing from wishlist:', error)
   }
 }
 
-const addAllToCart = () => {
-  wishlistItems.value.forEach(item => {
-    if (!item.addedToCart) {
-      addToCart(item.id)
+const addAllToCart = async () => {
+  if (!authStore.user?.id) {
+    router.push('/login')
+    return
+  }
+
+  for (const item of wishlistItems.value) {
+    if (!addedToCartItems.value.has(item.id)) {
+      await addToCart(item.id)
+      // Add small delay between requests to avoid overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
-  })
+  }
 }
 </script>
 

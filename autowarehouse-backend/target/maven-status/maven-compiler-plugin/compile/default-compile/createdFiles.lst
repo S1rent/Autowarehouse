@@ -29,6 +29,7 @@ com\autowarehouse\entity\AuctionWatcher.class
 com\autowarehouse\resource\CartResource$UpdateQuantityRequest.class
 com\autowarehouse\resource\UserResource$UserStatsResponse.class
 com\autowarehouse\resource\OrderResource$UpdatePaymentRequest.class
+com\autowarehouse\service\WishlistService.class
 com\autowarehouse\dto\PasswordResetConfirmRequest.class
 com\autowarehouse\resource\OrderResource$UpdateStatusRequest.class
 com\autowarehouse\resource\OrderResource$CreateOrderRequest.class
@@ -41,8 +42,12 @@ com\autowarehouse\entity\Order$OrderStatus.class
 com\autowarehouse\resource\AuctionResource$SuccessResponse.class
 com\autowarehouse\resource\AuctionResource$AuctionStatsResponse.class
 com\autowarehouse\resource\ProductResource$SuccessResponse.class
+com\autowarehouse\resource\WishlistResource$CountResponse.class
 com\autowarehouse\entity\Bid.class
+com\autowarehouse\resource\WishlistResource$ErrorResponse.class
+com\autowarehouse\resource\WishlistResource.class
 com\autowarehouse\resource\OrderResource.class
+com\autowarehouse\resource\WishlistResource$ExistsResponse.class
 com\autowarehouse\entity\Notification.class
 com\autowarehouse\resource\ProductResource$ProductDetailResponse.class
 com\autowarehouse\resource\OrderResource$OrderDetailResponse.class
@@ -60,15 +65,18 @@ com\autowarehouse\resource\ProductResource$UpdateProductRequest.class
 com\autowarehouse\entity\User.class
 com\autowarehouse\resource\AuctionResource$AuctionResponse.class
 com\autowarehouse\resource\UserResource$LoginRequest.class
+com\autowarehouse\resource\WishlistResource$AddToWishlistRequest.class
 com\autowarehouse\entity\CartItem.class
 com\autowarehouse\resource\ProductResource$ProductStatsResponse.class
 com\autowarehouse\resource\OrderResource$ShipOrderRequest.class
 com\autowarehouse\entity\UserRole.class
 com\autowarehouse\resource\ProductResource$ErrorResponse.class
+com\autowarehouse\resource\WishlistResource$WishlistItemResponse.class
 com\autowarehouse\resource\AuctionResource.class
 com\autowarehouse\resource\UserResource$ChangePasswordRequest.class
 com\autowarehouse\resource\AuthResource.class
 com\autowarehouse\resource\OrderResource$SuccessResponse.class
+com\autowarehouse\resource\WishlistResource$RemoveFromWishlistRequest.class
 com\autowarehouse\resource\UserResource$UpdateProfileRequest.class
 com\autowarehouse\entity\NotificationPriority$1.class
 com\autowarehouse\entity\Review.class
@@ -81,6 +89,7 @@ com\autowarehouse\resource\UserResource$RegisterRequest.class
 com\autowarehouse\service\JwtService.class
 com\autowarehouse\resource\CartResource$AddToCartRequest.class
 com\autowarehouse\resource\AuctionResource$CreateAuctionRequest.class
+com\autowarehouse\resource\WishlistResource$ProductResponse.class
 com\autowarehouse\resource\AuctionResource$AuctionDetailResponse.class
 com\autowarehouse\entity\NotificationType.class
 com\autowarehouse\entity\WishlistItem.class
@@ -94,6 +103,7 @@ com\autowarehouse\resource\AuctionResource$UpdateAuctionRequest.class
 com\autowarehouse\security\JwtAuthenticationMechanism.class
 com\autowarehouse\service\NotificationService.class
 com\autowarehouse\resource\OrderResource$CancelOrderRequest.class
+com\autowarehouse\resource\WishlistResource$SuccessResponse.class
 com\autowarehouse\resource\CartResource$SuccessResponse.class
 com\autowarehouse\resource\UserResource$ForgotPasswordRequest.class
 com\autowarehouse\resource\CartResource$ErrorResponse.class

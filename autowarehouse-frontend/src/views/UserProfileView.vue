@@ -69,7 +69,47 @@
 
         <!-- Profile Content -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Personal Information Section -->
+          <!-- Navigation Tabs -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="border-b border-gray-200">
+              <nav class="-mb-px flex space-x-8 px-6">
+                <button
+                  @click="activeTab = 'profile'"
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  :class="activeTab === 'profile' 
+                    ? 'border-blue-600 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                >
+                  <i class="fa-solid fa-user mr-2"></i>
+                  Profile
+                </button>
+                <button
+                  @click="activeTab = 'wishlist'"
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  :class="activeTab === 'wishlist' 
+                    ? 'border-blue-600 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                >
+                  <i class="fa-solid fa-heart mr-2"></i>
+                  Wishlist ({{ wishlistStore.wishlistCount }})
+                </button>
+                <button
+                  @click="activeTab = 'orders'"
+                  class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  :class="activeTab === 'orders' 
+                    ? 'border-blue-600 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                >
+                  <i class="fa-solid fa-shopping-bag mr-2"></i>
+                  Orders
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          <!-- Profile Tab Content -->
+          <div v-if="activeTab === 'profile'" class="space-y-6">
+            <!-- Personal Information Section -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="p-6 border-b border-gray-200">
               <div class="flex items-center justify-between">
@@ -223,6 +263,131 @@
                 </div> -->
               </div>
             </div>
+            </div>
+          </div>
+
+          <!-- Wishlist Tab Content -->
+          <div v-if="activeTab === 'wishlist'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-gray-900">My Wishlist</h3>
+                  <button 
+                    v-if="wishlistStore.wishlistCount > 0"
+                    @click="clearWishlist"
+                    class="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    <i class="fa-solid fa-trash mr-1"></i>
+                    Clear All
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Loading State -->
+              <div v-if="wishlistStore.isLoading" class="p-8 text-center">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600 mb-4"></i>
+                <p class="text-gray-600">Loading wishlist...</p>
+              </div>
+              
+              <!-- Empty State -->
+              <div v-else-if="wishlistStore.wishlistCount === 0" class="p-8 text-center">
+                <i class="fa-regular fa-heart text-4xl text-gray-400 mb-4"></i>
+                <h4 class="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h4>
+                <p class="text-gray-600 mb-4">Save items you love to your wishlist</p>
+                <button 
+                  @click="$router.push('/products')"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <i class="fa-solid fa-shopping-bag mr-2"></i>
+                  Browse Products
+                </button>
+              </div>
+              
+              <!-- Wishlist Items -->
+              <div v-else class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div 
+                    v-for="item in wishlistStore.wishlistItems" 
+                    :key="item.id"
+                    class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div class="flex space-x-4">
+                      <!-- Product Image -->
+                      <div class="flex-shrink-0">
+                        <img 
+                          :src="item.product.imageUrls?.[0] || '/placeholder-product.jpg'" 
+                          :alt="item.product.name"
+                          class="w-20 h-20 object-cover rounded-lg"
+                        >
+                      </div>
+                      
+                      <!-- Product Info -->
+                      <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.product.name }}</h4>
+                        <p class="text-sm text-gray-600 mt-1">{{ item.product.brand }}</p>
+                        <div class="flex items-center mt-2">
+                          <span class="text-lg font-bold text-blue-600">Rp {{ formatPrice(item.product.price) }}</span>
+                          <span 
+                            v-if="item.product.originalPrice && item.product.originalPrice > item.product.price"
+                            class="text-sm text-gray-500 line-through ml-2"
+                          >
+                            Rp {{ formatPrice(item.product.originalPrice) }}
+                          </span>
+                        </div>
+                        
+                        <!-- Stock Status -->
+                        <div class="mt-2">
+                          <span 
+                            :class="getStockClass(item.product.stockQuantity)"
+                            class="text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ getStockText(item.product.stockQuantity) }}
+                          </span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2 mt-3">
+                          <button 
+                            @click="addToCart(item.product.id)"
+                            :disabled="item.product.stockQuantity === 0"
+                            class="flex-1 bg-blue-600 text-white py-1 px-3 rounded text-xs hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <i class="fa-solid fa-shopping-cart mr-1"></i>
+                            Add to Cart
+                          </button>
+                          <button 
+                            @click="viewProduct(item.product.id)"
+                            class="px-3 py-1 border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50 transition-colors"
+                          >
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                          <button 
+                            @click="removeFromWishlist(item.product.id)"
+                            class="px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs transition-colors"
+                          >
+                            <i class="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Orders Tab Content -->
+          <div v-if="activeTab === 'orders'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Order History</h3>
+              </div>
+              <div class="p-8 text-center">
+                <i class="fa-solid fa-shopping-bag text-4xl text-gray-400 mb-4"></i>
+                <h4 class="text-lg font-medium text-gray-900 mb-2">Order history coming soon</h4>
+                <p class="text-gray-600">We're working on implementing the order history feature</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -231,14 +396,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useWishlistStore } from '@/stores/wishlist'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
+const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 // State
 const isEditingPersonal = ref(false)
+const activeTab = ref('profile')
 
 // User data
 const user = reactive({
@@ -323,6 +495,70 @@ const deactivateAccount = () => {
     alert('Account deactivation would be implemented here')
   }
 }
+
+// Wishlist methods
+const clearWishlist = async () => {
+  if (confirm('Are you sure you want to clear your entire wishlist?')) {
+    try {
+      await wishlistStore.clearWishlist()
+      alert('Wishlist cleared successfully!')
+    } catch (error) {
+      console.error('Error clearing wishlist:', error)
+      alert('Failed to clear wishlist. Please try again.')
+    }
+  }
+}
+
+const addToCart = async (productId: number) => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await cartStore.addToCart(productId, 1)
+    alert('Product added to cart!')
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+    alert('Failed to add product to cart. Please try again.')
+  }
+}
+
+const removeFromWishlist = async (productId: number) => {
+  try {
+    await wishlistStore.removeFromWishlist(productId)
+  } catch (error) {
+    console.error('Error removing from wishlist:', error)
+    alert('Failed to remove product from wishlist. Please try again.')
+  }
+}
+
+const viewProduct = (productId: number) => {
+  router.push(`/product/${productId}`)
+}
+
+// Utility methods
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('id-ID').format(price)
+}
+
+const getStockClass = (stock: number) => {
+  if (stock > 10) return 'bg-green-100 text-green-800'
+  if (stock > 5) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-red-100 text-red-800'
+}
+
+const getStockText = (stock: number) => {
+  if (stock > 10) return `Stock: ${stock}`
+  if (stock > 5) return `Low Stock: ${stock}`
+  if (stock > 0) return `Only ${stock} left`
+  return 'Out of Stock'
+}
+
+// Initialize on mount
+onMounted(async () => {
+  await wishlistStore.loadWishlist()
+})
 </script>
 
 <style scoped>

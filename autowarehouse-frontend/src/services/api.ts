@@ -277,6 +277,23 @@ export interface AddToCartRequest {
   quantity: number
 }
 
+// Wishlist Types
+export interface WishlistItem {
+  id: number
+  product: Product
+  createdAt: string
+}
+
+export interface AddToWishlistRequest {
+  userId: number
+  productId: number
+}
+
+export interface RemoveFromWishlistRequest {
+  userId: number
+  productId: number
+}
+
 // Statistics Types
 export interface UserStats {
   totalUsers: number
@@ -529,6 +546,37 @@ class ApiService {
 
   async checkProductInCart(userId: number, productId: number): Promise<{ exists: boolean }> {
     const response = await api.get<{ exists: boolean }>(`/cart/user/${userId}/product/${productId}/exists`)
+    return response.data
+  }
+
+  // Wishlist APIs
+  async getWishlistItems(userId: number): Promise<WishlistItem[]> {
+    const response = await api.get<WishlistItem[]>(`/wishlist/user/${userId}`)
+    return response.data
+  }
+
+  async addToWishlist(wishlistData: AddToWishlistRequest): Promise<WishlistItem> {
+    const response = await api.post<WishlistItem>('/wishlist/add', wishlistData)
+    return response.data
+  }
+
+  async removeFromWishlist(wishlistData: RemoveFromWishlistRequest): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>('/wishlist/remove', { data: wishlistData })
+    return response.data
+  }
+
+  async getWishlistCount(userId: number): Promise<{ count: number }> {
+    const response = await api.get<{ count: number }>(`/wishlist/user/${userId}/count`)
+    return response.data
+  }
+
+  async checkProductInWishlist(userId: number, productId: number): Promise<{ exists: boolean }> {
+    const response = await api.get<{ exists: boolean }>(`/wishlist/user/${userId}/product/${productId}/exists`)
+    return response.data
+  }
+
+  async clearWishlist(userId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/wishlist/user/${userId}/clear`)
     return response.data
   }
 

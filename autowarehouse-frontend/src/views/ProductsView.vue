@@ -31,15 +31,23 @@
               <label 
                 v-for="category in availableCategories" 
                 :key="category.id"
-                class="flex items-center"
+                class="flex items-center justify-between"
               >
-                <input 
-                  type="checkbox" 
-                  v-model="filters.categories" 
-                  :value="category.id" 
-                  class="mr-2 text-primary"
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    v-model="filters.categories" 
+                    :value="category.id" 
+                    class="mr-2 text-primary"
+                  >
+                  <span class="text-gray-700">{{ category.name }}</span>
+                </div>
+                <span 
+                  v-if="categoryProductCounts[category.id]"
+                  class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
                 >
-                <span class="text-gray-700">{{ category.name }}</span>
+                  {{ categoryProductCounts[category.id] }}
+                </span>
               </label>
             </div>
           </div>
@@ -378,6 +386,7 @@ const itemsPerPage = 12
 // Categories
 const availableCategories = ref<Category[]>([])
 const categoriesLoading = ref(false)
+const categoryProductCounts = ref<Record<number, number>>({})
 
 // Filters
 const filters = reactive({
@@ -393,10 +402,48 @@ const loadCategories = async () => {
     categoriesLoading.value = true
     const categories = await apiService.getCategories()
     availableCategories.value = categories.filter(cat => cat.isActive)
+    
+    // Load product counts for each category
+    await loadCategoryProductCounts()
   } catch (error) {
     console.error('Error loading categories:', error)
   } finally {
     categoriesLoading.value = false
+  }
+}
+
+// Load category product counts
+const loadCategoryProductCounts = async () => {
+  try {
+    const counts: Record<number, number> = {}
+    
+    // Get product count for each category
+    for (const category of availableCategories.value) {
+      try {
+        const products = await apiService.getProducts({
+          category: category.id,
+          status: 'active',
+          size: 1 // We only need the count, not the actual products
+        })
+        
+        // For now, we'll make a separate call to get the actual count
+        // In a real implementation, the API should return total count in metadata
+        const allProducts = await apiService.getProducts({
+          category: category.id,
+          status: 'active',
+          size: 1000 // Get a large number to count all
+        })
+        
+        counts[category.id] = allProducts.length
+      } catch (error) {
+        console.error(`Error loading count for category ${category.id}:`, error)
+        counts[category.id] = 0
+      }
+    }
+    
+    categoryProductCounts.value = counts
+  } catch (error) {
+    console.error('Error loading category product counts:', error)
   }
 }
 

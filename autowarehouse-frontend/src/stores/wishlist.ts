@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { apiService, type Product } from '@/services/api'
+import { apiService, type WishlistItem } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 
 export const useWishlistStore = defineStore('wishlist', () => {
   // State
-  const wishlistItems = ref<Product[]>([])
+  const wishlistItems = ref<WishlistItem[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -12,79 +13,93 @@ export const useWishlistStore = defineStore('wishlist', () => {
   const wishlistCount = computed(() => wishlistItems.value.length)
   
   const isInWishlist = computed(() => (productId: number) => {
-    return wishlistItems.value.some(item => item.id === productId)
+    return wishlistItems.value.some(item => item.product.id === productId)
+  })
+
+  const getWishlistProducts = computed(() => {
+    return wishlistItems.value.map(item => item.product)
   })
 
   // Actions
   const loadWishlist = async () => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      console.warn('User not authenticated, cannot load wishlist')
+      return
+    }
+
     try {
       isLoading.value = true
       error.value = null
       
-      // TODO: Replace with actual API call when wishlist endpoint is available
-      // For now, load from localStorage
-      const savedWishlist = localStorage.getItem('wishlist_items')
-      if (savedWishlist) {
-        const productIds = JSON.parse(savedWishlist) as number[]
-        
-        // Fetch product details for each ID
-        const products = await Promise.all(
-          productIds.map(async (id) => {
-            try {
-              return await apiService.getProduct(id)
-            } catch (error) {
-              console.error(`Failed to load product ${id}:`, error)
-              return null
-            }
-          })
-        )
-        
-        wishlistItems.value = products.filter(product => product !== null) as Product[]
-      }
-    } catch (err) {
+      const items = await apiService.getWishlistItems(authStore.user.id)
+      wishlistItems.value = items
+      
+      console.log('Wishlist loaded successfully:', items.length, 'items')
+    } catch (err: any) {
       console.error('Error loading wishlist:', err)
-      error.value = 'Failed to load wishlist'
+      error.value = err.response?.data?.message || 'Failed to load wishlist'
+      wishlistItems.value = []
     } finally {
       isLoading.value = false
     }
   }
 
   const addToWishlist = async (productId: number) => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
     try {
       // Check if already in wishlist
       if (isInWishlist.value(productId)) {
+        console.log('Product already in wishlist:', productId)
         return
       }
 
-      // Fetch product details
-      const product = await apiService.getProduct(productId)
-      wishlistItems.value.push(product)
+      isLoading.value = true
+      error.value = null
+
+      const newItem = await apiService.addToWishlist({
+        userId: authStore.user.id,
+        productId: productId
+      })
       
-      // Save to localStorage (TODO: Replace with API call)
-      const productIds = wishlistItems.value.map(item => item.id)
-      localStorage.setItem('wishlist_items', JSON.stringify(productIds))
-      
+      wishlistItems.value.push(newItem)
       console.log('Added to wishlist:', productId)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding to wishlist:', err)
-      error.value = 'Failed to add to wishlist'
+      error.value = err.response?.data?.message || 'Failed to add to wishlist'
       throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
   const removeFromWishlist = async (productId: number) => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
     try {
-      wishlistItems.value = wishlistItems.value.filter(item => item.id !== productId)
+      isLoading.value = true
+      error.value = null
+
+      await apiService.removeFromWishlist({
+        userId: authStore.user.id,
+        productId: productId
+      })
       
-      // Save to localStorage (TODO: Replace with API call)
-      const productIds = wishlistItems.value.map(item => item.id)
-      localStorage.setItem('wishlist_items', JSON.stringify(productIds))
-      
+      wishlistItems.value = wishlistItems.value.filter(item => item.product.id !== productId)
       console.log('Removed from wishlist:', productId)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error removing from wishlist:', err)
-      error.value = 'Failed to remove from wishlist'
+      error.value = err.response?.data?.message || 'Failed to remove from wishlist'
       throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -96,9 +111,62 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
   }
 
-  const clearWishlist = () => {
+  const clearWishlist = async () => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    try {
+      isLoading.value = true
+      error.value = null
+
+      await apiService.clearWishlist(authStore.user.id)
+      wishlistItems.value = []
+      console.log('Wishlist cleared successfully')
+    } catch (err: any) {
+      console.error('Error clearing wishlist:', err)
+      error.value = err.response?.data?.message || 'Failed to clear wishlist'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const checkProductInWishlist = async (productId: number): Promise<boolean> => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      return false
+    }
+
+    try {
+      const result = await apiService.checkProductInWishlist(authStore.user.id, productId)
+      return result.exists
+    } catch (err) {
+      console.error('Error checking product in wishlist:', err)
+      return false
+    }
+  }
+
+  const getWishlistCount = async (): Promise<number> => {
+    const authStore = useAuthStore()
+    if (!authStore.user?.id) {
+      return 0
+    }
+
+    try {
+      const result = await apiService.getWishlistCount(authStore.user.id)
+      return result.count
+    } catch (err) {
+      console.error('Error getting wishlist count:', err)
+      return 0
+    }
+  }
+
+  // Clear wishlist when user logs out
+  const clearLocalWishlist = () => {
     wishlistItems.value = []
-    localStorage.removeItem('wishlist_items')
+    error.value = null
   }
 
   return {
@@ -110,12 +178,16 @@ export const useWishlistStore = defineStore('wishlist', () => {
     // Getters
     wishlistCount,
     isInWishlist,
+    getWishlistProducts,
     
     // Actions
     loadWishlist,
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
-    clearWishlist
+    clearWishlist,
+    checkProductInWishlist,
+    getWishlistCount,
+    clearLocalWishlist
   }
 })
