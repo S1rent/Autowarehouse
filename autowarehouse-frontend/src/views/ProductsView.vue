@@ -176,7 +176,7 @@
                   class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
                 >
                   <i 
-                    :class="wishlistStore.isInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+                    :class="isProductInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
                   ></i>
                 </button>
                 <span 
@@ -256,7 +256,7 @@
                     class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
                   >
                     <i 
-                      :class="wishlistStore.isInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+                      :class="isProductInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
                       class="text-xs"
                     ></i>
                   </button>
@@ -634,10 +634,26 @@ const toggleWishlist = async (productId: number) => {
       return
     }
     
+    const isCurrentlyInWishlist = wishlistStore.isInWishlist(productId)
+    
     await wishlistStore.toggleWishlist(productId)
+    
+    // Show success alert
+    if (isCurrentlyInWishlist) {
+      alert('Produk berhasil dihapus dari wishlist!')
+    } else {
+      alert('Produk berhasil ditambahkan ke wishlist!')
+    }
+    
   } catch (error) {
     console.error('Error toggling wishlist:', error)
+    alert('Gagal mengubah wishlist. Silakan coba lagi.')
   }
+}
+
+// Helper function to check if product is in wishlist (reactive)
+const isProductInWishlist = (productId: number) => {
+  return wishlistStore.isInWishlist(productId)
 }
 
 const addToCart = async (productId: number) => {

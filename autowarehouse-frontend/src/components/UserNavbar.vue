@@ -263,12 +263,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
+import { useCartStore } from '@/stores/cart'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
 const mobileMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 
@@ -276,10 +280,33 @@ const userMenuOpen = ref(false)
 const userName = computed(() => authStore.fullName || 'User')
 const userEmail = computed(() => authStore.user?.email || '')
 
-// Mock counts for now - these would come from respective stores
-const cartCount = ref(0)
-const wishlistCount = ref(0)
-const notificationCount = ref(0)
+// Get counts from stores
+const cartCount = computed(() => cartStore.totalQuantity)
+const wishlistCount = computed(() => wishlistStore.wishlistCount)
+const notificationCount = ref(0) // TODO: Connect to notification store when implemented
+
+// Load data when component mounts or user changes
+const loadData = async () => {
+  if (authStore.user?.id) {
+    await Promise.all([
+      wishlistStore.loadWishlist(),
+      cartStore.fetchCartItems()
+    ])
+  }
+}
+
+onMounted(loadData)
+
+// Watch for user changes and reload data
+watch(() => authStore.user?.id, (newUserId) => {
+  if (newUserId) {
+    loadData()
+  } else {
+    // Clear data when user logs out
+    wishlistStore.clearLocalWishlist()
+    cartStore.resetCart()
+  }
+})
 
 const logout = () => {
   authStore.logout()

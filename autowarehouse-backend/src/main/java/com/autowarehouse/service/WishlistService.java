@@ -33,11 +33,25 @@ public class WishlistService {
                 throw new IllegalArgumentException("User not found with ID: " + userId);
             }
             
-            // Get wishlist items with product details using JPQL
+            // Get wishlist items with product details using JPQL with eager loading
             List<WishlistItem> wishlistItems = entityManager
-                .createQuery("SELECT w FROM WishlistItem w JOIN FETCH w.product p WHERE w.user.id = :userId AND p.isActive = true ORDER BY w.createdAt DESC", WishlistItem.class)
+                .createQuery("SELECT DISTINCT w FROM WishlistItem w " +
+                           "JOIN FETCH w.product p " +
+                           "LEFT JOIN FETCH p.category " +
+                           "WHERE w.user.id = :userId AND p.isActive = true " +
+                           "ORDER BY w.createdAt DESC", WishlistItem.class)
                 .setParameter("userId", userId)
                 .getResultList();
+            
+            // Force initialization of lazy collections for each product
+            for (WishlistItem item : wishlistItems) {
+                if (item.product.imageUrls != null) {
+                    item.product.imageUrls.size(); // Force loading
+                }
+                if (item.product.tags != null) {
+                    item.product.tags.size(); // Force loading
+                }
+            }
             
             LOGGER.info("Found " + wishlistItems.size() + " wishlist items for user: " + userId);
             return wishlistItems;
@@ -65,8 +79,14 @@ public class WishlistService {
                 throw new IllegalArgumentException("User not found with ID: " + userId);
             }
             
-            // Validate product exists and is active
-            Product product = entityManager.find(Product.class, productId);
+            // Validate product exists and is active with eager loading of collections
+            Product product = entityManager
+                .createQuery("SELECT p FROM Product p " +
+                           "LEFT JOIN FETCH p.category " +
+                           "WHERE p.id = :productId", Product.class)
+                .setParameter("productId", productId)
+                .getSingleResult();
+            
             if (product == null) {
                 throw new IllegalArgumentException("Product not found with ID: " + productId);
             }
@@ -74,10 +94,25 @@ public class WishlistService {
                 throw new IllegalArgumentException("Product is not active: " + productId);
             }
             
+            // Force initialization of lazy collections
+            if (product.imageUrls != null) {
+                product.imageUrls.size(); // This forces Hibernate to load the collection
+            }
+            if (product.tags != null) {
+                product.tags.size(); // This forces Hibernate to load the collection
+            }
+            
             // Check for duplicates
             WishlistItem existingItem = WishlistItem.findByUserIdAndProductId(userId, productId);
             if (existingItem != null) {
                 LOGGER.info("Product " + productId + " already in wishlist for user: " + userId);
+                // For existing item, also ensure collections are loaded
+                if (existingItem.product.imageUrls != null) {
+                    existingItem.product.imageUrls.size();
+                }
+                if (existingItem.product.tags != null) {
+                    existingItem.product.tags.size();
+                }
                 return existingItem;
             }
             

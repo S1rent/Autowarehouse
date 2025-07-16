@@ -507,9 +507,20 @@ const toggleWishlist = async () => {
       return
     }
     
+    const isCurrentlyInWishlist = wishlistStore.isInWishlist(transformedProduct.value.id)
+    
     await wishlistStore.toggleWishlist(transformedProduct.value.id)
+    
+    // Show success alert
+    if (isCurrentlyInWishlist) {
+      alert('Produk berhasil dihapus dari wishlist!')
+    } else {
+      alert('Produk berhasil ditambahkan ke wishlist!')
+    }
+    
   } catch (error) {
     console.error('Error toggling wishlist:', error)
+    alert('Gagal mengubah wishlist. Silakan coba lagi.')
   }
 }
 
