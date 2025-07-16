@@ -52,7 +52,7 @@
               class="w-full h-full object-cover"
             >
           </div>
-          <div class="grid grid-cols-4 gap-2">
+          <div v-if="transformedProduct.images.length > 1" class="grid grid-cols-4 gap-2">
             <div 
               v-for="(image, index) in transformedProduct.images" 
               :key="index"
@@ -301,7 +301,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
@@ -341,6 +341,12 @@ const loadProduct = async () => {
     isLoading.value = true
     error.value = null
     product.value = await apiService.getProduct(productId.value)
+    
+    // Check if product is active (only show active products to customers)
+    if (product.value && !product.value.isActive) {
+      error.value = 'Product not available'
+      product.value = null
+    }
   } catch (err) {
     console.error('Error loading product:', err)
     error.value = 'Failed to load product details'
@@ -357,6 +363,7 @@ onMounted(async () => {
 
 // Computed properties
 const selectedImage = ref('')
+
 const productImages = computed(() => {
   if (!product.value?.imageUrls || product.value.imageUrls.length === 0) {
     return ['/placeholder-product.jpg']
@@ -364,20 +371,12 @@ const productImages = computed(() => {
   return product.value.imageUrls
 })
 
-// Watch for product changes to set initial image
+// Set initial image when product loads
 const setInitialImage = () => {
   if (productImages.value.length > 0) {
     selectedImage.value = productImages.value[0]
   }
 }
-
-// Set initial image when product loads
-const productData = computed(() => {
-  if (product.value && selectedImage.value === '') {
-    setInitialImage()
-  }
-  return product.value
-})
 
 // Transform API data to match template expectations
 const transformedProduct = computed(() => {
@@ -518,6 +517,11 @@ const toggleWishlist = async () => {
 const isInWishlistComputed = computed(() => {
   return transformedProduct.value ? wishlistStore.isInWishlist(transformedProduct.value.id) : false
 })
+
+// Watch for product changes to set initial image
+watch(productImages, () => {
+  setInitialImage()
+}, { immediate: true })
 </script>
 
 <style scoped>

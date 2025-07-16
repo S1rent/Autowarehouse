@@ -223,7 +223,7 @@ public class ProductService {
             if (status != null && !status.trim().isEmpty()) {
                 switch (status.toLowerCase()) {
                     case "active":
-                        queryBuilder.append(" and isActive = true and stockQuantity > 0");
+                        queryBuilder.append(" and isActive = true");
                         break;
                     case "inactive":
                         queryBuilder.append(" and isActive = false");

@@ -448,16 +448,17 @@ const loadProducts = async () => {
       const productIds = new Set<number>() // To avoid duplicates
       
       for (const categoryId of filters.categories) {
-        const productFilters: ProductFilters = {
-          search: searchQuery.value || undefined,
-          category: categoryId,
-          minPrice: filters.priceMin || priceRange.min,
-          maxPrice: filters.priceMax || priceRange.max,
-          sortBy: sorting.sortBy,
-          sortOrder: sorting.sortOrder,
-          page: 1, // Always get first page for each category
-          size: 100 // Get more items to ensure we have enough
-        }
+      const productFilters: ProductFilters = {
+        search: searchQuery.value || undefined,
+        category: categoryId,
+        minPrice: filters.priceMin || priceRange.min,
+        maxPrice: filters.priceMax || priceRange.max,
+        sortBy: sorting.sortBy,
+        sortOrder: sorting.sortOrder,
+        status: 'active', // Only show active products to customers
+        page: 1, // Always get first page for each category
+        size: 100 // Get more items to ensure we have enough
+      }
         
         try {
           await productsStore.fetchProducts(productFilters)
@@ -499,6 +500,7 @@ const loadProducts = async () => {
         maxPrice: filters.priceMax || priceRange.max,
         sortBy: sorting.sortBy,
         sortOrder: sorting.sortOrder,
+        status: 'active', // Only show active products to customers
         page: productsStore.currentPage,
         size: itemsPerPage
       }
