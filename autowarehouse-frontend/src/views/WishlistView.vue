@@ -200,7 +200,7 @@ const wishlistItems = computed(() => {
     rating: product.rating || 4,
     reviews: product.reviewCount || 0,
     stock: product.stockQuantity > 0 ? (product.stockQuantity < 10 ? 'low-stock' : 'in-stock') : 'out-of-stock',
-    image: product.imageUrls?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+    image: product.imageUrls?.[0] || '/placeholder-product.jpg',
     removing: false,
     addingToCart: addingToCartItems.value.has(product.id),
     addedToCart: addedToCartItems.value.has(product.id)

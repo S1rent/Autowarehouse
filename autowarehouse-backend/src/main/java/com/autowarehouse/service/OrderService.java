@@ -147,6 +147,96 @@ public class OrderService {
         return createOrder(user, cartItems);
     }
 
+    @Transactional
+    public Order createOrderFromCartWithDetails(Long userId, String shippingAddress, String billingAddress, String paymentMethod) {
+        User user = User.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        List<CartItem> cartItems = CartItem.findByUserAndSelected(user, true);
+        if (cartItems.isEmpty()) {
+            throw new IllegalArgumentException("No selected items in cart");
+        }
+
+        // Validate all cart items
+        for (CartItem cartItem : cartItems) {
+            if (!productService.isProductAvailable(cartItem.product.id, cartItem.quantity)) {
+                throw new IllegalArgumentException("Product " + cartItem.product.name + " is not available in requested quantity");
+            }
+        }
+
+        // Create order
+        Order order = new Order();
+        order.orderNumber = generateOrderNumber();
+        order.user = user;
+        order.status = Order.OrderStatus.PENDING;
+        order.paymentStatus = Order.PaymentStatus.PENDING;
+        order.shippingAddress = shippingAddress;
+        order.billingAddress = billingAddress;
+        order.paymentMethod = paymentMethod;
+        
+        // Calculate shipping and tax
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (CartItem cartItem : cartItems) {
+            BigDecimal itemTotal = cartItem.product.getCurrentPrice().multiply(BigDecimal.valueOf(cartItem.quantity));
+            subtotal = subtotal.add(itemTotal);
+        }
+        
+        order.subtotal = subtotal;
+        order.shippingCost = calculateShippingCost(subtotal);
+        order.taxAmount = calculateTaxAmount(subtotal);
+        order.totalAmount = subtotal.add(order.shippingCost).add(order.taxAmount);
+        
+        order.persist();
+
+        // Create order items
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.order = order;
+            orderItem.product = cartItem.product;
+            orderItem.productName = cartItem.product.name;
+            orderItem.productSku = cartItem.product.sku;
+            orderItem.productPrice = cartItem.product.getCurrentPrice();
+            orderItem.quantity = cartItem.quantity;
+            orderItem.subtotal = orderItem.productPrice.multiply(BigDecimal.valueOf(orderItem.quantity));
+            orderItem.persist();
+
+            // Decrease product stock
+            productService.decreaseStock(cartItem.product.id, cartItem.quantity);
+            productService.incrementSalesCount(cartItem.product.id, cartItem.quantity);
+        }
+
+        // Clear selected cart items after successful order creation
+        clearSelectedCartItems(user);
+
+        // Send order confirmation notification
+        notificationService.notifyOrderCreated(user, order);
+
+        return order;
+    }
+
+    @Transactional
+    public void clearSelectedCartItems(User user) {
+        List<CartItem> selectedItems = CartItem.findByUserAndSelected(user, true);
+        for (CartItem item : selectedItems) {
+            item.delete();
+        }
+    }
+
+    private BigDecimal calculateShippingCost(BigDecimal subtotal) {
+        // Free shipping over 10M IDR
+        if (subtotal.compareTo(new BigDecimal("10000000")) >= 0) {
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal("50000"); // 50K IDR shipping cost
+    }
+
+    private BigDecimal calculateTaxAmount(BigDecimal subtotal) {
+        // 11% tax (PPN in Indonesia)
+        return subtotal.multiply(new BigDecimal("0.11"));
+    }
+
     public List<Order> findByUserId(Long userId) {
         User user = User.findById(userId);
         if (user == null) {

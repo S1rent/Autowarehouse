@@ -187,6 +187,33 @@ export interface Order {
   createdAt: string
 }
 
+export interface OrderDetail extends Order {
+  billingAddress?: string
+  paymentMethod?: string
+  paymentReference?: string
+  notes?: string
+  shippedAt?: string
+  deliveredAt?: string
+  items?: OrderItem[]
+}
+
+export interface OrderItem {
+  id: number
+  productId: number
+  productName: string
+  productSku: string
+  productPrice: number
+  quantity: number
+  subtotal: number
+}
+
+export interface CheckoutOrderRequest {
+  userId: number
+  shippingAddress: string
+  billingAddress?: string
+  paymentMethod: string
+}
+
 // Category Types
 export interface Category {
   id: number
@@ -272,6 +299,32 @@ export interface CartSummary {
 }
 
 export interface AddToCartRequest {
+  userId: number
+  productId: number
+  quantity: number
+}
+
+// Saved Items Types
+export interface SavedItem {
+  id: number
+  userId: number
+  productId: number
+  productName: string
+  productBrand: string
+  productSku: string
+  productPrice: number
+  originalPrice?: number
+  productImages: string[]
+  quantity: number
+  subtotal: number
+  savings?: number
+  savedFromCart: boolean
+  isProductActive: boolean
+  availableStock: number
+  createdAt: string
+}
+
+export interface SaveForLaterRequest {
   userId: number
   productId: number
   quantity: number
@@ -549,6 +602,57 @@ class ApiService {
     return response.data
   }
 
+  // Saved Items APIs
+  async getSavedItems(userId: number): Promise<SavedItem[]> {
+    const response = await api.get<SavedItem[]>(`/saved-items/user/${userId}`)
+    return response.data
+  }
+
+  async getSavedItemCount(userId: number): Promise<{ count: number }> {
+    const response = await api.get<{ count: number }>(`/saved-items/user/${userId}/count`)
+    return response.data
+  }
+
+  async saveForLater(savedData: SaveForLaterRequest): Promise<SavedItem> {
+    const response = await api.post<SavedItem>('/saved-items/save', savedData)
+    return response.data
+  }
+
+  async moveToSaved(cartItemId: number): Promise<SavedItem> {
+    const response = await api.post<SavedItem>(`/saved-items/move-from-cart/${cartItemId}`)
+    return response.data
+  }
+
+  async moveToCart(savedItemId: number): Promise<CartItem> {
+    const response = await api.post<CartItem>(`/saved-items/${savedItemId}/move-to-cart`)
+    return response.data
+  }
+
+  async moveAllSavedToCart(userId: number): Promise<CartItem[]> {
+    const response = await api.post<CartItem[]>(`/saved-items/user/${userId}/move-all-to-cart`)
+    return response.data
+  }
+
+  async updateSavedItemQuantity(savedItemId: number, quantity: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/saved-items/${savedItemId}/quantity`, { quantity })
+    return response.data
+  }
+
+  async removeSavedItem(savedItemId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/saved-items/${savedItemId}`)
+    return response.data
+  }
+
+  async clearSavedItems(userId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/saved-items/user/${userId}/clear`)
+    return response.data
+  }
+
+  async checkProductSaved(userId: number, productId: number): Promise<{ exists: boolean }> {
+    const response = await api.get<{ exists: boolean }>(`/saved-items/user/${userId}/product/${productId}/exists`)
+    return response.data
+  }
+
   // Wishlist APIs
   async getWishlistItems(userId: number): Promise<WishlistItem[]> {
     const response = await api.get<WishlistItem[]>(`/wishlist/user/${userId}`)
@@ -580,9 +684,14 @@ class ApiService {
     return response.data
   }
 
-  // Order APIs
+// Order APIs
   async createOrder(userId: number): Promise<Order> {
     const response = await api.post<Order>('/orders/create', { userId })
+    return response.data
+  }
+
+  async createOrderWithCheckout(checkoutData: CheckoutOrderRequest): Promise<OrderDetail> {
+    const response = await api.post<OrderDetail>('/orders/checkout', checkoutData)
     return response.data
   }
 

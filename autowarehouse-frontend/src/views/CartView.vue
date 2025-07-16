@@ -18,7 +18,24 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-            <p class="text-gray-600">Review your items before checkout</p>
+            <div class="flex items-center space-x-4">
+              <p class="text-gray-600">Review your items before checkout</p>
+              <!-- Online/Offline Status -->
+              <div class="flex items-center space-x-2">
+                <div 
+                  :class="isOnline ? 'bg-green-500' : 'bg-red-500'"
+                  class="w-2 h-2 rounded-full"
+                ></div>
+                <span class="text-xs text-gray-500">
+                  {{ isOnline ? 'Online' : 'Offline' }}
+                </span>
+              </div>
+              <!-- Loading Indicator -->
+              <div v-if="cartStore.isLoading" class="flex items-center space-x-2">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span class="text-xs text-gray-500">Syncing...</span>
+              </div>
+            </div>
           </div>
           <div v-if="cartItems.length > 0" class="flex items-center space-x-4">
             <label class="flex items-center space-x-2 cursor-pointer">
@@ -27,6 +44,7 @@
                 :checked="allItemsSelected"
                 @change="toggleSelectAll"
                 class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                :disabled="cartStore.isLoading"
               >
               <span class="text-sm text-gray-700">Select All ({{ cartItems.length }} items)</span>
             </label>
@@ -92,28 +110,40 @@
                   </span>
                 </div>
               </div>
-              <div class="flex items-center space-x-4">
-                <div class="flex items-center border rounded-lg">
+              <div class="flex flex-col items-end space-y-2">
+                <div class="flex items-center space-x-2">
+                  <div class="flex items-center border rounded-lg">
+                    <button 
+                      @click="decreaseQuantity(item.id)"
+                      class="p-2 hover:bg-gray-100"
+                      :disabled="item.quantity <= 1"
+                    >
+                      <i class="fa-solid fa-minus text-sm"></i>
+                    </button>
+                    <span class="px-4 py-2 border-x">{{ item.quantity }}</span>
+                    <button 
+                      @click="increaseQuantity(item.id)"
+                      class="p-2 hover:bg-gray-100"
+                    >
+                      <i class="fa-solid fa-plus text-sm"></i>
+                    </button>
+                  </div>
                   <button 
-                    @click="decreaseQuantity(item.id)"
-                    class="p-2 hover:bg-gray-100"
-                    :disabled="item.quantity <= 1"
+                    @click="removeItem(item.id)"
+                    class="text-red-500 hover:text-red-700 p-2"
+                    title="Remove from cart"
                   >
-                    <i class="fa-solid fa-minus text-sm"></i>
-                  </button>
-                  <span class="px-4 py-2 border-x">{{ item.quantity }}</span>
-                  <button 
-                    @click="increaseQuantity(item.id)"
-                    class="p-2 hover:bg-gray-100"
-                  >
-                    <i class="fa-solid fa-plus text-sm"></i>
+                    <i class="fa-solid fa-trash"></i>
                   </button>
                 </div>
                 <button 
-                  @click="removeItem(item.id)"
-                  class="text-red-500 hover:text-red-700 p-2"
+                  @click="saveForLater(item.id)"
+                  class="text-blue-600 hover:text-blue-700 text-sm px-2 py-1 rounded transition-colors"
+                  title="Save for later"
+                  :disabled="savedItemsStore.isLoading"
                 >
-                  <i class="fa-solid fa-trash"></i>
+                  <i class="fa-solid fa-bookmark mr-1"></i>
+                  Save for Later
                 </button>
               </div>
             </div>
@@ -298,11 +328,18 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import { useSavedItemsStore } from '@/stores/savedItems'
+import { useNotifications } from '@/composables/useNotifications'
+import { useCartPersistence } from '@/composables/useCartPersistence'
 import UserNavbar from '../components/UserNavbar.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const savedItemsStore = useSavedItemsStore()
+
+// Initialize cart persistence
+const { isOnline, startAutoSync, syncCartWithServer, loadPendingOperations } = useCartPersistence()
 
 // State
 const searchQuery = ref('')
@@ -315,7 +352,17 @@ const appliedCoupon = ref('')
 // Initialize cart on mount
 onMounted(async () => {
   if (authStore.isAuthenticated && authStore.user) {
-    await cartStore.fetchCartItems()
+    // Load pending operations first
+    loadPendingOperations()
+    
+    // Sync cart with server
+    await syncCartWithServer()
+    
+    // Start auto-sync
+    const stopAutoSync = startAutoSync()
+    
+    // Cleanup on unmount
+    return stopAutoSync
   }
 })
 
@@ -418,39 +465,69 @@ const navigateToProduct = (productId: number, event: Event) => {
 }
 
 const increaseQuantity = async (itemId: number) => {
+  const { warning, error } = useNotifications()
   const item = cartItems.value.find(item => item.id === itemId)
+  
   if (item) {
     // Check stock availability before increasing
     if (item.quantity >= item.availableStock) {
-      alert(`Cannot add more items. Only ${item.availableStock} available in stock.`)
+      warning('Stock Limit Reached', `Cannot add more items. Only ${item.availableStock} available in stock.`)
       return
     }
     
     try {
       await cartStore.updateQuantity(itemId, item.quantity + 1)
-    } catch (error) {
-      console.error('Error updating quantity:', error)
-      alert('Failed to update quantity. Please try again.')
+    } catch (err) {
+      console.error('Error updating quantity:', err)
+      error('Update Failed', 'Failed to update quantity. Please try again.')
     }
   }
 }
 
 const decreaseQuantity = async (itemId: number) => {
+  const { error } = useNotifications()
   const item = cartItems.value.find(item => item.id === itemId)
+  
   if (item && item.quantity > 1) {
     try {
       await cartStore.updateQuantity(itemId, item.quantity - 1)
-    } catch (error) {
-      console.error('Error updating quantity:', error)
+    } catch (err) {
+      console.error('Error updating quantity:', err)
+      error('Update Failed', 'Failed to update quantity. Please try again.')
     }
   }
 }
 
 const removeItem = async (itemId: number) => {
+  const { warning } = useNotifications()
+  
+  // Get item name for confirmation
+  const item = cartItems.value.find(item => item.id === itemId)
+  const itemName = item?.productName || 'this item'
+  
+  // Show confirmation dialog
+  const confirmed = confirm(`Are you sure you want to remove "${itemName}" from your cart?`)
+  if (!confirmed) return
+  
   try {
     await cartStore.removeItem(itemId)
   } catch (error) {
     console.error('Error removing item:', error)
+    warning('Remove Failed', 'Failed to remove item from cart. Please try again.')
+  }
+}
+
+const saveForLater = async (itemId: number) => {
+  try {
+    // Move cart item to saved items
+    await savedItemsStore.moveToSaved(itemId)
+    
+    // Refresh cart items to reflect the removal
+    if (authStore.user) {
+      await cartStore.fetchCartItems()
+    }
+  } catch (error) {
+    console.error('Error saving item for later:', error)
   }
 }
 

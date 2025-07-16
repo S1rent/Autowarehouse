@@ -38,6 +38,31 @@ public class OrderResource {
         }
     }
 
+    @POST
+    @Path("/checkout")
+    @RolesAllowed({"ADMIN", "CUSTOMER"})
+    public Response createOrderWithCheckout(@Valid CheckoutOrderRequest request) {
+        try {
+            Order order = orderService.createOrderFromCartWithDetails(
+                request.userId, 
+                request.shippingAddress, 
+                request.billingAddress, 
+                request.paymentMethod
+            );
+            
+            // Simulate payment processing - mark as paid immediately
+            orderService.updatePaymentStatus(order.id, Order.PaymentStatus.PAID);
+            
+            return Response.status(Response.Status.CREATED)
+                    .entity(new OrderDetailResponse(order))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADMIN", "CUSTOMER"})
@@ -203,6 +228,13 @@ public class OrderResource {
     // DTO Classes
     public static class CreateOrderRequest {
         public Long userId;
+    }
+
+    public static class CheckoutOrderRequest {
+        public Long userId;
+        public String shippingAddress;
+        public String billingAddress;
+        public String paymentMethod;
     }
 
     public static class UpdatePaymentRequest {

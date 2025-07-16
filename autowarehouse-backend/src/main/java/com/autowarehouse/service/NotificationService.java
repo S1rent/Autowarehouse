@@ -172,6 +172,18 @@ public class NotificationService {
 
     // Order-related notifications
     @Transactional
+    public void notifyOrderCreated(User user, Order order) {
+        createNotification(
+            user,
+            "Order Created",
+            "Your order #" + order.orderNumber + " has been created successfully. Total: $" + order.totalAmount,
+            NotificationType.ORDER_CONFIRMED,
+            order.id,
+            "order"
+        );
+    }
+
+    @Transactional
     public void notifyOrderConfirmed(User user, Order order) {
         createNotification(
             user,

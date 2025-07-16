@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiService, type CartItem, type CartSummary, type AddToCartRequest } from '@/services/api'
 import { useAuthStore } from './auth'
+import { useNotifications } from '@/composables/useNotifications'
 
 export const useCartStore = defineStore('cart', () => {
   // State
@@ -54,6 +55,8 @@ export const useCartStore = defineStore('cart', () => {
 
   const addToCart = async (productId: number, quantity: number = 1) => {
     const authStore = useAuthStore()
+    const { success, error: notifyError } = useNotifications()
+    
     if (!authStore.user) throw new Error('User not authenticated')
 
     try {
@@ -74,15 +77,19 @@ export const useCartStore = defineStore('cart', () => {
       if (existingItemIndex >= 0) {
         // Update existing item
         items.value[existingItemIndex] = newItem
+        success('Cart Updated', `Quantity updated to ${newItem.quantity}`)
       } else {
         // Add new item
         items.value.push(newItem)
+        success('Added to Cart', `${newItem.productName} has been added to your cart`)
       }
       
       await fetchCartSummary()
       return newItem
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to add item to cart'
+      const errorMessage = err.response?.data?.message || 'Failed to add item to cart'
+      error.value = errorMessage
+      notifyError('Cart Error', errorMessage)
       throw err
     } finally {
       isLoading.value = false
@@ -90,6 +97,8 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   const updateQuantity = async (cartItemId: number, quantity: number) => {
+    const { success, error: notifyError } = useNotifications()
+    
     try {
       isLoading.value = true
       error.value = null
@@ -101,11 +110,14 @@ export const useCartStore = defineStore('cart', () => {
       if (itemIndex >= 0) {
         items.value[itemIndex].quantity = quantity
         items.value[itemIndex].subtotal = items.value[itemIndex].productPrice * quantity
+        success('Quantity Updated', `Updated to ${quantity} items`)
       }
       
       await fetchCartSummary()
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to update quantity'
+      const errorMessage = err.response?.data?.message || 'Failed to update quantity'
+      error.value = errorMessage
+      notifyError('Update Failed', errorMessage)
       throw err
     } finally {
       isLoading.value = false
@@ -149,18 +161,27 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   const removeItem = async (cartItemId: number) => {
+    const { success, error: notifyError } = useNotifications()
+    
     try {
       isLoading.value = true
       error.value = null
+      
+      // Get item name before removing for notification
+      const item = items.value.find(item => item.id === cartItemId)
+      const itemName = item?.productName || 'Item'
       
       await apiService.removeFromCart(cartItemId)
       
       // Remove from local state
       items.value = items.value.filter(item => item.id !== cartItemId)
       
+      success('Item Removed', `${itemName} has been removed from your cart`)
       await fetchCartSummary()
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to remove item'
+      const errorMessage = err.response?.data?.message || 'Failed to remove item'
+      error.value = errorMessage
+      notifyError('Remove Failed', errorMessage)
       throw err
     } finally {
       isLoading.value = false
