@@ -159,184 +159,20 @@
           
           <!-- Product Grid/List -->
           <div v-if="viewMode === 'grid'" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <div 
+            <ProductCard 
               v-for="product in filteredProducts" 
               :key="product.id"
-              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              <div class="relative">
-                <img 
-                  :src="product.imageUrls?.[0] || '/placeholder-product.jpg'" 
-                  :alt="product.name"
-                  class="w-full h-48 object-cover"
-                >
-                <button 
-                  @click="toggleWishlist(product.id)"
-                  class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
-                >
-                  <i 
-                    :class="isProductInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
-                  ></i>
-                </button>
-                <span 
-                  v-if="product.isOnSale"
-                  class="bg-red-500 text-white absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold"
-                >
-                  Sale
-                </span>
-              </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-dark mb-2">{{ product.name }}</h3>
-                <p class="text-sm text-gray-600 mb-2">{{ product.description }}</p>
-                <div class="flex items-center mb-2">
-                  <div class="flex text-yellow-400 text-sm mr-2">
-                    <i 
-                      v-for="i in 5" 
-                      :key="i"
-                      :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
-                    ></i>
-                  </div>
-                  <span class="text-sm text-gray-600">({{ product.rating }}) ulasan</span>
-                </div>
-                <div class="flex justify-between items-center mb-3">
-                  <div>
-                    <span class="text-lg font-bold text-primary">Rp {{ formatPrice(product.price) }}</span>
-                    <span 
-                      v-if="product.originalPrice"
-                      class="text-sm text-gray-500 line-through ml-2"
-                    >
-                      Rp {{ formatPrice(product.originalPrice) }}
-                    </span>
-                  </div>
-                  <span 
-                    :class="getStockClass(product.stockQuantity)"
-                    class="text-xs px-2 py-1 rounded"
-                  >
-                    Stok: {{ product.stockQuantity }}
-                  </span>
-                </div>
-                <div class="flex space-x-2">
-                  <button 
-                    @click="addToCart(product.id)"
-                    class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                  >
-                    <i class="fa-solid fa-shopping-cart mr-1"></i>Keranjang
-                  </button>
-                  <button 
-                    @click="viewProduct(product.id)"
-                    class="px-3 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
-                  >
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
+              :product="product"
+            />
           </div>
 
           <!-- Product List View -->
           <div v-else class="space-y-4">
-            
-            <div 
+            <ProductListItem 
               v-for="product in filteredProducts" 
               :key="product.id"
-              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              <div class="flex">
-                <!-- Product Image -->
-                <div class="relative w-48 h-32 flex-shrink-0">
-                  <img 
-                    :src="product.imageUrls?.[0] || '/placeholder-product.jpg'" 
-                    :alt="product.name"
-                    class="w-full h-full object-cover"
-                  >
-                  <button 
-                    @click="toggleWishlist(product.id)"
-                    class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
-                  >
-                    <i 
-                      :class="isProductInWishlist(product.id) ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
-                      class="text-xs"
-                    ></i>
-                  </button>
-                  <span 
-                    v-if="product.isOnSale"
-                    class="bg-red-500 text-white absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
-                  >
-                    Sale
-                  </span>
-                </div>
-
-                <!-- Product Info -->
-                <div class="flex-1 p-4">
-                  <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h3 class="font-semibold text-dark text-lg mb-1">{{ product.name }}</h3>
-                      <p class="text-sm text-gray-600 mb-2">{{ product.brand }} - {{ product.model }}</p>
-                      <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
-                      
-                      <!-- Rating -->
-                      <div class="flex items-center mb-3">
-                        <div class="flex text-yellow-400 text-sm mr-2">
-                          <i 
-                            v-for="i in 5" 
-                            :key="i"
-                            :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
-                          ></i>
-                        </div>
-                        <span class="text-sm text-gray-600">({{ product.rating }}) {{ product.reviewCount }} ulasan</span>
-                      </div>
-
-                      <!-- Specifications (if available) -->
-                      <div v-if="product.specifications" class="mb-3">
-                        <p class="text-xs text-gray-500 line-clamp-2">{{ product.specifications }}</p>
-                      </div>
-                    </div>
-
-                    <!-- Price and Actions -->
-                    <div class="ml-4 text-right">
-                      <div class="mb-3">
-                        <div class="text-xl font-bold text-primary">Rp {{ formatPrice(product.price) }}</div>
-                        <div 
-                          v-if="product.originalPrice"
-                          class="text-sm text-gray-500 line-through"
-                        >
-                          Rp {{ formatPrice(product.originalPrice) }}
-                        </div>
-                      </div>
-
-                      <!-- Stock Status -->
-                      <div class="mb-3">
-                        <span 
-                          :class="getStockClass(product.stockQuantity)"
-                          class="text-xs px-2 py-1 rounded"
-                        >
-                          Stok: {{ product.stockQuantity }}
-                        </span>
-                      </div>
-
-                      <!-- Action Buttons -->
-                      <div class="flex flex-col space-y-2">
-                        <button 
-                          @click="addToCart(product.id)"
-                          class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                        >
-                          <i class="fa-solid fa-shopping-cart mr-1"></i>Keranjang
-                        </button>
-                        <button 
-                          @click="viewProduct(product.id)"
-                          class="border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm"
-                        >
-                          <i class="fa-solid fa-eye mr-1"></i>Detail
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
+              :product="product"
+            />
           </div>
 
           <!-- Pagination -->
@@ -368,6 +204,8 @@ import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import UserNavbar from '../components/UserNavbar.vue'
+import ProductCard from '../components/ProductCard.vue'
+import ProductListItem from '../components/ProductListItem.vue'
 import { apiService, type ProductFilters, type Category, type Product } from '@/services/api'
 import { debounce } from '@/utils/debounce'
 
@@ -627,52 +465,6 @@ const getStockClass = (stock: number) => {
   return 'bg-red-100 text-red-800'
 }
 
-const toggleWishlist = async (productId: number) => {
-  try {
-    if (!authStore.isAuthenticated) {
-      router.push('/login')
-      return
-    }
-    
-    const isCurrentlyInWishlist = wishlistStore.isInWishlist(productId)
-    
-    await wishlistStore.toggleWishlist(productId)
-    
-    // Show success alert
-    if (isCurrentlyInWishlist) {
-      alert('Produk berhasil dihapus dari wishlist!')
-    } else {
-      alert('Produk berhasil ditambahkan ke wishlist!')
-    }
-    
-  } catch (error) {
-    console.error('Error toggling wishlist:', error)
-    alert('Gagal mengubah wishlist. Silakan coba lagi.')
-  }
-}
-
-// Helper function to check if product is in wishlist (reactive)
-const isProductInWishlist = (productId: number) => {
-  return wishlistStore.isInWishlist(productId)
-}
-
-const addToCart = async (productId: number) => {
-  try {
-    if (!authStore.isAuthenticated) {
-      router.push('/login')
-      return
-    }
-    
-    await cartStore.addToCart(productId, 1)
-    console.log('Added to cart:', productId)
-  } catch (error) {
-    console.error('Error adding to cart:', error)
-  }
-}
-
-const viewProduct = (productId: number) => {
-  router.push(`/product/${productId}`)
-}
 
 const applyFilters = () => {
   currentPage.value = 1

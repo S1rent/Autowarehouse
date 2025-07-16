@@ -83,7 +83,7 @@
             <h3 class="text-xl font-semibold text-gray-900 mb-6">Order Summary</h3>
             
             <!-- Coupon Section -->
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <!-- <div class="mb-6 p-4 bg-gray-50 rounded-lg">
               <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium text-gray-700">Have a coupon?</span>
                 <button 
@@ -119,7 +119,7 @@
                   Remove
                 </button>
               </div>
-            </div>
+            </div> -->
             
             <!-- Price Breakdown -->
             <div class="space-y-3 mb-6">

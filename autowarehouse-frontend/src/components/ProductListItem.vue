@@ -1,0 +1,212 @@
+<template>
+  <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+    <div class="flex">
+      <!-- Product Image -->
+      <div class="relative w-48 h-32 flex-shrink-0">
+        <img 
+          :src="product.imageUrls?.[0] || '/placeholder-product.jpg'" 
+          :alt="product.name"
+          class="w-full h-full object-cover"
+        >
+        <button 
+          @click="toggleWishlist"
+          class="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+        >
+          <i 
+            :class="isInWishlist ? 'fa-solid fa-heart text-red-500' : 'fa-regular fa-heart text-gray-600'"
+            class="text-xs"
+          ></i>
+        </button>
+        <span 
+          v-if="product.isOnSale"
+          class="bg-red-500 text-white absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold"
+        >
+          Sale
+        </span>
+      </div>
+
+      <!-- Product Info -->
+      <div class="flex-1 p-4">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="font-semibold text-dark text-lg mb-1">{{ product.name }}</h3>
+            <p class="text-sm text-gray-600 mb-2">{{ product.brand }} - {{ product.model }}</p>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ product.description }}</p>
+            
+            <!-- Rating -->
+            <div class="flex items-center mb-3">
+              <div class="flex text-yellow-400 text-sm mr-2">
+                <i 
+                  v-for="i in 5" 
+                  :key="i"
+                  :class="i <= product.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                ></i>
+              </div>
+              <span class="text-sm text-gray-600">({{ product.rating }}) {{ product.reviewCount }} ulasan</span>
+            </div>
+
+            <!-- Specifications (if available) -->
+            <div v-if="product.specifications" class="mb-3">
+              <p class="text-xs text-gray-500 line-clamp-2">{{ product.specifications }}</p>
+            </div>
+          </div>
+
+          <!-- Price and Actions -->
+          <div class="ml-4 text-right">
+            <div class="mb-3">
+              <div class="text-xl font-bold text-primary">Rp {{ formatPrice(product.price) }}</div>
+              <div 
+                v-if="product.originalPrice"
+                class="text-sm text-gray-500 line-through"
+              >
+                Rp {{ formatPrice(product.originalPrice) }}
+              </div>
+            </div>
+
+            <!-- Stock Status -->
+            <div class="mb-3">
+              <span 
+                :class="getStockClass(product.stockQuantity)"
+                class="text-xs px-2 py-1 rounded"
+              >
+                Stok: {{ product.stockQuantity }}
+              </span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col space-y-2">
+              <button 
+                @click="addToCart"
+                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                <i class="fa-solid fa-shopping-cart mr-1"></i>Keranjang
+              </button>
+              <button 
+                @click="viewProduct"
+                class="border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm"
+              >
+                <i class="fa-solid fa-eye mr-1"></i>Detail
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
+import type { Product } from '@/services/api'
+
+interface Props {
+  product: Product
+}
+
+const props = defineProps<Props>()
+const router = useRouter()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
+
+// Local state for wishlist status
+const isInWishlist = ref(false)
+
+// Initialize wishlist status
+onMounted(() => {
+  isInWishlist.value = wishlistStore.isInWishlist(props.product.id)
+})
+
+// Methods
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('id-ID').format(price)
+}
+
+const getStockClass = (stock: number) => {
+  if (stock > 10) return 'bg-green-100 text-green-800'
+  if (stock > 5) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-red-100 text-red-800'
+}
+
+const toggleWishlist = async () => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    const wasInWishlist = isInWishlist.value
+    
+    // Optimistically update UI
+    isInWishlist.value = !isInWishlist.value
+    
+    try {
+      await wishlistStore.toggleWishlist(props.product.id)
+      
+      // Show success alert
+      if (wasInWishlist) {
+        alert('Produk berhasil dihapus dari wishlist!')
+      } else {
+        alert('Produk berhasil ditambahkan ke wishlist!')
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      isInWishlist.value = wasInWishlist
+      console.error('Error toggling wishlist:', error)
+      alert('Gagal mengubah wishlist. Silakan coba lagi.')
+    }
+    
+  } catch (error) {
+    console.error('Error toggling wishlist:', error)
+    alert('Gagal mengubah wishlist. Silakan coba lagi.')
+  }
+}
+
+const addToCart = async () => {
+  try {
+    if (!authStore.isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    
+    await cartStore.addToCart(props.product.id, 1)
+    console.log('Added to cart:', props.product.id)
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+  }
+}
+
+const viewProduct = () => {
+  router.push(`/product/${props.product.id}`)
+}
+</script>
+
+<style scoped>
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Ensure proper spacing and alignment in list view */
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments for list view */
+@media (max-width: 768px) {
+  .w-48 {
+    width: 120px;
+  }
+  
+  .h-32 {
+    height: 80px;
+  }
+}
+</style>

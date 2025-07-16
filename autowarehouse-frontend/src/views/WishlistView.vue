@@ -38,8 +38,9 @@
         <div 
           v-for="item in wishlistItems" 
           :key="item.id"
-          class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all duration-300"
+          class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all duration-300 cursor-pointer"
           :class="{ 'opacity-50 transform -translate-x-4': item.removing }"
+          @click="navigateToProduct(item.id, $event)"
         >
           <div class="flex items-center space-x-6">
             <div class="flex-shrink-0">
@@ -292,6 +293,19 @@ const addAllToCart = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
     }
   }
+}
+
+const navigateToProduct = (productId: number, event: Event) => {
+  // Check if the click was on a button or interactive element
+  const target = event.target as HTMLElement
+  if (target.closest('button')) {
+    // If clicked on a button, don't navigate (let the button handle its own action)
+    event.stopPropagation()
+    return
+  }
+  
+  // Navigate to product detail page
+  router.push(`/product/${productId}`)
 }
 </script>
 
