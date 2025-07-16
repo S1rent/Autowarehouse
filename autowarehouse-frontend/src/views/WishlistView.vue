@@ -257,8 +257,13 @@ const addToCart = async (itemId: number) => {
     // Add to cart
     await cartStore.addToCart(itemId, 1)
     
-    // Remove from wishlist after successfully adding to cart
-    await wishlistStore.removeFromWishlist(itemId)
+    // Always try to remove from wishlist, even if cart addition had issues
+    try {
+      await wishlistStore.removeFromWishlist(itemId)
+    } catch (wishlistError) {
+      console.error('Error removing from wishlist:', wishlistError)
+      // Don't throw - we still want to show success for cart addition
+    }
     
     addedToCartItems.value.add(itemId)
     setTimeout(() => {
@@ -266,6 +271,17 @@ const addToCart = async (itemId: number) => {
     }, 2000)
   } catch (error) {
     console.error('Error adding to cart:', error)
+    
+    // Even if cart addition failed, try to remove from wishlist if the item might have been added
+    // This handles cases where the API call succeeded but response parsing failed
+    try {
+      await wishlistStore.removeFromWishlist(itemId)
+    } catch (wishlistError) {
+      console.error('Error removing from wishlist after cart error:', wishlistError)
+    }
+    
+    // Re-throw the original error
+    throw error
   } finally {
     addingToCartItems.value.delete(itemId)
   }

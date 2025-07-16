@@ -50,11 +50,23 @@ public class CartService {
             }
             existingItem.quantity = newQuantity;
             existingItem.persist();
+            
+            // Force initialization of lazy-loaded collections
+            if (existingItem.product != null && existingItem.product.imageUrls != null) {
+                existingItem.product.imageUrls.size();
+            }
+            
             return existingItem;
         } else {
             // Create new cart item
             CartItem cartItem = new CartItem(user, product, quantity);
             cartItem.persist();
+            
+            // Force initialization of lazy-loaded collections
+            if (cartItem.product != null && cartItem.product.imageUrls != null) {
+                cartItem.product.imageUrls.size();
+            }
+            
             return cartItem;
         }
     }
@@ -139,12 +151,22 @@ public class CartService {
         }
     }
 
+    @Transactional
     public List<CartItem> getCartItems(Long userId) {
         User user = User.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
-        return CartItem.findByUser(user);
+        List<CartItem> cartItems = CartItem.findByUser(user);
+        
+        // Force initialization of lazy-loaded collections
+        for (CartItem cartItem : cartItems) {
+            if (cartItem.product != null && cartItem.product.imageUrls != null) {
+                cartItem.product.imageUrls.size(); // Force lazy loading
+            }
+        }
+        
+        return cartItems;
     }
 
     public List<CartItem> getSelectedCartItems(Long userId) {
