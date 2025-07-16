@@ -360,7 +360,7 @@ import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import UserNavbar from '../components/UserNavbar.vue'
-import { apiService, type ProductFilters, type Category } from '@/services/api'
+import { apiService, type ProductFilters, type Category, type Product } from '@/services/api'
 import { debounce } from '@/utils/debounce'
 
 const router = useRouter()
@@ -431,24 +431,80 @@ const parseSortBy = () => {
   }
 }
 
+// State for combined products when multiple categories are selected
+const combinedProducts = ref<Product[]>([])
+const isMultiCategoryMode = ref(false)
+
 // Load products function
 const loadProducts = async () => {
   try {
     const priceRange = parsePriceRange()
     const sorting = parseSortBy()
     
-    const productFilters: ProductFilters = {
-      search: searchQuery.value || undefined,
-      category: filters.categories.length > 0 ? filters.categories[0] : undefined, // Use first selected category
-      minPrice: filters.priceMin || priceRange.min,
-      maxPrice: filters.priceMax || priceRange.max,
-      sortBy: sorting.sortBy,
-      sortOrder: sorting.sortOrder,
-      page: productsStore.currentPage,
-      size: itemsPerPage
+    // Handle multiple categories by making multiple API calls and combining results
+    if (filters.categories.length > 1) {
+      isMultiCategoryMode.value = true
+      const allProducts: Product[] = []
+      const productIds = new Set<number>() // To avoid duplicates
+      
+      for (const categoryId of filters.categories) {
+        const productFilters: ProductFilters = {
+          search: searchQuery.value || undefined,
+          category: categoryId,
+          minPrice: filters.priceMin || priceRange.min,
+          maxPrice: filters.priceMax || priceRange.max,
+          sortBy: sorting.sortBy,
+          sortOrder: sorting.sortOrder,
+          page: 1, // Always get first page for each category
+          size: 100 // Get more items to ensure we have enough
+        }
+        
+        try {
+          await productsStore.fetchProducts(productFilters)
+          // Add unique products to our combined list
+          productsStore.products.forEach(product => {
+            if (!productIds.has(product.id)) {
+              productIds.add(product.id)
+              allProducts.push(product)
+            }
+          })
+        } catch (error) {
+          console.error(`Error loading products for category ${categoryId}:`, error)
+        }
+      }
+      
+      // Sort the combined results
+      if (sorting.sortBy === 'name') {
+        allProducts.sort((a, b) => {
+          const comparison = a.name.localeCompare(b.name)
+          return sorting.sortOrder === 'asc' ? comparison : -comparison
+        })
+      } else if (sorting.sortBy === 'price') {
+        allProducts.sort((a, b) => {
+          const comparison = a.price - b.price
+          return sorting.sortOrder === 'asc' ? comparison : -comparison
+        })
+      }
+      
+      // Store combined results
+      combinedProducts.value = allProducts
+      
+    } else {
+      // Single category or no category - use normal API call
+      isMultiCategoryMode.value = false
+      const productFilters: ProductFilters = {
+        search: searchQuery.value || undefined,
+        category: filters.categories.length > 0 ? filters.categories[0] : undefined,
+        minPrice: filters.priceMin || priceRange.min,
+        maxPrice: filters.priceMax || priceRange.max,
+        sortBy: sorting.sortBy,
+        sortOrder: sorting.sortOrder,
+        page: productsStore.currentPage,
+        size: itemsPerPage
+      }
+      
+      await productsStore.fetchProducts(productFilters)
     }
-    
-    await productsStore.fetchProducts(productFilters)
   } catch (error) {
     console.error('Error loading products:', error)
   }
@@ -483,7 +539,7 @@ watch(viewMode, (newMode) => {
 
 // Computed
 const filteredProducts = computed(() => {
-  return productsStore.products
+  return isMultiCategoryMode.value ? combinedProducts.value : productsStore.products
 })
 
 const totalPages = computed(() => {

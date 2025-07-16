@@ -39,7 +39,7 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+          <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h4>
             <div class="space-y-3">
               <button 
@@ -64,7 +64,7 @@
                 <span class="text-sm font-medium text-gray-700">Notifications</span>
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <!-- Profile Content -->
@@ -208,7 +208,7 @@
                     Logout
                   </button>
                 </div>
-                <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <!-- <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                   <div>
                     <h4 class="text-sm font-medium text-yellow-900">Deactivate Account</h4>
                     <p class="text-sm text-yellow-700 mt-1">Temporarily disable your account</p>
@@ -220,7 +220,7 @@
                     <i class="fa-solid fa-pause mr-2"></i>
                     Deactivate
                   </button>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
