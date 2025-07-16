@@ -102,11 +102,9 @@
               @click="userMenuOpen = !userMenuOpen"
               class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors"
             >
-              <img 
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" 
-                alt="User Avatar" 
-                class="w-8 h-8 rounded-full"
-              >
+              <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-user text-gray-500 text-sm"></i>
+              </div>
               <span class="text-sm font-medium">{{ userName }}</span>
               <i class="fa-solid fa-chevron-down text-xs"></i>
             </button>
@@ -210,11 +208,9 @@
         
         <div class="border-t border-gray-200 pt-4 pb-3">
           <div class="flex items-center px-3 pb-3">
-            <img 
-              src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" 
-              alt="User Avatar" 
-              class="w-10 h-10 rounded-full"
-            >
+            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <i class="fa-solid fa-user text-gray-500"></i>
+            </div>
             <div class="ml-3">
               <div class="text-base font-medium text-gray-800">{{ userName }}</div>
               <div class="text-sm text-gray-500">{{ userEmail }}</div>

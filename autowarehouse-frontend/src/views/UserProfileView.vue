@@ -21,20 +21,18 @@
         <div class="lg:col-span-1">
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="text-center">
-              <img 
-                :src="user.avatar" 
-                alt="Profile Picture" 
-                class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-600"
-              >
+              <div class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-600 bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-user text-3xl text-gray-500"></i>
+              </div>
               <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ user.name }}</h3>
-              <p class="text-sm text-gray-500 mb-4">{{ user.membershipType }}</p>
-              <button 
+              <p class="text-sm text-gray-500 mb-4">Member</p>
+              <!-- <button 
                 @click="changePhoto"
                 class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
               >
                 <i class="fa-solid fa-camera mr-2"></i>
                 Change Photo
-              </button>
+              </button> -->
             </div>
           </div>
 
@@ -156,7 +154,7 @@
                     :class="{ 'bg-gray-50': !isEditingPersonal }"
                   >
                 </div>
-                <div>
+                <!-- <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
                   <input 
                     type="date" 
@@ -165,7 +163,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     :class="{ 'bg-gray-50': !isEditingPersonal }"
                   >
-                </div>
+                </div> -->
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
                   <textarea 
@@ -305,67 +303,84 @@
               
               <!-- Wishlist Items -->
               <div v-else class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
                   <div 
                     v-for="item in wishlistStore.wishlistItems" 
                     :key="item.id"
-                    class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    @click="viewProduct(item.product.id)"
                   >
-                    <div class="flex space-x-4">
+                    <div class="flex space-x-6">
                       <!-- Product Image -->
                       <div class="flex-shrink-0">
                         <img 
                           :src="item.product.imageUrls?.[0] || '/placeholder-product.jpg'" 
                           :alt="item.product.name"
-                          class="w-20 h-20 object-cover rounded-lg"
+                          class="w-24 h-24 object-cover rounded-lg border border-gray-200"
                         >
                       </div>
                       
                       <!-- Product Info -->
                       <div class="flex-1 min-w-0">
-                        <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.product.name }}</h4>
-                        <p class="text-sm text-gray-600 mt-1">{{ item.product.brand }}</p>
-                        <div class="flex items-center mt-2">
-                          <span class="text-lg font-bold text-blue-600">Rp {{ formatPrice(item.product.price) }}</span>
-                          <span 
-                            v-if="item.product.originalPrice && item.product.originalPrice > item.product.price"
-                            class="text-sm text-gray-500 line-through ml-2"
+                        <div class="flex items-start justify-between">
+                          <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-1">{{ item.product.name }}</h4>
+                            <p class="text-sm text-gray-600 mb-2">{{ item.product.brand }}</p>
+                            
+                            <!-- Price -->
+                            <div class="flex items-center space-x-2 mb-3">
+                              <span class="text-xl font-bold text-blue-600">Rp {{ formatPrice(item.product.price) }}</span>
+                              <span 
+                                v-if="item.product.originalPrice && item.product.originalPrice > item.product.price"
+                                class="text-sm text-gray-500 line-through"
+                              >
+                                Rp {{ formatPrice(item.product.originalPrice) }}
+                              </span>
+                              <span 
+                                v-if="item.product.originalPrice && item.product.originalPrice > item.product.price"
+                                class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full"
+                              >
+                                {{ Math.round(((item.product.originalPrice - item.product.price) / item.product.originalPrice) * 100) }}% OFF
+                              </span>
+                            </div>
+                            
+                            <!-- Stock Status -->
+                            <div class="mb-4">
+                              <span 
+                                :class="getStockClass(item.product.stockQuantity)"
+                                class="text-xs px-3 py-1 rounded-full font-medium"
+                              >
+                                {{ getStockText(item.product.stockQuantity) }}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <!-- Remove Button -->
+                          <button 
+                            @click.stop="removeFromWishlist(item.product.id)"
+                            class="text-gray-400 hover:text-red-600 transition-colors p-2"
+                            title="Remove from wishlist"
                           >
-                            Rp {{ formatPrice(item.product.originalPrice) }}
-                          </span>
-                        </div>
-                        
-                        <!-- Stock Status -->
-                        <div class="mt-2">
-                          <span 
-                            :class="getStockClass(item.product.stockQuantity)"
-                            class="text-xs px-2 py-1 rounded-full"
-                          >
-                            {{ getStockText(item.product.stockQuantity) }}
-                          </span>
+                            <i class="fa-solid fa-heart-broken text-lg"></i>
+                          </button>
                         </div>
                         
                         <!-- Action Buttons -->
-                        <div class="flex space-x-2 mt-3">
+                        <div class="flex space-x-3">
                           <button 
-                            @click="addToCart(item.product.id)"
+                            @click.stop="addToCart(item.product.id)"
                             :disabled="item.product.stockQuantity === 0"
-                            class="flex-1 bg-blue-600 text-white py-1 px-3 rounded text-xs hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <i class="fa-solid fa-shopping-cart mr-1"></i>
+                            <i class="fa-solid fa-shopping-cart mr-2"></i>
                             Add to Cart
                           </button>
                           <button 
-                            @click="viewProduct(item.product.id)"
-                            class="px-3 py-1 border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50 transition-colors"
+                            @click.stop="viewProduct(item.product.id)"
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                           >
-                            <i class="fa-solid fa-eye"></i>
-                          </button>
-                          <button 
-                            @click="removeFromWishlist(item.product.id)"
-                            class="px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs transition-colors"
-                          >
-                            <i class="fa-solid fa-trash"></i>
+                            <i class="fa-solid fa-eye mr-2"></i>
+                            View Details
                           </button>
                         </div>
                       </div>
@@ -382,10 +397,102 @@
               <div class="p-6 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Order History</h3>
               </div>
-              <div class="p-8 text-center">
+              
+              <!-- Loading State -->
+              <div v-if="orderStore.isLoading" class="p-8 text-center">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600 mb-4"></i>
+                <p class="text-gray-600">Loading orders...</p>
+              </div>
+              
+              <!-- Empty State -->
+              <div v-else-if="orderStore.orders.length === 0" class="p-8 text-center">
                 <i class="fa-solid fa-shopping-bag text-4xl text-gray-400 mb-4"></i>
-                <h4 class="text-lg font-medium text-gray-900 mb-2">Order history coming soon</h4>
-                <p class="text-gray-600">We're working on implementing the order history feature</p>
+                <h4 class="text-lg font-medium text-gray-900 mb-2">No orders yet</h4>
+                <p class="text-gray-600 mb-4">Start shopping to see your order history here</p>
+                <button 
+                  @click="$router.push('/products')"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <i class="fa-solid fa-shopping-bag mr-2"></i>
+                  Browse Products
+                </button>
+              </div>
+              
+              <!-- Orders List -->
+              <div v-else class="divide-y divide-gray-200">
+                <div 
+                  v-for="order in orderStore.orders" 
+                  :key="order.id"
+                  class="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="viewOrderDetail(order.id)"
+                >
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 class="text-lg font-semibold text-gray-900">Order #{{ order.orderNumber }}</h4>
+                      <p class="text-sm text-gray-600">{{ formatDate(order.createdAt) }}</p>
+                    </div>
+                    <div class="text-right">
+                      <span 
+                        :class="getOrderStatusClass(order.status)"
+                        class="px-3 py-1 rounded-full text-xs font-medium"
+                      >
+                        {{ getOrderStatusText(order.status) }}
+                      </span>
+                      <p class="text-lg font-bold text-gray-900 mt-1">Rp {{ formatPrice(order.totalAmount) }}</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Order Summary -->
+                  <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="text-gray-600">Payment Status:</span>
+                        <span 
+                          :class="order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-yellow-600'"
+                          class="ml-2 font-medium"
+                        >
+                          {{ order.paymentStatus }}
+                        </span>
+                      </div>
+                      <div>
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span class="ml-2 font-medium">Rp {{ formatPrice(order.subtotal) }}</span>
+                      </div>
+                      <div>
+                        <span class="text-gray-600">Shipping:</span>
+                        <span class="ml-2 font-medium">Rp {{ formatPrice(order.shippingCost) }}</span>
+                      </div>
+                      <div>
+                        <span class="text-gray-600">Total:</span>
+                        <span class="ml-2 font-medium text-blue-600">Rp {{ formatPrice(order.totalAmount) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Order Actions -->
+                  <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div class="flex space-x-2">
+                      <button 
+                        @click.stop="viewOrderDetail(order.id)"
+                        class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        <i class="fa-solid fa-eye mr-1"></i>
+                        View Details
+                      </button>
+                      <button 
+                        v-if="order.status === 'DELIVERED'"
+                        @click.stop="reorderItems(order.id)"
+                        class="text-green-600 hover:text-green-700 text-sm font-medium"
+                      >
+                        <i class="fa-solid fa-redo mr-1"></i>
+                        Reorder
+                      </button>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      Order placed on {{ formatDate(order.createdAt) }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -403,6 +510,7 @@ import { useRouter } from 'vue-router'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import { useOrderStore } from '@/stores/order'
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
 
@@ -410,20 +518,21 @@ const router = useRouter()
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const orderStore = useOrderStore()
 
 // State
 const isEditingPersonal = ref(false)
 const activeTab = ref('profile')
 
-// User data
+// User data - will be populated from auth store
 const user = reactive({
-  name: 'Sarah Johnson',
-  email: 'sarah.johnson@email.com',
-  phone: '+62 812-3456-7890',
-  birthDate: '1990-05-15',
-  address: 'Jl. Sudirman No. 123, RT 05/RW 02, Kebayoran Baru, Jakarta Selatan, DKI Jakarta 12190',
-  avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-  membershipType: 'Premium Member'
+  name: '',
+  email: '',
+  phone: '',
+  birthDate: '',
+  address: '',
+  avatar: '',
+  membershipType: 'Member'
 })
 
 // Password form
@@ -558,9 +667,84 @@ const getStockText = (stock: number) => {
   return 'Out of Stock'
 }
 
+// Order methods
+const viewOrderDetail = (orderId: number) => {
+  router.push(`/order/${orderId}`)
+}
+
+const reorderItems = async (orderId: number) => {
+  try {
+    // Implementation for reordering items
+    console.log('Reordering items from order:', orderId)
+    alert('Reorder functionality would be implemented here')
+  } catch (error) {
+    console.error('Error reordering items:', error)
+    alert('Failed to reorder items. Please try again.')
+  }
+}
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const getOrderStatusClass = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'bg-yellow-100 text-yellow-800'
+    case 'CONFIRMED':
+      return 'bg-blue-100 text-blue-800'
+    case 'SHIPPED':
+      return 'bg-purple-100 text-purple-800'
+    case 'DELIVERED':
+      return 'bg-green-100 text-green-800'
+    case 'CANCELLED':
+      return 'bg-red-100 text-red-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getOrderStatusText = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Pending'
+    case 'CONFIRMED':
+      return 'Confirmed'
+    case 'SHIPPED':
+      return 'Shipped'
+    case 'DELIVERED':
+      return 'Delivered'
+    case 'CANCELLED':
+      return 'Cancelled'
+    default:
+      return status
+  }
+}
+
+// Load user data from auth store
+const loadUserData = () => {
+  if (authStore.user) {
+    user.name = `${authStore.user.firstName} ${authStore.user.lastName}`.trim() || ''
+    user.email = authStore.user.email || ''
+    user.phone = authStore.user.phoneNumber || ''
+    user.address = '' // Address not available in current user model
+  }
+}
+
 // Initialize on mount
 onMounted(async () => {
-  await wishlistStore.loadWishlist()
+  // Load user data from auth store
+  loadUserData()
+  
+  // Load wishlist and orders
+  await Promise.all([
+    wishlistStore.loadWishlist(),
+    orderStore.fetchUserOrders()
+  ])
 })
 </script>
 
