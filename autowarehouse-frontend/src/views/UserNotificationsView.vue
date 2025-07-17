@@ -74,7 +74,7 @@
           </div>
 
           <!-- Notification Settings -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+          <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Settings</h4>
             <div class="space-y-4">
               <div class="flex items-center justify-between">
@@ -112,7 +112,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Notification Content -->
         <div class="lg:col-span-3">
