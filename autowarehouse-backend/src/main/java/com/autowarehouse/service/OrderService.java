@@ -614,4 +614,248 @@ public class OrderService {
     public void deliverOrderWithConfirmation(Long orderId, String deliveredBy) {
         updateOrderStatus(orderId, Order.OrderStatus.DELIVERED, deliveredBy, "Order successfully delivered");
     }
+
+    // New methods for enhanced admin functionality
+    public List<Order> findRecentOrdersWithLimit(int limit) {
+        return Order.find("ORDER BY createdAt DESC").page(0, limit).list();
+    }
+
+    @Transactional
+    public int bulkUpdateStatus(List<Long> orderIds, Order.OrderStatus status, String notes) {
+        int updatedCount = 0;
+        for (Long orderId : orderIds) {
+            try {
+                updateOrderStatus(orderId, status, "ADMIN", notes);
+                updatedCount++;
+            } catch (Exception e) {
+                // Log error but continue with other orders
+                System.err.println("Failed to update order " + orderId + ": " + e.getMessage());
+            }
+        }
+        return updatedCount;
+    }
+
+    public com.autowarehouse.resource.OrderResource.OrderSearchResponse searchOrders(com.autowarehouse.resource.OrderResource.OrderSearchRequest request) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT o FROM Order o WHERE 1=1");
+        
+        if (request.query != null && !request.query.trim().isEmpty()) {
+            queryBuilder.append(" AND (o.orderNumber LIKE :query OR o.user.firstName LIKE :query OR o.user.lastName LIKE :query OR o.user.email LIKE :query)");
+        }
+        
+        if (request.status != null && !request.status.trim().isEmpty()) {
+            queryBuilder.append(" AND o.status = :status");
+        }
+        
+        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+            queryBuilder.append(" AND o.paymentStatus = :paymentStatus");
+        }
+        
+        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+            queryBuilder.append(" AND o.createdAt >= :startDate");
+        }
+        
+        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+            queryBuilder.append(" AND o.createdAt <= :endDate");
+        }
+        
+        queryBuilder.append(" ORDER BY o.createdAt DESC");
+        
+        var query = Order.getEntityManager().createQuery(queryBuilder.toString(), Order.class);
+        
+        if (request.query != null && !request.query.trim().isEmpty()) {
+            query.setParameter("query", "%" + request.query.trim() + "%");
+        }
+        
+        if (request.status != null && !request.status.trim().isEmpty()) {
+            query.setParameter("status", Order.OrderStatus.valueOf(request.status.toUpperCase()));
+        }
+        
+        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+            query.setParameter("paymentStatus", Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase()));
+        }
+        
+        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+            query.setParameter("startDate", LocalDateTime.parse(request.startDate + "T00:00:00"));
+        }
+        
+        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+            query.setParameter("endDate", LocalDateTime.parse(request.endDate + "T23:59:59"));
+        }
+        
+        // Get total count
+        var countQuery = Order.getEntityManager().createQuery(
+            queryBuilder.toString().replace("SELECT o FROM Order o", "SELECT COUNT(o) FROM Order o"), Long.class);
+        
+        if (request.query != null && !request.query.trim().isEmpty()) {
+            countQuery.setParameter("query", "%" + request.query.trim() + "%");
+        }
+        
+        if (request.status != null && !request.status.trim().isEmpty()) {
+            countQuery.setParameter("status", Order.OrderStatus.valueOf(request.status.toUpperCase()));
+        }
+        
+        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+            countQuery.setParameter("paymentStatus", Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase()));
+        }
+        
+        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+            countQuery.setParameter("startDate", LocalDateTime.parse(request.startDate + "T00:00:00"));
+        }
+        
+        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+            countQuery.setParameter("endDate", LocalDateTime.parse(request.endDate + "T23:59:59"));
+        }
+        
+        long totalElements = countQuery.getSingleResult();
+        int totalPages = (int) Math.ceil((double) totalElements / request.size);
+        
+        // Get paginated results
+        List<Order> orders = query
+            .setFirstResult(request.page * request.size)
+            .setMaxResults(request.size)
+            .getResultList();
+        
+        List<com.autowarehouse.resource.OrderResource.OrderResponse> orderResponses = orders.stream()
+            .map(com.autowarehouse.resource.OrderResource.OrderResponse::new)
+            .toList();
+        
+        return new com.autowarehouse.resource.OrderResource.OrderSearchResponse(
+            orderResponses, totalElements, totalPages, request.page, request.size);
+    }
+
+    public com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse getOrderAnalytics(String startDate, String endDate, String groupBy) {
+        LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate + "T00:00:00") : LocalDateTime.now().minusDays(30);
+        LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate + "T23:59:59") : LocalDateTime.now();
+        
+        List<Order> orders = Order.find("createdAt >= ?1 AND createdAt <= ?2 AND status = ?3", 
+                                       start, end, Order.OrderStatus.DELIVERED).list();
+        
+        // Group orders by date
+        var groupedOrders = orders.stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                order -> order.createdAt.toLocalDate().toString()
+            ));
+        
+        List<com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse.OrderAnalyticsData> analyticsData = 
+            groupedOrders.entrySet().stream()
+                .map(entry -> {
+                    var data = new com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse.OrderAnalyticsData();
+                    data.date = entry.getKey();
+                    data.orderCount = entry.getValue().size();
+                    data.revenue = entry.getValue().stream()
+                        .map(order -> order.totalAmount)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    data.averageOrderValue = data.orderCount > 0 ? 
+                        data.revenue.divide(BigDecimal.valueOf(data.orderCount), 2, java.math.RoundingMode.HALF_UP).doubleValue() : 0.0;
+                    return data;
+                })
+                .sorted((a, b) -> a.date.compareTo(b.date))
+                .toList();
+        
+        // Calculate summary
+        var summary = new com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse.OrderSummary();
+        summary.totalOrders = orders.size();
+        summary.totalRevenue = orders.stream()
+            .map(order -> order.totalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        summary.averageOrderValue = summary.totalOrders > 0 ? 
+            summary.totalRevenue.divide(BigDecimal.valueOf(summary.totalOrders), 2, java.math.RoundingMode.HALF_UP).doubleValue() : 0.0;
+        
+        // Calculate growth rate (simplified - comparing with previous period)
+        LocalDateTime previousStart = start.minusDays(java.time.Duration.between(start, end).toDays());
+        List<Order> previousOrders = Order.find("createdAt >= ?1 AND createdAt < ?2 AND status = ?3", 
+                                               previousStart, start, Order.OrderStatus.DELIVERED).list();
+        
+        if (!previousOrders.isEmpty()) {
+            BigDecimal previousRevenue = previousOrders.stream()
+                .map(order -> order.totalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            if (previousRevenue.compareTo(BigDecimal.ZERO) > 0) {
+                summary.growthRate = summary.totalRevenue.subtract(previousRevenue)
+                    .divide(previousRevenue, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .doubleValue();
+            }
+        }
+        
+        var response = new com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse();
+        response.data = analyticsData;
+        response.summary = summary;
+        
+        return response;
+    }
+
+    public String exportOrders(String status, String startDate, String endDate, String format) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT o FROM Order o WHERE 1=1");
+        
+        if (status != null && !status.trim().isEmpty()) {
+            queryBuilder.append(" AND o.status = :status");
+        }
+        
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            queryBuilder.append(" AND o.createdAt >= :startDate");
+        }
+        
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            queryBuilder.append(" AND o.createdAt <= :endDate");
+        }
+        
+        queryBuilder.append(" ORDER BY o.createdAt DESC");
+        
+        var query = Order.getEntityManager().createQuery(queryBuilder.toString(), Order.class);
+        
+        if (status != null && !status.trim().isEmpty()) {
+            query.setParameter("status", Order.OrderStatus.valueOf(status.toUpperCase()));
+        }
+        
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            query.setParameter("startDate", LocalDateTime.parse(startDate + "T00:00:00"));
+        }
+        
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            query.setParameter("endDate", LocalDateTime.parse(endDate + "T23:59:59"));
+        }
+        
+        List<Order> orders = query.getResultList();
+        
+        if ("csv".equalsIgnoreCase(format)) {
+            return generateCSVExport(orders);
+        } else {
+            throw new IllegalArgumentException("Unsupported export format: " + format);
+        }
+    }
+
+    private String generateCSVExport(List<Order> orders) {
+        StringBuilder csv = new StringBuilder();
+        
+        // CSV Header
+        csv.append("Order Number,Customer Name,Customer Email,Status,Payment Status,Subtotal,Tax,Shipping,Total,Created Date,Shipped Date,Delivered Date\n");
+        
+        // CSV Data
+        for (Order order : orders) {
+            csv.append(escapeCSV(order.orderNumber)).append(",");
+            csv.append(escapeCSV(order.user != null ? order.user.getFullName() : "")).append(",");
+            csv.append(escapeCSV(order.user != null ? order.user.email : "")).append(",");
+            csv.append(escapeCSV(order.status.name())).append(",");
+            csv.append(escapeCSV(order.paymentStatus.name())).append(",");
+            csv.append(order.subtotal != null ? order.subtotal.toString() : "0").append(",");
+            csv.append(order.taxAmount != null ? order.taxAmount.toString() : "0").append(",");
+            csv.append(order.shippingCost != null ? order.shippingCost.toString() : "0").append(",");
+            csv.append(order.totalAmount != null ? order.totalAmount.toString() : "0").append(",");
+            csv.append(order.createdAt != null ? order.createdAt.toString() : "").append(",");
+            csv.append(order.shippedAt != null ? order.shippedAt.toString() : "").append(",");
+            csv.append(order.deliveredAt != null ? order.deliveredAt.toString() : "").append("\n");
+        }
+        
+        return csv.toString();
+    }
+
+    private String escapeCSV(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
 }

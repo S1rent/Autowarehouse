@@ -765,6 +765,127 @@ class ApiService {
     return response.data
   }
 
+  // Enhanced Admin Order APIs
+  async searchOrders(searchParams: {
+    query?: string
+    status?: string
+    paymentStatus?: string
+    startDate?: string
+    endDate?: string
+    page?: number
+    size?: number
+  }): Promise<{
+    orders: Order[]
+    totalElements: number
+    totalPages: number
+    currentPage: number
+    pageSize: number
+  }> {
+    const params = new URLSearchParams()
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, value.toString())
+      }
+    })
+    const response = await api.get(`/orders/admin/search?${params.toString()}`)
+    return response.data
+  }
+
+  async shipOrder(orderId: number, trackingNumber: string): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/orders/admin/${orderId}/ship`, { trackingNumber })
+    return response.data
+  }
+
+  async deliverOrder(orderId: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/orders/admin/${orderId}/deliver`)
+    return response.data
+  }
+
+  async bulkUpdateOrderStatus(orderIds: number[], status: string, notes?: string): Promise<{
+    updatedCount: number
+    message: string
+  }> {
+    const response = await api.put(`/orders/admin/bulk-status`, {
+      orderIds,
+      status,
+      notes
+    })
+    return response.data
+  }
+
+  async getOrderAnalytics(params: {
+    startDate?: string
+    endDate?: string
+    groupBy?: string
+  }): Promise<{
+    data: Array<{
+      date: string
+      orderCount: number
+      revenue: number
+      averageOrderValue: number
+    }>
+    summary: {
+      totalOrders: number
+      totalRevenue: number
+      averageOrderValue: number
+      growthRate: number
+    }
+  }> {
+    const queryParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString())
+      }
+    })
+    const response = await api.get(`/orders/admin/analytics?${queryParams.toString()}`)
+    return response.data
+  }
+
+  async exportOrders(params: {
+    status?: string
+    startDate?: string
+    endDate?: string
+    format?: string
+  }): Promise<string> {
+    const queryParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString())
+      }
+    })
+    const response = await api.get(`/orders/admin/export?${queryParams.toString()}`, {
+      responseType: 'text'
+    })
+    return response.data
+  }
+
+  async getRecentOrders(limit: number = 10): Promise<Order[]> {
+    const response = await api.get<Order[]>(`/orders/admin/recent?limit=${limit}`)
+    return response.data
+  }
+
+  // Invoice APIs
+  async generateInvoicePDF(orderId: number): Promise<Blob> {
+    const response = await api.get(`/invoices/${orderId}/pdf`, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
+
+  async generateInvoiceHTML(orderId: number): Promise<string> {
+    const response = await api.get(`/invoices/${orderId}/html`, {
+      responseType: 'text'
+    })
+    return response.data
+  }
+
+  async downloadInvoice(orderId: number): Promise<Blob> {
+    const response = await api.get(`/invoices/${orderId}/download`, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
+
   // Category APIs
   async getCategories(): Promise<Category[]> {
     const response = await api.get<Category[]>('/categories')

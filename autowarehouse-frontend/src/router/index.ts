@@ -145,6 +145,11 @@ const routes: RouteRecordRaw[] = [
     name: 'AdminOrders',
     component: () => import('../views/admin/AdminOrderView.vue')
   },
+  {
+    path: '/admin/orders/:id',
+    name: 'AdminOrderDetail',
+    component: () => import('../views/admin/AdminOrderDetailView.vue')
+  },
 
   // UI Index for development
   {
@@ -205,7 +210,7 @@ router.beforeEach((to, from, next) => {
   // Admin routes protection
   const adminRoutes = [
     'AdminDashboard', 'AdminProducts', 'AdminAuctions', 'AdminCategories',
-    'AdminCustomerService', 'AdminNotifications', 'AdminOrders'
+    'AdminCustomerService', 'AdminNotifications', 'AdminOrders', 'AdminOrderDetail'
   ]
   
   // If user is not admin and trying to access admin routes, redirect to home

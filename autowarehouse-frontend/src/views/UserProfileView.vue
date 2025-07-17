@@ -800,14 +800,21 @@ const loadUserData = async () => {
     user.email = authStore.user.email || ''
     user.phone = authStore.user.phoneNumber || ''
     
-    // Load full user profile to get address
+    // Load full user profile to get address and ensure phone number is loaded
     try {
       const fullProfile = await apiService.getUserProfile(authStore.user.id)
       user.address = fullProfile.address || ''
-      user.phone = fullProfile.phoneNumber || ''
+      // Make sure to use the phoneNumber from the API response
+      user.phone = fullProfile.phoneNumber || authStore.user.phoneNumber || ''
+      
+      console.log('Loaded user profile:', fullProfile)
+      console.log('Phone number from API:', fullProfile.phoneNumber)
+      console.log('Phone number set to user.phone:', user.phone)
     } catch (err) {
       console.error('Error loading user profile:', err)
       user.address = ''
+      // Fallback to auth store phone number if API call fails
+      user.phone = authStore.user.phoneNumber || ''
     }
   }
 }

@@ -272,6 +272,119 @@ public class OrderResource {
         }
     }
 
+    @GET
+    @Path("/admin/search")
+    @RolesAllowed("ADMIN")
+    public Response searchOrders(
+            @QueryParam("query") String query,
+            @QueryParam("status") String status,
+            @QueryParam("paymentStatus") String paymentStatus,
+            @QueryParam("startDate") String startDate,
+            @QueryParam("endDate") String endDate,
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        try {
+            OrderSearchRequest searchRequest = new OrderSearchRequest();
+            searchRequest.query = query;
+            searchRequest.status = status;
+            searchRequest.paymentStatus = paymentStatus;
+            searchRequest.startDate = startDate;
+            searchRequest.endDate = endDate;
+            searchRequest.page = page;
+            searchRequest.size = size;
+
+            OrderSearchResponse searchResponse = orderService.searchOrders(searchRequest);
+            return Response.ok(searchResponse).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to search orders"))
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/admin/{id}/ship")
+    @RolesAllowed("ADMIN")
+    public Response shipOrder(@PathParam("id") Long id, @Valid ShipOrderRequest request) {
+        try {
+            orderService.shipOrder(id, request.trackingNumber);
+            return Response.ok(new SuccessResponse("Order shipped successfully")).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/admin/{id}/deliver")
+    @RolesAllowed("ADMIN")
+    public Response deliverOrder(@PathParam("id") Long id) {
+        try {
+            orderService.deliverOrder(id);
+            return Response.ok(new SuccessResponse("Order marked as delivered")).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/admin/bulk-status")
+    @RolesAllowed("ADMIN")
+    public Response bulkUpdateStatus(@Valid BulkStatusUpdateRequest request) {
+        try {
+            Order.OrderStatus status = Order.OrderStatus.valueOf(request.status.toUpperCase());
+            int updatedCount = orderService.bulkUpdateStatus(request.orderIds, status, request.notes);
+            return Response.ok(new BulkUpdateResponse(updatedCount, "Orders updated successfully")).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/admin/analytics")
+    @RolesAllowed("ADMIN")
+    public Response getOrderAnalytics(
+            @QueryParam("startDate") String startDate,
+            @QueryParam("endDate") String endDate,
+            @QueryParam("groupBy") @DefaultValue("day") String groupBy) {
+        try {
+            OrderAnalyticsResponse analytics = orderService.getOrderAnalytics(startDate, endDate, groupBy);
+            return Response.ok(analytics).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to fetch order analytics"))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/admin/export")
+    @RolesAllowed("ADMIN")
+    @Produces("text/csv")
+    public Response exportOrders(
+            @QueryParam("status") String status,
+            @QueryParam("startDate") String startDate,
+            @QueryParam("endDate") String endDate,
+            @QueryParam("format") @DefaultValue("csv") String format) {
+        try {
+            String exportData = orderService.exportOrders(status, startDate, endDate, format);
+            String filename = "orders_export_" + LocalDateTime.now().toString().substring(0, 10) + "." + format;
+            
+            return Response.ok(exportData)
+                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to export orders"))
+                    .build();
+        }
+    }
+
     // DTO Classes
     public static class CreateOrderRequest {
         public Long userId;
@@ -392,6 +505,67 @@ public class OrderResource {
 
         public SuccessResponse(String message) {
             this.message = message;
+        }
+    }
+
+    public static class OrderSearchRequest {
+        public String query;
+        public String status;
+        public String paymentStatus;
+        public String startDate;
+        public String endDate;
+        public int page;
+        public int size;
+    }
+
+    public static class OrderSearchResponse {
+        public List<OrderResponse> orders;
+        public long totalElements;
+        public int totalPages;
+        public int currentPage;
+        public int pageSize;
+
+        public OrderSearchResponse(List<OrderResponse> orders, long totalElements, int totalPages, int currentPage, int pageSize) {
+            this.orders = orders;
+            this.totalElements = totalElements;
+            this.totalPages = totalPages;
+            this.currentPage = currentPage;
+            this.pageSize = pageSize;
+        }
+    }
+
+    public static class BulkStatusUpdateRequest {
+        public List<Long> orderIds;
+        public String status;
+        public String notes;
+    }
+
+    public static class BulkUpdateResponse {
+        public int updatedCount;
+        public String message;
+
+        public BulkUpdateResponse(int updatedCount, String message) {
+            this.updatedCount = updatedCount;
+            this.message = message;
+        }
+    }
+
+    public static class OrderAnalyticsResponse {
+        public List<OrderAnalyticsData> data;
+        public OrderSummary summary;
+
+        public static class OrderAnalyticsData {
+            public String date;
+            public long orderCount;
+            public BigDecimal revenue;
+            public double averageOrderValue;
+        }
+
+        public static class OrderSummary {
+            public long totalOrders;
+            public BigDecimal totalRevenue;
+            public double averageOrderValue;
+            public double growthRate;
         }
     }
 }
