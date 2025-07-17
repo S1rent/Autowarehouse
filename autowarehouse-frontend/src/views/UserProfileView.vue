@@ -810,6 +810,11 @@ const loadUserData = async () => {
       console.log('Loaded user profile:', fullProfile)
       console.log('Phone number from API:', fullProfile.phoneNumber)
       console.log('Phone number set to user.phone:', user.phone)
+      
+      // Additional debugging
+      console.log('authStore.user.phoneNumber:', authStore.user.phoneNumber)
+      console.log('Type of fullProfile.phoneNumber:', typeof fullProfile.phoneNumber)
+      console.log('Is fullProfile.phoneNumber empty?', !fullProfile.phoneNumber)
     } catch (err) {
       console.error('Error loading user profile:', err)
       user.address = ''

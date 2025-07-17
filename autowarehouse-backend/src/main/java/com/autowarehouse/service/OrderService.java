@@ -129,8 +129,8 @@ public class OrderService {
         return Order.findPendingOrders();
     }
 
-    public List<Order> findRecentOrders(int days) {
-        return Order.findRecentOrders(days);
+    public List<Order> findRecentOrders(int limit) {
+        return Order.find("ORDER BY createdAt DESC").page(0, limit).list();
     }
 
     public Order createOrderFromCart(Long userId) {
@@ -620,6 +620,7 @@ public class OrderService {
         return Order.find("ORDER BY createdAt DESC").page(0, limit).list();
     }
 
+
     @Transactional
     public int bulkUpdateStatus(List<Long> orderIds, Order.OrderStatus status, String notes) {
         int updatedCount = 0;
@@ -636,91 +637,250 @@ public class OrderService {
     }
 
     public com.autowarehouse.resource.OrderResource.OrderSearchResponse searchOrders(com.autowarehouse.resource.OrderResource.OrderSearchRequest request) {
-        StringBuilder queryBuilder = new StringBuilder("SELECT o FROM Order o WHERE 1=1");
-        
-        if (request.query != null && !request.query.trim().isEmpty()) {
-            queryBuilder.append(" AND (o.orderNumber LIKE :query OR o.user.firstName LIKE :query OR o.user.lastName LIKE :query OR o.user.email LIKE :query)");
+        try {
+            StringBuilder queryBuilder = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.user u WHERE 1=1");
+            
+            // Enhanced search query - include order ID search and better handling
+            if (request.query != null && !request.query.trim().isEmpty()) {
+                String searchTerm = request.query.trim();
+                
+                // Check if search term is numeric (for order ID search)
+                boolean isNumeric = searchTerm.matches("\\d+");
+                
+                if (isNumeric) {
+                    // Search by order ID or order number
+                    queryBuilder.append(" AND (o.id = :numericQuery OR o.orderNumber LIKE :query OR u.firstName LIKE :query OR u.lastName LIKE :query OR u.email LIKE :query)");
+                } else {
+                    // Search by text fields only
+                    queryBuilder.append(" AND (o.orderNumber LIKE :query OR u.firstName LIKE :query OR u.lastName LIKE :query OR u.email LIKE :query)");
+                }
+            }
+            
+            if (request.status != null && !request.status.trim().isEmpty()) {
+                queryBuilder.append(" AND o.status = :status");
+            }
+            
+            if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+                queryBuilder.append(" AND o.paymentStatus = :paymentStatus");
+            }
+            
+            // Date filtering with proper range handling
+            if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+                queryBuilder.append(" AND o.createdAt >= :startDate");
+            }
+            
+            if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+                queryBuilder.append(" AND o.createdAt <= :endDate");
+            }
+            
+            queryBuilder.append(" ORDER BY o.createdAt DESC");
+            
+            System.out.println("Generated query: " + queryBuilder.toString());
+            
+            var query = Order.getEntityManager().createQuery(queryBuilder.toString(), Order.class);
+            
+            // Set search parameters
+            if (request.query != null && !request.query.trim().isEmpty()) {
+                String searchTerm = request.query.trim();
+                String searchPattern = "%" + searchTerm + "%";
+                
+                query.setParameter("query", searchPattern);
+                
+                // If numeric, also set the numeric parameter for ID search
+                if (searchTerm.matches("\\d+")) {
+                    try {
+                        Long numericValue = Long.parseLong(searchTerm);
+                        query.setParameter("numericQuery", numericValue);
+                        System.out.println("Numeric search parameter: " + numericValue);
+                    } catch (NumberFormatException e) {
+                        // Fallback to 0 if parsing fails
+                        query.setParameter("numericQuery", 0L);
+                    }
+                }
+                
+                System.out.println("Search query parameter: " + searchPattern);
+            }
+            
+            // Set status parameter
+            if (request.status != null && !request.status.trim().isEmpty()) {
+                try {
+                    Order.OrderStatus status = Order.OrderStatus.valueOf(request.status.toUpperCase());
+                    query.setParameter("status", status);
+                    System.out.println("Status filter: " + status);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid order status: " + request.status);
+                    // Don't add the parameter if invalid
+                    queryBuilder = new StringBuilder(queryBuilder.toString().replace(" AND o.status = :status", ""));
+                    query = Order.getEntityManager().createQuery(queryBuilder.toString(), Order.class);
+                    
+                    // Re-apply other parameters
+                    if (request.query != null && !request.query.trim().isEmpty()) {
+                        String searchTerm = request.query.trim();
+                        query.setParameter("query", "%" + searchTerm + "%");
+                        if (searchTerm.matches("\\d+")) {
+                            try {
+                                query.setParameter("numericQuery", Long.parseLong(searchTerm));
+                            } catch (NumberFormatException ex) {
+                                query.setParameter("numericQuery", 0L);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Set payment status parameter
+            if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+                try {
+                    Order.PaymentStatus paymentStatus = Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase());
+                    query.setParameter("paymentStatus", paymentStatus);
+                    System.out.println("Payment status filter: " + paymentStatus);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid payment status: " + request.paymentStatus);
+                }
+            }
+            
+            // Set date parameters
+            if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+                try {
+                    LocalDateTime startDateTime = LocalDateTime.parse(request.startDate + "T00:00:00");
+                    query.setParameter("startDate", startDateTime);
+                    System.out.println("Start date filter: " + startDateTime);
+                } catch (Exception e) {
+                    System.err.println("Invalid start date format: " + request.startDate + " - " + e.getMessage());
+                }
+            }
+            
+            if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+                try {
+                    LocalDateTime endDateTime = LocalDateTime.parse(request.endDate + "T23:59:59");
+                    query.setParameter("endDate", endDateTime);
+                    System.out.println("End date filter: " + endDateTime);
+                } catch (Exception e) {
+                    System.err.println("Invalid end date format: " + request.endDate + " - " + e.getMessage());
+                }
+            }
+            
+            // Create count query with same logic
+            String baseCountQuery = "SELECT COUNT(o) FROM Order o LEFT JOIN o.user u WHERE 1=1";
+            StringBuilder countQueryBuilder = new StringBuilder(baseCountQuery);
+            
+            // Apply same filters to count query
+            if (request.query != null && !request.query.trim().isEmpty()) {
+                String searchTerm = request.query.trim();
+                boolean isNumeric = searchTerm.matches("\\d+");
+                
+                if (isNumeric) {
+                    countQueryBuilder.append(" AND (o.id = :numericQuery OR o.orderNumber LIKE :query OR u.firstName LIKE :query OR u.lastName LIKE :query OR u.email LIKE :query)");
+                } else {
+                    countQueryBuilder.append(" AND (o.orderNumber LIKE :query OR u.firstName LIKE :query OR u.lastName LIKE :query OR u.email LIKE :query)");
+                }
+            }
+            
+            if (request.status != null && !request.status.trim().isEmpty()) {
+                try {
+                    Order.OrderStatus.valueOf(request.status.toUpperCase());
+                    countQueryBuilder.append(" AND o.status = :status");
+                } catch (IllegalArgumentException e) {
+                    // Skip invalid status
+                }
+            }
+            
+            if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+                try {
+                    Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase());
+                    countQueryBuilder.append(" AND o.paymentStatus = :paymentStatus");
+                } catch (IllegalArgumentException e) {
+                    // Skip invalid payment status
+                }
+            }
+            
+            if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+                countQueryBuilder.append(" AND o.createdAt >= :startDate");
+            }
+            
+            if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+                countQueryBuilder.append(" AND o.createdAt <= :endDate");
+            }
+            
+            var countQuery = Order.getEntityManager().createQuery(countQueryBuilder.toString(), Long.class);
+            
+            // Apply same parameters to count query
+            if (request.query != null && !request.query.trim().isEmpty()) {
+                String searchTerm = request.query.trim();
+                countQuery.setParameter("query", "%" + searchTerm + "%");
+                if (searchTerm.matches("\\d+")) {
+                    try {
+                        countQuery.setParameter("numericQuery", Long.parseLong(searchTerm));
+                    } catch (NumberFormatException e) {
+                        countQuery.setParameter("numericQuery", 0L);
+                    }
+                }
+            }
+            
+            if (request.status != null && !request.status.trim().isEmpty()) {
+                try {
+                    Order.OrderStatus status = Order.OrderStatus.valueOf(request.status.toUpperCase());
+                    countQuery.setParameter("status", status);
+                } catch (IllegalArgumentException e) {
+                    // Skip invalid status
+                }
+            }
+            
+            if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
+                try {
+                    Order.PaymentStatus paymentStatus = Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase());
+                    countQuery.setParameter("paymentStatus", paymentStatus);
+                } catch (IllegalArgumentException e) {
+                    // Skip invalid payment status
+                }
+            }
+            
+            if (request.startDate != null && !request.startDate.trim().isEmpty()) {
+                try {
+                    LocalDateTime startDateTime = LocalDateTime.parse(request.startDate + "T00:00:00");
+                    countQuery.setParameter("startDate", startDateTime);
+                } catch (Exception e) {
+                    // Skip invalid date
+                }
+            }
+            
+            if (request.endDate != null && !request.endDate.trim().isEmpty()) {
+                try {
+                    LocalDateTime endDateTime = LocalDateTime.parse(request.endDate + "T23:59:59");
+                    countQuery.setParameter("endDate", endDateTime);
+                } catch (Exception e) {
+                    // Skip invalid date
+                }
+            }
+            
+            long totalElements = countQuery.getSingleResult();
+            int totalPages = request.size > 0 ? (int) Math.ceil((double) totalElements / request.size) : 1;
+            
+            System.out.println("Total elements found: " + totalElements);
+            
+            // Get paginated results
+            List<Order> orders = query
+                .setFirstResult(request.page * request.size)
+                .setMaxResults(request.size)
+                .getResultList();
+            
+            System.out.println("Orders returned: " + orders.size());
+            
+            List<com.autowarehouse.resource.OrderResource.OrderResponse> orderResponses = orders.stream()
+                .map(com.autowarehouse.resource.OrderResource.OrderResponse::new)
+                .toList();
+            
+            return new com.autowarehouse.resource.OrderResource.OrderSearchResponse(
+                orderResponses, totalElements, totalPages, request.page, request.size);
+                
+        } catch (Exception e) {
+            System.err.println("Error in searchOrders: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return empty result on error
+            return new com.autowarehouse.resource.OrderResource.OrderSearchResponse(
+                java.util.Collections.emptyList(), 0, 0, 0, request.size);
         }
-        
-        if (request.status != null && !request.status.trim().isEmpty()) {
-            queryBuilder.append(" AND o.status = :status");
-        }
-        
-        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
-            queryBuilder.append(" AND o.paymentStatus = :paymentStatus");
-        }
-        
-        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
-            queryBuilder.append(" AND o.createdAt >= :startDate");
-        }
-        
-        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
-            queryBuilder.append(" AND o.createdAt <= :endDate");
-        }
-        
-        queryBuilder.append(" ORDER BY o.createdAt DESC");
-        
-        var query = Order.getEntityManager().createQuery(queryBuilder.toString(), Order.class);
-        
-        if (request.query != null && !request.query.trim().isEmpty()) {
-            query.setParameter("query", "%" + request.query.trim() + "%");
-        }
-        
-        if (request.status != null && !request.status.trim().isEmpty()) {
-            query.setParameter("status", Order.OrderStatus.valueOf(request.status.toUpperCase()));
-        }
-        
-        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
-            query.setParameter("paymentStatus", Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase()));
-        }
-        
-        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
-            query.setParameter("startDate", LocalDateTime.parse(request.startDate + "T00:00:00"));
-        }
-        
-        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
-            query.setParameter("endDate", LocalDateTime.parse(request.endDate + "T23:59:59"));
-        }
-        
-        // Get total count
-        var countQuery = Order.getEntityManager().createQuery(
-            queryBuilder.toString().replace("SELECT o FROM Order o", "SELECT COUNT(o) FROM Order o"), Long.class);
-        
-        if (request.query != null && !request.query.trim().isEmpty()) {
-            countQuery.setParameter("query", "%" + request.query.trim() + "%");
-        }
-        
-        if (request.status != null && !request.status.trim().isEmpty()) {
-            countQuery.setParameter("status", Order.OrderStatus.valueOf(request.status.toUpperCase()));
-        }
-        
-        if (request.paymentStatus != null && !request.paymentStatus.trim().isEmpty()) {
-            countQuery.setParameter("paymentStatus", Order.PaymentStatus.valueOf(request.paymentStatus.toUpperCase()));
-        }
-        
-        if (request.startDate != null && !request.startDate.trim().isEmpty()) {
-            countQuery.setParameter("startDate", LocalDateTime.parse(request.startDate + "T00:00:00"));
-        }
-        
-        if (request.endDate != null && !request.endDate.trim().isEmpty()) {
-            countQuery.setParameter("endDate", LocalDateTime.parse(request.endDate + "T23:59:59"));
-        }
-        
-        long totalElements = countQuery.getSingleResult();
-        int totalPages = (int) Math.ceil((double) totalElements / request.size);
-        
-        // Get paginated results
-        List<Order> orders = query
-            .setFirstResult(request.page * request.size)
-            .setMaxResults(request.size)
-            .getResultList();
-        
-        List<com.autowarehouse.resource.OrderResource.OrderResponse> orderResponses = orders.stream()
-            .map(com.autowarehouse.resource.OrderResource.OrderResponse::new)
-            .toList();
-        
-        return new com.autowarehouse.resource.OrderResource.OrderSearchResponse(
-            orderResponses, totalElements, totalPages, request.page, request.size);
     }
 
     public com.autowarehouse.resource.OrderResource.OrderAnalyticsResponse getOrderAnalytics(String startDate, String endDate, String groupBy) {
