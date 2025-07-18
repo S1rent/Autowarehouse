@@ -84,11 +84,8 @@
               @click="adminMenuOpen = !adminMenuOpen"
               class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors"
             >
-              <img 
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" 
-                alt="Admin Avatar" 
-                class="w-8 h-8 rounded-full"
-              >
+              
+                <i class="fa-solid fa-user mr-2"></i>
               <span class="text-sm font-medium">{{ adminName }}</span>
               <i class="fa-solid fa-chevron-down text-xs"></i>
             </button>
