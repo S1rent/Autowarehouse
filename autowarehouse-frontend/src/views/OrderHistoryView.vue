@@ -136,6 +136,21 @@
             :key="order.id"
             class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
           >
+            <!-- Cancel Reason Alert (if order is cancelled and has cancel reason) -->
+            <div v-if="order.status === 'CANCELLED' && order.cancelReason" class="bg-red-50 border-l-4 border-red-400 p-4 mb-0">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <i class="fa-solid fa-exclamation-triangle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm text-red-800">
+                    <span class="font-medium">Pesanan Dibatalkan:</span>
+                    {{ order.cancelReason }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div class="p-6">
               <!-- Order Header -->
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">

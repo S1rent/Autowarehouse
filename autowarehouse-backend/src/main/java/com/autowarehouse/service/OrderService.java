@@ -379,6 +379,12 @@ public class OrderService {
         }
 
         order.updateStatus(Order.OrderStatus.CANCELLED);
+        
+        // If order was paid, set payment status to PENDING_REFUND
+        if (order.paymentStatus == Order.PaymentStatus.PAID) {
+            order.paymentStatus = Order.PaymentStatus.PENDING_REFUND;
+        }
+        
         order.notes = (order.notes != null ? order.notes + "\n" : "") + "Cancelled: " + reason;
         order.persist();
 
@@ -415,6 +421,35 @@ public class OrderService {
             order.user,
             "Refund Processed",
             "A refund of $" + refundAmount + " has been processed for order #" + order.orderNumber,
+            NotificationType.PAYMENT_SUCCESSFUL,
+            order.id,
+            "order"
+        );
+    }
+
+    @Transactional
+    public void processRefundFromPending(Long orderId, String notes) {
+        Order order = Order.findById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("Order not found");
+        }
+
+        if (order.paymentStatus != Order.PaymentStatus.PENDING_REFUND) {
+            throw new IllegalArgumentException("Order payment status is not pending refund");
+        }
+
+        // Update payment status to refunded
+        order.paymentStatus = Order.PaymentStatus.REFUNDED;
+        
+        // Add notes about refund processing
+        order.notes = (order.notes != null ? order.notes + "\n" : "") + "Refund processed: " + (notes != null ? notes : "Full refund completed");
+        order.persist();
+
+        // Create notification
+        notificationService.createNotification(
+            order.user,
+            "Refund Completed",
+            "Your refund for order #" + order.orderNumber + " has been processed successfully.",
             NotificationType.PAYMENT_SUCCESSFUL,
             order.id,
             "order"

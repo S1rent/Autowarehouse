@@ -120,7 +120,7 @@ public class Order extends PanacheEntityBase {
     }
 
     public enum PaymentStatus {
-        PENDING, PAID, FAILED, REFUNDED, PARTIALLY_REFUNDED
+        PENDING, PAID, FAILED, REFUNDED, PARTIALLY_REFUNDED, PENDING_REFUND
     }
 
     // Static finder methods

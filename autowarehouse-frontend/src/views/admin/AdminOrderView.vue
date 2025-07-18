@@ -47,11 +47,11 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-yellow-100">
-              <i class="fa-solid fa-clock text-yellow-600 text-xl"></i>
+              <i class="fa-solid fa-money-bill-wave text-yellow-600 text-xl"></i>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Pending</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.pending }}</p>
+              <p class="text-sm font-medium text-gray-600">Pending Refund</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.pendingRefund }}</p>
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-orange-100">
-              <i class="fa-solid fa-truck text-orange-600 text-xl"></i>
+              <i class="fa-solid fa-cog text-orange-600 text-xl"></i>
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-600">Processing</p>
@@ -70,17 +70,18 @@
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100">
-              <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
+            <div class="p-3 rounded-full bg-red-100">
+              <i class="fa-solid fa-times-circle text-red-600 text-xl"></i>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Completed</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.completed }}</p>
+              <p class="text-sm font-medium text-gray-600">Cancelled</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.cancelled }}</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-purple-100">
               <i class="fa-solid fa-dollar-sign text-purple-600 text-xl"></i>
@@ -91,7 +92,6 @@
             </div>
           </div>
         </div>
-      </div>
 
       <!-- Filters -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -123,11 +123,11 @@
               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
             >
               <option value="">All Payment</option>
-              <option value="PENDING">Pending</option>
+              <!-- <option value="PENDING">Pending</option> -->
               <option value="PAID">Paid</option>
-              <option value="FAILED">Failed</option>
+              <!-- <option value="FAILED">Failed</option> -->
               <option value="REFUNDED">Refunded</option>
-              <option value="PARTIALLY_REFUNDED">Partially Refunded</option>
+              <!-- <option value="PARTIALLY_REFUNDED">Partially Refunded</option> -->
             </select>
             <input 
               v-model="dateFilter"
@@ -156,7 +156,7 @@
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th> -->
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
@@ -214,14 +214,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img :src="order.customer.avatar" :alt="order.customer.name" class="h-8 w-8 rounded-full">
+                    <!-- <img :src="order.customer.avatar" :alt="order.customer.name" class="h-8 w-8 rounded-full"> -->
                     <div class="ml-3">
                       <div class="text-sm font-medium text-gray-900">{{ order.customer.name }}</div>
                       <div class="text-sm text-gray-500">{{ order.customer.email }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4">
+                <!-- <td class="px-6 py-4">
                   <div class="text-sm text-gray-900">
                     <div v-for="item in order.items.slice(0, 2)" :key="item.id" class="mb-1">
                       {{ item.name }} ({{ item.quantity }}x)
@@ -230,7 +230,7 @@
                       +{{ order.items.length - 2 }} more items
                     </div>
                   </div>
-                </td>
+                </td> -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">Rp {{ formatPrice(order.total) }}</div>
                 </td>
@@ -256,20 +256,28 @@
                     >
                       <i class="fa-solid fa-eye"></i>
                     </button>
-                    <button 
+                    <!-- <button 
                       @click="editOrder(order)"
                       class="text-gray-600 hover:text-gray-700"
                       title="Edit Order"
                     >
                       <i class="fa-solid fa-edit"></i>
-                    </button>
-                    <button 
+                    </button> -->
+                    <!-- <button 
                       v-if="order.status === 'processing'"
                       @click="markAsShipped(order)"
                       class="text-green-600 hover:text-green-700"
                       title="Mark as Shipped"
                     >
                       <i class="fa-solid fa-truck"></i>
+                    </button> -->
+                    <button 
+                      v-if="order.paymentStatus === 'pending_refund'"
+                      @click="processRefund(order)"
+                      class="text-yellow-600 hover:text-yellow-700"
+                      title="Process Refund"
+                    >
+                      <i class="fa-solid fa-money-bill-wave"></i>
                     </button>
                     <button 
                       @click="printInvoice(order)"
@@ -601,7 +609,7 @@
       </div>
     </div>
 
-    <!-- Bulk Actions Modal -->
+    <!-- Bulk Action Modal -->
     <div v-if="showBulkModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-lg max-w-md w-full">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -663,6 +671,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminNavbar from '../../components/AdminNavbar.vue'
 import { apiService } from '../../services/api'
+import { useNotifications } from '@/composables/useNotifications'
 
 interface Customer {
   id: string
@@ -682,14 +691,24 @@ interface OrderItem {
 
 interface Order {
   id: string
+  orderNumber?: string
   customer: Customer
+  customerName?: string
+  customerEmail?: string
+  customerPhone?: string
   items: OrderItem[]
   total: number
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  paymentStatus: 'paid' | 'unpaid' | 'refunded'
+  totalAmount?: number
+  subtotal?: number
+  shippingCost?: number
+  taxAmount?: number
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'paid' | 'unpaid' | 'refunded' | 'pending_refund'
   paymentMethod: string
   shippingAddress: string
+  trackingNumber?: string
   createdAt: string
+  cancelReason?: string
 }
 
 const searchQuery = ref('')
@@ -719,15 +738,17 @@ const bulkAction = ref({
 
 const stats = ref({
   total: 0,
-  pending: 0,
+  pendingRefund: 0,
   processing: 0,
-  completed: 0,
+  cancelled: 0,
   revenue: 0
 })
 
 const orders = ref<Order[]>([])
 const loading = ref(false)
 const error = ref('')
+
+const { success, error: showError } = useNotifications()
 
 // Load orders from API with search/filter support
 const loadOrders = async (useFilters = false) => {
@@ -815,14 +836,14 @@ const loadOrders = async (useFilters = false) => {
 // Update statistics
 const updateStats = () => {
   const total = orders.value.length
-  const pending = orders.value.filter(o => o.status === 'pending').length
-  const processing = orders.value.filter(o => o.status === 'processing').length
-  const completed = orders.value.filter(o => o.status === 'delivered').length
+  const pendingRefund = orders.value.filter(o => o.paymentStatus === 'pending_refund').length
+  const processing = orders.value.filter(o => o.status === 'confirmed' && o.paymentStatus === 'paid').length
+  const cancelled = orders.value.filter(o => o.status === 'cancelled' && o.paymentStatus === 'refunded').length
   const revenue = orders.value
     .filter(o => o.paymentStatus === 'paid')
     .reduce((sum, o) => sum + o.total, 0)
   
-  stats.value = { total, pending, processing, completed, revenue }
+  stats.value = { total, pendingRefund, processing, cancelled, revenue }
 }
 
 const filteredOrders = computed(() => {
@@ -939,8 +960,131 @@ const markAsShipped = (order: Order) => {
   }
 }
 
-const printInvoice = (order: Order) => {
-  alert(`Print invoice for order ${order.id}`)
+const printInvoice = async (order: Order) => {
+  try {
+    // Import jsPDF dynamically
+    const { jsPDF } = await import('jspdf')
+    
+    // Create new PDF document
+    const doc = new jsPDF()
+    
+    // Set font
+    doc.setFont('helvetica')
+    
+    // Header
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text('INVOICE', 20, 30)
+    
+    // Company info
+    doc.setFontSize(12)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Autowarehouse', 20, 45)
+    doc.text('Jakarta, Indonesia', 20, 52)
+    doc.text('Email: info@autowarehouse.com', 20, 59)
+    
+    // Invoice details
+    doc.setTextColor(40, 40, 40)
+    doc.text(`Invoice #: ${order.id}`, 120, 45)
+    doc.text(`Date: ${formatDateTime(order.createdAt)}`, 120, 52)
+    doc.text(`Status: ${getStatusText(order.status)}`, 120, 59)
+    
+    // Customer info
+    doc.setFontSize(14)
+    doc.text('Bill To:', 20, 80)
+    doc.setFontSize(12)
+    const customerName = order.customerName || 'Customer'
+    doc.text(customerName, 20, 90)
+    if (order.customerEmail) {
+      doc.text(order.customerEmail, 20, 97)
+    }
+    if (order.customerPhone) {
+      doc.text(order.customerPhone, 20, 104)
+    }
+    if (order.shippingAddress) {
+      const addressLines = doc.splitTextToSize(order.shippingAddress, 80)
+      doc.text(addressLines, 20, 111)
+    }
+    
+    // Items table header
+    let yPos = 140
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Item', 20, yPos)
+    doc.text('Qty', 120, yPos)
+    doc.text('Price', 140, yPos)
+    doc.text('Total', 170, yPos)
+    
+    // Draw line under header
+    doc.line(20, yPos + 3, 190, yPos + 3)
+    yPos += 15
+    
+    // Note: For basic invoice from order list, we'll show summary info
+    // For detailed items, user should go to order detail page
+    doc.setFontSize(10)
+    doc.text('Order Summary', 20, yPos)
+    doc.text('1', 120, yPos)
+    doc.text(`Rp ${formatPrice(order.totalAmount || order.total)}`, 140, yPos)
+    doc.text(`Rp ${formatPrice(order.totalAmount || order.total)}`, 170, yPos)
+    yPos += 15
+    
+    // Totals
+    yPos += 10
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(11)
+    doc.text('Subtotal:', 120, yPos)
+    doc.text(`Rp ${formatPrice(order.subtotal || order.totalAmount || order.total)}`, 170, yPos)
+    yPos += 8
+    
+    if (order.shippingCost && order.shippingCost > 0) {
+      doc.text('Shipping:', 120, yPos)
+      doc.text(`Rp ${formatPrice(order.shippingCost)}`, 170, yPos)
+      yPos += 8
+    }
+    
+    if (order.taxAmount && order.taxAmount > 0) {
+      doc.text('Tax:', 120, yPos)
+      doc.text(`Rp ${formatPrice(order.taxAmount)}`, 170, yPos)
+      yPos += 8
+    }
+    
+    // Total line
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('TOTAL:', 120, yPos)
+    doc.text(`Rp ${formatPrice(order.totalAmount || order.total)}`, 170, yPos)
+    
+    // Payment info
+    yPos += 20
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`Payment Method: ${order.paymentMethod || 'Bank Transfer'}`, 20, yPos)
+    doc.text(`Payment Status: ${order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}`, 20, yPos + 7)
+    
+    if (order.trackingNumber) {
+      doc.text(`Tracking Number: ${order.trackingNumber}`, 20, yPos + 14)
+    }
+    
+    // Footer
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Thank you for your business!', 20, 280)
+    doc.text('This is a computer generated invoice.', 20, 285)
+    
+    // Save the PDF
+    doc.save(`Invoice-${order.id}.pdf`)
+    
+    success('Invoice Downloaded', 'Invoice has been downloaded successfully')
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    showError('Download Failed', 'Failed to generate invoice. Please try again.')
+  }
 }
 
 const refreshOrders = async () => {
@@ -998,6 +1142,24 @@ const toggleSelectAll = (event: Event) => {
     selectedOrders.value = filteredOrders.value.map(order => order.id)
   } else {
     selectedOrders.value = []
+  }
+}
+
+const processRefund = async (order: Order) => {
+  if (!confirm(`Process refund for order #${order.id}?`)) {
+    return
+  }
+  
+  try {
+    await apiService.processRefund(parseInt(order.id), 'Refund processed by admin')
+    
+    // Update local order status
+    order.paymentStatus = 'refunded'
+    
+    success('Refund Processed', `Refund for order #${order.id} has been processed successfully`)
+  } catch (error) {
+    console.error('Process refund failed:', error)
+    showError('Process Refund Failed', 'Failed to process refund. Please try again.')
   }
 }
 

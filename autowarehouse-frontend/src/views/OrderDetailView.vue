@@ -168,12 +168,12 @@
                   <i class="fa-solid fa-credit-card text-gray-400"></i>
                   <span class="text-gray-600">Metode: {{ paymentInfo.method }}</span>
                 </div>
-                <div class="flex items-center space-x-2 text-sm mt-1">
+                <!-- <div class="flex items-center space-x-2 text-sm mt-1">
                   <i :class="order.paymentStatus === 'PAID' ? 'fa-solid fa-check-circle text-green-500' : 'fa-solid fa-clock text-yellow-500'"></i>
                   <span :class="order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-yellow-600'">
                     {{ order.paymentStatus === 'PAID' ? 'Pembayaran Berhasil' : 'Menunggu Pembayaran' }}
                   </span>
-                </div>
+                </div> -->
               </div>
             </div>
           </section>

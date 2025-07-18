@@ -202,8 +202,16 @@ export interface OrderDetail extends Order {
   notes?: string
   shippedAt?: string
   deliveredAt?: string
+  trackingNumber?: string
   items?: OrderItem[]
   statusHistory?: any[]
+  user?: {
+    id: number
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber?: string
+  }
 }
 
 export interface OrderItem {
@@ -213,6 +221,7 @@ export interface OrderItem {
   productSku: string
   productPrice: number
   productImages?: string[]
+  productBrand?: string
   quantity: number
   subtotal: number
 }
@@ -718,6 +727,11 @@ class ApiService {
     return response.data
   }
 
+  async getOrderDetail(orderId: number): Promise<OrderDetail> {
+    const response = await api.get<OrderDetail>(`/orders/${orderId}`)
+    return response.data
+  }
+
   async getUserOrders(userId: number): Promise<Order[]> {
     const response = await api.get<Order[]>(`/orders/user/${userId}`)
     return response.data
@@ -798,6 +812,16 @@ class ApiService {
 
   async deliverOrder(orderId: number): Promise<{ message: string }> {
     const response = await api.put<{ message: string }>(`/orders/admin/${orderId}/deliver`)
+    return response.data
+  }
+
+  async cancelOrder(orderId: number, reason?: string): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/orders/${orderId}/cancel`, { reason })
+    return response.data
+  }
+
+  async processRefund(orderId: number, notes?: string): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/orders/admin/${orderId}/process-refund`, { notes })
     return response.data
   }
 

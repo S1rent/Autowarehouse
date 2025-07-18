@@ -12,7 +12,7 @@
             </button>
             <div>
               <h1 class="text-3xl font-bold text-gray-900">Order Details</h1>
-              <p class="text-gray-600 mt-1">Order #{{ order?.orderNumber || orderId }}</p>
+              <p class="text-gray-600 mt-1">Order #{{ order?.orderNumber }}</p>
             </div>
           </div>
           <div class="flex space-x-3">
@@ -24,14 +24,14 @@
               <i class="fa-solid fa-print text-sm"></i>
               <span>Print Invoice</span>
             </button>
-            <button 
+            <!-- <button 
               @click="downloadInvoice"
               :disabled="!order"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center space-x-2"
             >
               <i class="fa-solid fa-download text-sm"></i>
               <span>Download PDF</span>
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
@@ -149,27 +149,22 @@
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
             <div class="space-y-3">
-              <div class="flex items-center space-x-3">
-                <img 
-                  :src="order.customer?.avatar || '/default-avatar.png'" 
-                  :alt="order.customerName"
-                  class="w-12 h-12 rounded-full object-cover"
-                >
-                <div>
-                  <p class="font-medium text-gray-900">{{ order.customerName }}</p>
-                  <p class="text-sm text-gray-600">{{ order.customer?.email }}</p>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-700">Customer Name:</span>
+                  <span class="text-gray-900">{{ order.customerName || (order.user ? `${order.user.firstName} ${order.user.lastName}` : 'N/A') }}</span>
                 </div>
-              </div>
-              <div class="pt-3 border-t">
-                <div class="grid grid-cols-1 gap-3 text-sm">
-                  <div>
-                    <span class="font-medium text-gray-700">Phone:</span>
-                    <span class="ml-2 text-gray-600">{{ order.customer?.phone || 'Not provided' }}</span>
-                  </div>
-                  <div>
-                    <span class="font-medium text-gray-700">Customer ID:</span>
-                    <span class="ml-2 text-gray-600">#{{ order.customer?.id }}</span>
-                  </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-700">Email:</span>
+                  <span class="text-gray-600">{{ order.user?.email || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-700">Phone:</span>
+                  <span class="text-gray-600">{{ order.user?.phoneNumber || 'Not provided' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-700">Customer ID:</span>
+                  <span class="text-gray-600">#{{ order.user?.id || 'N/A' }}</span>
                 </div>
               </div>
             </div>
@@ -215,10 +210,10 @@
               <h4 class="font-medium text-gray-700 mb-2">Shipping Address</h4>
               <p class="text-sm text-gray-600 whitespace-pre-line">{{ order.shippingAddress }}</p>
             </div>
-            <div v-if="order.billingAddress">
+            <!-- <div v-if="order.billingAddress">
               <h4 class="font-medium text-gray-700 mb-2">Billing Address</h4>
               <p class="text-sm text-gray-600 whitespace-pre-line">{{ order.billingAddress }}</p>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -229,7 +224,7 @@
           </div>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+              <thead class="bg-white">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
@@ -239,17 +234,17 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="item in order.items" :key="item.id" class="hover:bg-gray-50">
+                <tr v-for="item in order.items" :key="item.id">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <img 
-                        :src="item.product?.imageUrls?.[0] || '/placeholder-product.jpg'" 
+                        :src="item.productImages?.[0] || '/placeholder-product.jpg'" 
                         :alt="item.productName"
                         class="w-12 h-12 rounded-lg object-cover mr-4"
                       >
                       <div>
                         <p class="text-sm font-medium text-gray-900">{{ item.productName }}</p>
-                        <p class="text-sm text-gray-500">{{ item.product?.brand || 'N/A' }}</p>
+                        <p class="text-sm text-gray-500">{{ item.productBrand || 'N/A' }}</p>
                       </div>
                     </div>
                   </td>
@@ -271,7 +266,7 @@
           </div>
           
           <!-- Order Summary -->
-          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div class="px-6 py-4 border-t border-gray-200 bg-white">
             <div class="flex justify-end">
               <div class="w-64 space-y-2">
                 <div class="flex justify-between text-sm">
@@ -383,7 +378,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotifications } from '@/composables/useNotifications'
-import { apiService } from '@/services/api'
+import { apiService, type OrderDetail } from '@/services/api'
 import AdminNavbar from '../../components/AdminNavbar.vue'
 
 interface OrderItem {
@@ -394,6 +389,8 @@ interface OrderItem {
   productPrice: number
   quantity: number
   subtotal: number
+  productBrand?: string
+  productImages?: string[]
   product?: {
     id: number
     name: string
@@ -422,6 +419,13 @@ interface Order {
   totalAmount: number
   customerName: string
   customer: Customer
+  user: {
+    id: number
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber: string
+  }
   shippingAddress: string
   billingAddress: string
   paymentMethod: string
@@ -518,58 +522,8 @@ const loadOrderDetails = async () => {
     isLoading.value = true
     error.value = ''
     
-    // TODO: Replace with actual API call
-    // const response = await apiService.getOrderDetails(orderId.value)
-    // order.value = response
-    
-    // Mock data for now
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
-    
-    order.value = {
-      id: parseInt(orderId.value),
-      orderNumber: `ORD-${orderId.value.padStart(6, '0')}`,
-      status: 'CONFIRMED',
-      paymentStatus: 'PAID',
-      subtotal: 15000000,
-      taxAmount: 1650000,
-      shippingCost: 50000,
-      discountAmount: 0,
-      totalAmount: 16700000,
-      customerName: 'John Doe',
-      customer: {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+62812345678',
-        avatar: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg'
-      },
-      shippingAddress: 'Jl. Sudirman No. 123\nJakarta Pusat 10110\nDKI Jakarta, Indonesia',
-      billingAddress: 'Jl. Sudirman No. 123\nJakarta Pusat 10110\nDKI Jakarta, Indonesia',
-      paymentMethod: 'Credit Card',
-      paymentReference: 'PAY-123456789',
-      trackingNumber: '',
-      notes: '',
-      createdAt: '2024-12-15T10:30:00',
-      shippedAt: '',
-      deliveredAt: '',
-      items: [
-        {
-          id: 1,
-          productId: 1,
-          productName: 'iPhone 15 Pro',
-          productSku: 'IPH15PRO-256-BLU',
-          productPrice: 15000000,
-          quantity: 1,
-          subtotal: 15000000,
-          product: {
-            id: 1,
-            name: 'iPhone 15 Pro',
-            brand: 'Apple',
-            imageUrls: ['https://storage.googleapis.com/uxpilot-auth.appspot.com/fcb55106aa-0ffdc5ff6af0c82fa322.png']
-          }
-        }
-      ]
-    }
+    const response = await apiService.getOrderDetail(parseInt(orderId.value))
+    order.value = response as any
   } catch (err: any) {
     error.value = err.message || 'Failed to load order details'
   } finally {
@@ -581,18 +535,10 @@ const updateOrderStatus = async (newStatus: string) => {
   try {
     isUpdatingStatus.value = true
     
-    // TODO: Replace with actual API call
-    // await apiService.updateOrderStatus(orderId.value, newStatus)
+    await apiService.updateOrderStatus(parseInt(orderId.value), newStatus)
     
-    // Mock API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    if (order.value) {
-      order.value.status = newStatus
-      if (newStatus === 'DELIVERED') {
-        order.value.deliveredAt = new Date().toISOString()
-      }
-    }
+    // Reload order details to get updated data
+    await loadOrderDetails()
     
     success('Status Updated', `Order status updated to ${getStatusText(newStatus)}`)
   } catch (err: any) {
@@ -606,17 +552,10 @@ const shipOrder = async () => {
   try {
     isUpdatingStatus.value = true
     
-    // TODO: Replace with actual API call
-    // await apiService.shipOrder(orderId.value, trackingNumber.value)
+    await apiService.shipOrder(parseInt(orderId.value), trackingNumber.value)
     
-    // Mock API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    if (order.value) {
-      order.value.status = 'SHIPPED'
-      order.value.trackingNumber = trackingNumber.value
-      order.value.shippedAt = new Date().toISOString()
-    }
+    // Reload order details to get updated data
+    await loadOrderDetails()
     
     showShippingModal.value = false
     trackingNumber.value = ''
@@ -632,17 +571,10 @@ const cancelOrder = async () => {
   try {
     isUpdatingStatus.value = true
     
-    // TODO: Replace with actual API call
-    // await apiService.cancelOrder(orderId.value, cancelReason.value)
+    await apiService.cancelOrder(parseInt(orderId.value), cancelReason.value)
     
-    // Mock API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    if (order.value) {
-      order.value.status = 'CANCELLED'
-      order.value.notes = (order.value.notes ? order.value.notes + '\n\n' : '') + 
-                         `Cancelled: ${cancelReason.value}`
-    }
+    // Reload order details to get updated data
+    await loadOrderDetails()
     
     showCancelModal.value = false
     cancelReason.value = ''
@@ -654,9 +586,137 @@ const cancelOrder = async () => {
   }
 }
 
-const printInvoice = () => {
-  // TODO: Implement PDF generation and print
-  window.print()
+const printInvoice = async () => {
+  if (!order.value) return
+  
+  try {
+    // Import jsPDF dynamically
+    const { jsPDF } = await import('jspdf')
+    
+    // Create new PDF document
+    const doc = new jsPDF()
+    
+    // Set font
+    doc.setFont('helvetica')
+    
+    // Header
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text('INVOICE', 20, 30)
+    
+    // Company info
+    doc.setFontSize(12)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Autowarehouse', 20, 45)
+    doc.text('Jakarta, Indonesia', 20, 52)
+    doc.text('Email: info@autowarehouse.com', 20, 59)
+    
+    // Invoice details
+    doc.setTextColor(40, 40, 40)
+    doc.text(`Invoice #: ${order.value.orderNumber}`, 120, 45)
+    doc.text(`Date: ${formatDateTime(order.value.createdAt)}`, 120, 52)
+    doc.text(`Status: ${getStatusText(order.value.status)}`, 120, 59)
+    
+    // Customer info
+    doc.setFontSize(14)
+    doc.text('Bill To:', 20, 80)
+    doc.setFontSize(12)
+    const customerName = order.value.customerName || (order.value.user ? `${order.value.user.firstName} ${order.value.user.lastName}` : 'Customer')
+    doc.text(customerName, 20, 90)
+    if (order.value.user?.email) {
+      doc.text(order.value.user.email, 20, 97)
+    }
+    if (order.value.user?.phoneNumber) {
+      doc.text(order.value.user.phoneNumber, 20, 104)
+    }
+    if (order.value.shippingAddress) {
+      const addressLines = doc.splitTextToSize(order.value.shippingAddress, 80)
+      doc.text(addressLines, 20, 111)
+    }
+    
+    // Items table header
+    let yPos = 140
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Item', 20, yPos)
+    doc.text('Qty', 120, yPos)
+    doc.text('Price', 140, yPos)
+    doc.text('Total', 170, yPos)
+    
+    // Draw line under header
+    doc.line(20, yPos + 3, 190, yPos + 3)
+    yPos += 15
+    
+    // Items
+    if (order.value.items && order.value.items.length > 0) {
+      order.value.items.forEach((item) => {
+        doc.setFontSize(10)
+        const itemName = doc.splitTextToSize(item.productName, 90)
+        doc.text(itemName, 20, yPos)
+        doc.text(item.quantity.toString(), 120, yPos)
+        doc.text(`Rp ${formatPrice(item.productPrice)}`, 140, yPos)
+        doc.text(`Rp ${formatPrice(item.subtotal)}`, 170, yPos)
+        yPos += itemName.length * 5 + 5
+      })
+    }
+    
+    // Totals
+    yPos += 10
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(11)
+    doc.text('Subtotal:', 120, yPos)
+    doc.text(`Rp ${formatPrice(order.value.subtotal)}`, 170, yPos)
+    yPos += 8
+    
+    if (order.value.shippingCost > 0) {
+      doc.text('Shipping:', 120, yPos)
+      doc.text(`Rp ${formatPrice(order.value.shippingCost)}`, 170, yPos)
+      yPos += 8
+    }
+    
+    if (order.value.taxAmount > 0) {
+      doc.text('Tax:', 120, yPos)
+      doc.text(`Rp ${formatPrice(order.value.taxAmount)}`, 170, yPos)
+      yPos += 8
+    }
+    
+    // Total line
+    doc.line(120, yPos, 190, yPos)
+    yPos += 10
+    
+    doc.setFontSize(12)
+    doc.setTextColor(40, 40, 40)
+    doc.text('TOTAL:', 120, yPos)
+    doc.text(`Rp ${formatPrice(order.value.totalAmount)}`, 170, yPos)
+    
+    // Payment info
+    yPos += 20
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`Payment Method: ${order.value.paymentMethod || 'Bank Transfer'}`, 20, yPos)
+    doc.text(`Payment Status: ${order.value.paymentStatus === 'PAID' ? 'Paid' : 'Pending'}`, 20, yPos + 7)
+    
+    if (order.value.trackingNumber) {
+      doc.text(`Tracking Number: ${order.value.trackingNumber}`, 20, yPos + 14)
+    }
+    
+    // Footer
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Thank you for your business!', 20, 280)
+    doc.text('This is a computer generated invoice.', 20, 285)
+    
+    // Save the PDF
+    doc.save(`Invoice-${order.value.orderNumber}.pdf`)
+    
+    success('Invoice Downloaded', 'Invoice has been downloaded successfully')
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    showError('Download Failed', 'Failed to generate invoice. Please try again.')
+  }
 }
 
 const downloadInvoice = () => {

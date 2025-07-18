@@ -331,6 +331,20 @@ public class OrderResource {
     }
 
     @PUT
+    @Path("/admin/{id}/process-refund")
+    @RolesAllowed("ADMIN")
+    public Response processRefund(@PathParam("id") Long id, @Valid ProcessRefundRequest request) {
+        try {
+            orderService.processRefundFromPending(id, request.notes);
+            return Response.ok(new SuccessResponse("Refund processed successfully")).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @PUT
     @Path("/admin/bulk-status")
     @RolesAllowed("ADMIN")
     public Response bulkUpdateStatus(@Valid BulkStatusUpdateRequest request) {
@@ -414,6 +428,10 @@ public class OrderResource {
         public String reason;
     }
 
+    public static class ProcessRefundRequest {
+        public String notes;
+    }
+
     public static class OrderResponse {
         public Long id;
         public String orderNumber;
@@ -449,7 +467,9 @@ public class OrderResource {
         public String notes;
         public LocalDateTime shippedAt;
         public LocalDateTime deliveredAt;
+        public String trackingNumber;
         public List<OrderItemResponse> items;
+        public UserInfo user;
 
         public OrderDetailResponse(Order order) {
             super(order);
@@ -459,9 +479,27 @@ public class OrderResource {
             this.notes = order.notes;
             this.shippedAt = order.shippedAt;
             this.deliveredAt = order.deliveredAt;
+            this.trackingNumber = order.trackingNumber;
             this.items = order.items != null ? 
                         order.items.stream().map(OrderItemResponse::new).toList() : 
                         null;
+            this.user = order.user != null ? new UserInfo(order.user) : null;
+        }
+    }
+
+    public static class UserInfo {
+        public Long id;
+        public String firstName;
+        public String lastName;
+        public String email;
+        public String phoneNumber;
+
+        public UserInfo(User user) {
+            this.id = user.id;
+            this.firstName = user.firstName;
+            this.lastName = user.lastName;
+            this.email = user.email;
+            this.phoneNumber = user.phoneNumber;
         }
     }
 
@@ -473,6 +511,8 @@ public class OrderResource {
         public BigDecimal productPrice;
         public Integer quantity;
         public BigDecimal subtotal;
+        public String productBrand;
+        public List<String> productImages;
 
         public OrderItemResponse(OrderItem item) {
             this.id = item.id;
@@ -482,6 +522,8 @@ public class OrderResource {
             this.productPrice = item.productPrice;
             this.quantity = item.quantity;
             this.subtotal = item.subtotal;
+            this.productBrand = item.product != null ? item.product.brand : null;
+            this.productImages = item.product != null ? item.product.imageUrls : null;
         }
     }
 
