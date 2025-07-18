@@ -31,7 +31,7 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-blue-100">
@@ -70,6 +70,18 @@
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100">
+              <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-600">Completed</p>
+              <p class="text-2xl font-bold text-gray-900">{{ stats.completed }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
             <div class="p-3 rounded-full bg-red-100">
               <i class="fa-solid fa-times-circle text-red-600 text-xl"></i>
             </div>
@@ -79,9 +91,11 @@
             </div>
           </div>
         </div>
+
+        
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-purple-100">
               <i class="fa-solid fa-dollar-sign text-purple-600 text-xl"></i>
@@ -740,6 +754,7 @@ const stats = ref({
   total: 0,
   pendingRefund: 0,
   processing: 0,
+  completed: 0,
   cancelled: 0,
   revenue: 0
 })
@@ -838,12 +853,13 @@ const updateStats = () => {
   const total = orders.value.length
   const pendingRefund = orders.value.filter(o => o.paymentStatus === 'pending_refund').length
   const processing = orders.value.filter(o => o.status === 'confirmed' && o.paymentStatus === 'paid').length
+  const completed = orders.value.filter(o => o.status === 'delivered').length
   const cancelled = orders.value.filter(o => o.status === 'cancelled' && o.paymentStatus === 'refunded').length
   const revenue = orders.value
     .filter(o => o.paymentStatus === 'paid')
     .reduce((sum, o) => sum + o.total, 0)
   
-  stats.value = { total, pendingRefund, processing, cancelled, revenue }
+  stats.value = { total, pendingRefund, processing, completed, cancelled, revenue }
 }
 
 const filteredOrders = computed(() => {
