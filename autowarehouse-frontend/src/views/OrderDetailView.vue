@@ -77,6 +77,25 @@
           </div>
         </section>
 
+        <!-- Cancel Reason Alert (if order is cancelled and has cancel reason) -->
+        <section v-if="order.status === 'CANCELLED' && order.notes" class="bg-red-50 border-l-4 border-red-400 rounded-lg p-6 mb-8">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-exclamation-triangle text-red-400 text-xl"></i>
+            </div>
+            <div class="ml-4">
+              <h3 class="text-lg font-medium text-red-800 mb-2">Pesanan Dibatalkan</h3>
+              <p class="text-red-700">
+                <span class="font-medium">Alasan pembatalan:</span>
+                {{ order.notes }}
+              </p>
+              <div class="mt-3 text-sm text-red-600">
+                <p>Jika Anda memiliki pertanyaan mengenai pembatalan ini, silakan hubungi customer service kami.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Left Column -->
           <div class="lg:col-span-2 space-y-8">
