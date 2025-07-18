@@ -281,6 +281,7 @@ interface ChatSession {
   lastMessage?: string
   lastMessageTime: string
   unreadCount: number
+  ticketId?: number // Add ticket ID to track the active ticket
 }
 
 interface Message {
@@ -419,14 +420,13 @@ const selectCustomer = (session: ChatSession) => {
   // Load chat history for this customer
   loadChatHistory(session.customerId)
   
-  // Join chat room via WebSocket (we'll need to get the ticket ID for this customer)
-  if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
-    // For now, we'll use a placeholder - in a real implementation, 
-    // you'd need to get the active ticket ID for this customer
+  // Join chat room via WebSocket using the actual ticket ID
+  if (websocket.value && websocket.value.readyState === WebSocket.OPEN && session.ticketId) {
     websocket.value.send(JSON.stringify({
       type: 'JOIN_ROOM',
-      ticketId: session.customerId // Using customerId as placeholder
+      ticketId: session.ticketId // Use the actual ticket ID
     }))
+    console.log('Admin joined ticket room:', session.ticketId)
   }
 }
 
@@ -443,13 +443,13 @@ const loadChatHistory = (customerId: number) => {
 
 const sendMessage = () => {
   const text = newMessage.value.trim()
-  if (!text || !selectedCustomer.value || !websocket.value) return
+  if (!text || !selectedCustomer.value || !websocket.value || !selectedCustomer.value.ticketId) return
 
   try {
-    // Send via WebSocket
+    // Send via WebSocket using the actual ticket ID
     websocket.value.send(JSON.stringify({
       type: 'SEND_MESSAGE',
-      customerId: selectedCustomer.value.customerId,
+      ticketId: selectedCustomer.value.ticketId, // Use the actual ticket ID
       message: text
     }))
     
@@ -476,12 +476,12 @@ const sendMessage = () => {
 }
 
 const handleTyping = () => {
-  if (!selectedCustomer.value || !websocket.value) return
+  if (!selectedCustomer.value || !websocket.value || !selectedCustomer.value.ticketId) return
   
-  // Send typing start
+  // Send typing start using the actual ticket ID
   websocket.value.send(JSON.stringify({
     type: 'TYPING_START',
-    customerId: selectedCustomer.value.customerId
+    ticketId: selectedCustomer.value.ticketId // Use the actual ticket ID
   }))
   
   // Clear existing timeout
@@ -491,10 +491,10 @@ const handleTyping = () => {
   
   // Set timeout to send typing stop
   typingTimeout.value = setTimeout(() => {
-    if (websocket.value && selectedCustomer.value) {
+    if (websocket.value && selectedCustomer.value && selectedCustomer.value.ticketId) {
       websocket.value.send(JSON.stringify({
         type: 'TYPING_STOP',
-        customerId: selectedCustomer.value.customerId
+        ticketId: selectedCustomer.value.ticketId // Use the actual ticket ID
       }))
     }
   }, 1000)
@@ -530,18 +530,41 @@ const loadTickets = async () => {
   try {
     const tickets = await apiService.getAllTickets()
     
-    // Convert tickets to chat sessions
-    chatSessions.value = tickets.map(ticket => ({
-      customerId: ticket.customerId,
-      customerName: ticket.customerName,
-      customerAvatar: undefined, // Will use default avatar
-      isOnline: false, // Will be updated via WebSocket
-      lastMessage: ticket.subject,
-      lastMessageTime: ticket.createdAt,
-      unreadCount: 0 // Will be updated via WebSocket
-    }))
+    // Group tickets by customer ID to avoid duplicates, but keep the latest ticket ID
+    const customerMap = new Map<number, ChatSession>()
     
-    console.log('Loaded tickets:', chatSessions.value.length)
+    tickets.forEach(ticket => {
+      const existingSession = customerMap.get(ticket.customerId)
+      
+      if (!existingSession) {
+        // Create new chat session for this customer
+        customerMap.set(ticket.customerId, {
+          customerId: ticket.customerId,
+          customerName: ticket.customerName,
+          customerAvatar: undefined, // Will use default avatar
+          isOnline: false, // Will be updated via WebSocket
+          lastMessage: ticket.subject,
+          lastMessageTime: ticket.createdAt,
+          unreadCount: 0, // Will be updated via WebSocket
+          ticketId: ticket.id // Store the actual ticket ID
+        })
+      } else {
+        // Update with latest ticket info if this ticket is newer
+        const ticketDate = new Date(ticket.createdAt)
+        const existingDate = new Date(existingSession.lastMessageTime)
+        
+        if (ticketDate > existingDate) {
+          existingSession.lastMessage = ticket.subject
+          existingSession.lastMessageTime = ticket.createdAt
+          existingSession.ticketId = ticket.id // Update to latest ticket ID
+        }
+      }
+    })
+    
+    // Convert map to array
+    chatSessions.value = Array.from(customerMap.values())
+    
+    console.log('Loaded unique customers:', chatSessions.value.length)
   } catch (error) {
     console.error('Error loading tickets:', error)
   }

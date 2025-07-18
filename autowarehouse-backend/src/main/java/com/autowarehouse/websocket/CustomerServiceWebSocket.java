@@ -8,6 +8,9 @@ import com.autowarehouse.service.WebSocketService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import io.quarkus.arc.runtime.BeanContainer;
+import io.quarkus.arc.Arc;
+import io.quarkus.arc.ManagedContext;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -136,6 +139,23 @@ public class CustomerServiceWebSocket {
             return;
         }
 
+        // Run database operations on a worker thread with proper CDI context
+        CompletableFuture.runAsync(() -> {
+            ManagedContext requestContext = Arc.container().requestContext();
+            if (requestContext.isActive()) {
+                executeJoinRoom(wsMessage, userId);
+            } else {
+                requestContext.activate();
+                try {
+                    executeJoinRoom(wsMessage, userId);
+                } finally {
+                    requestContext.terminate();
+                }
+            }
+        });
+    }
+
+    private void executeJoinRoom(WebSocketMessage wsMessage, Long userId) {
         try {
             // Validate user can access this ticket
             if (!chatService.validateMessageAccess(wsMessage.ticketId, userId)) {
@@ -174,23 +194,37 @@ public class CustomerServiceWebSocket {
             return;
         }
 
-        // Run database operations on a worker thread to avoid blocking IO thread
+        // Run database operations on a worker thread with proper CDI context
         CompletableFuture.runAsync(() -> {
-            try {
-                // Create send message request
-                SendMessageRequest request = new SendMessageRequest(wsMessage.ticketId, wsMessage.message);
-                
-                // Send message through chat service
-                var messageResponse = chatService.sendMessage(request, userId);
-                
-                // Broadcast to all users in the ticket room
-                webSocketService.broadcastNewMessage(messageResponse);
-                
-            } catch (Exception e) {
-                LOG.errorf("Error sending message for user %d: %s", userId, e.getMessage());
-                webSocketService.sendErrorMessage(userId, "Error sending message: " + e.getMessage());
+            ManagedContext requestContext = Arc.container().requestContext();
+            if (requestContext.isActive()) {
+                executeSendMessage(wsMessage, userId);
+            } else {
+                requestContext.activate();
+                try {
+                    executeSendMessage(wsMessage, userId);
+                } finally {
+                    requestContext.terminate();
+                }
             }
         });
+    }
+
+    private void executeSendMessage(WebSocketMessage wsMessage, Long userId) {
+        try {
+            // Create send message request
+            SendMessageRequest request = new SendMessageRequest(wsMessage.ticketId, wsMessage.message);
+            
+            // Send message through chat service
+            var messageResponse = chatService.sendMessage(request, userId);
+            
+            // Broadcast to all users in the ticket room
+            webSocketService.broadcastNewMessage(messageResponse);
+            
+        } catch (Exception e) {
+            LOG.errorf("Error sending message for user %d: %s", userId, e.getMessage());
+            webSocketService.sendErrorMessage(userId, "Error sending message: " + e.getMessage());
+        }
     }
 
     private void handleTypingStart(WebSocketMessage wsMessage, Long userId) {
@@ -199,6 +233,23 @@ public class CustomerServiceWebSocket {
             return;
         }
 
+        // Run database operations on a worker thread with proper CDI context
+        CompletableFuture.runAsync(() -> {
+            ManagedContext requestContext = Arc.container().requestContext();
+            if (requestContext.isActive()) {
+                executeTypingStart(wsMessage, userId);
+            } else {
+                requestContext.activate();
+                try {
+                    executeTypingStart(wsMessage, userId);
+                } finally {
+                    requestContext.terminate();
+                }
+            }
+        });
+    }
+
+    private void executeTypingStart(WebSocketMessage wsMessage, Long userId) {
         try {
             // Validate user can access this ticket
             if (!chatService.validateMessageAccess(wsMessage.ticketId, userId)) {
@@ -219,6 +270,23 @@ public class CustomerServiceWebSocket {
             return;
         }
 
+        // Run database operations on a worker thread with proper CDI context
+        CompletableFuture.runAsync(() -> {
+            ManagedContext requestContext = Arc.container().requestContext();
+            if (requestContext.isActive()) {
+                executeTypingStop(wsMessage, userId);
+            } else {
+                requestContext.activate();
+                try {
+                    executeTypingStop(wsMessage, userId);
+                } finally {
+                    requestContext.terminate();
+                }
+            }
+        });
+    }
+
+    private void executeTypingStop(WebSocketMessage wsMessage, Long userId) {
         try {
             // Validate user can access this ticket
             if (!chatService.validateMessageAccess(wsMessage.ticketId, userId)) {
@@ -239,16 +307,30 @@ public class CustomerServiceWebSocket {
             return;
         }
 
-        // Run database operations on a worker thread to avoid blocking IO thread
+        // Run database operations on a worker thread with proper CDI context
         CompletableFuture.runAsync(() -> {
-            try {
-                chatService.markMessagesAsRead(wsMessage.ticketId, userId);
-                webSocketService.sendSuccessMessage(userId, "Messages marked as read");
-                
-            } catch (Exception e) {
-                LOG.errorf("Error marking messages as read for user %d: %s", userId, e.getMessage());
-                webSocketService.sendErrorMessage(userId, "Error marking messages as read: " + e.getMessage());
+            ManagedContext requestContext = Arc.container().requestContext();
+            if (requestContext.isActive()) {
+                executeMessageRead(wsMessage, userId);
+            } else {
+                requestContext.activate();
+                try {
+                    executeMessageRead(wsMessage, userId);
+                } finally {
+                    requestContext.terminate();
+                }
             }
         });
+    }
+
+    private void executeMessageRead(WebSocketMessage wsMessage, Long userId) {
+        try {
+            chatService.markMessagesAsRead(wsMessage.ticketId, userId);
+            webSocketService.sendSuccessMessage(userId, "Messages marked as read");
+            
+        } catch (Exception e) {
+            LOG.errorf("Error marking messages as read for user %d: %s", userId, e.getMessage());
+            webSocketService.sendErrorMessage(userId, "Error marking messages as read: " + e.getMessage());
+        }
     }
 }
