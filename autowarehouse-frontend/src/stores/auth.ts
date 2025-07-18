@@ -77,9 +77,28 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     error.value = null
     
-    // Clear localStorage
+    // Clear localStorage completely
     localStorage.removeItem('auth_token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user_data')
+    
+    // Clear other stores' data
+    // Note: We import these stores dynamically to avoid circular dependencies
+    try {
+      const { useCartStore } = require('./cart')
+      const { useWishlistStore } = require('./wishlist')
+      const { useSavedItemsStore } = require('./savedItems')
+      
+      const cartStore = useCartStore()
+      const wishlistStore = useWishlistStore()
+      const savedItemsStore = useSavedItemsStore()
+      
+      cartStore.resetCart()
+      wishlistStore.clearLocalWishlist()
+      savedItemsStore.resetSavedItems()
+    } catch (err) {
+      console.warn('Error clearing store data on logout:', err)
+    }
   }
 
   const forgotPassword = async (email: string) => {

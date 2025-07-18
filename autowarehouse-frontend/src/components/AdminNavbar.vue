@@ -214,8 +214,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 const adminMenuOpen = ref(false)
 
@@ -226,7 +228,8 @@ const notificationCount = ref(5)
 const supportTickets = ref(3)
 
 const logout = () => {
-  // In real app, clear auth tokens and admin data
+  // Clear auth tokens and admin data
+  authStore.logout()
   adminMenuOpen.value = false
   mobileMenuOpen.value = false
   router.push('/login')
