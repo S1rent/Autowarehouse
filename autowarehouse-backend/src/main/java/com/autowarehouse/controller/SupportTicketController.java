@@ -4,6 +4,7 @@ import com.autowarehouse.dto.CreateTicketRequest;
 import com.autowarehouse.dto.TicketResponse;
 import com.autowarehouse.dto.UpdateTicketRequest;
 import com.autowarehouse.entity.TicketStatus;
+import com.autowarehouse.entity.User;
 import com.autowarehouse.service.SupportTicketService;
 import com.autowarehouse.service.WebSocketService;
 import jakarta.annotation.security.RolesAllowed;
@@ -342,15 +343,25 @@ public class SupportTicketController {
             // This assumes the JWT subject is set to the user ID
             return Long.parseLong(principal);
         } catch (NumberFormatException e) {
-            // Fallback: try to extract from email-based principal
+            // Fallback: look up user by email from database
             // This is a temporary workaround for the current authentication system
-            if (principal.equals("customer@autowarehouse.com")) {
-                return 2L; // Customer user ID
-            } else if (principal.equals("admin@autowarehouse.com")) {
-                return 1L; // Admin user ID
+            User user = User.findByEmail(principal);
+            if (user != null) {
+                return user.id;
             }
-            // Default fallback
-            return 1L;
+            
+            // Legacy fallback for hardcoded emails
+            if (principal.equals("customer@autowarehouse.com")) {
+                User customer = User.findByEmail("customer@autowarehouse.com");
+                return customer != null ? customer.id : 2L;
+            } else if (principal.equals("admin@autowarehouse.com")) {
+                User admin = User.findByEmail("admin@autowarehouse.com");
+                return admin != null ? admin.id : 1L;
+            }
+            
+            // Default fallback - find any customer user for ticket creation
+            User anyCustomer = User.find("role = 'CUSTOMER'").firstResult();
+            return anyCustomer != null ? anyCustomer.id : 1L;
         }
     }
 

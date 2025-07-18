@@ -88,12 +88,12 @@
           >
             <div class="flex items-start space-x-2 max-w-xs lg:max-w-md">
               <!-- Avatar for agent messages -->
-              <img 
+              <!-- <img 
                 v-if="!message.isUser"
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
                 alt="Support Agent"
                 class="w-8 h-8 rounded-full mt-1"
-              >
+              > -->
               
               <div 
                 :class="message.isUser ? 'bg-blue-600 text-white ml-auto' : 'bg-gray-200 text-gray-900'"
@@ -109,12 +109,12 @@
               </div>
               
               <!-- Avatar for user messages -->
-              <img 
+              <!-- <img 
                 v-if="message.isUser"
                 src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
                 alt="You"
                 class="w-8 h-8 rounded-full mt-1"
-              >
+              > -->
             </div>
           </div>
         </div>

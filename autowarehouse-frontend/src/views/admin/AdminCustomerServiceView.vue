@@ -27,11 +27,11 @@
               >
                 <div class="flex items-start space-x-3">
                   <div class="relative">
-                    <img 
+                    <!-- <img 
                       :src="session.customerAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'" 
                       :alt="session.customerName"
                       class="w-10 h-10 rounded-full"
-                    >
+                    > -->
                     <div 
                       :class="session.isOnline ? 'bg-green-500' : 'bg-gray-400'"
                       class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
@@ -71,11 +71,11 @@
             <div v-if="selectedCustomer" class="bg-white border-b border-gray-200 p-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <img 
+                  <!-- <img 
                     :src="selectedCustomer.customerAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'" 
                     :alt="selectedCustomer.customerName"
                     class="w-10 h-10 rounded-full"
-                  >
+                  > -->
                   <div>
                     <h3 class="font-semibold text-gray-900">{{ selectedCustomer.customerName }}</h3>
                     <p class="text-sm text-gray-500">

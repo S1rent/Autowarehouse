@@ -142,5 +142,12 @@ private Long getCurrentUserId(SecurityContext securityContext) {
    - Added User entity import
    - Enhanced authentication logic to handle email-based principals
 
+3. `autowarehouse-backend/src/main/java/com/autowarehouse/controller/SupportTicketController.java`
+   - Applied same authentication fix as ChatController
+   - Fixed `getCurrentUserId()` method to properly lookup users from database
+   - Added User entity import
+   - Enhanced authentication logic to handle email-based principals
+   - Fixed "Customer not found" error when creating new tickets
+
 ## Status
 ✅ **COMPLETED** - Admin side now properly loads and displays chat history, matching the functionality available on the customer side.
