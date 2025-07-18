@@ -108,6 +108,26 @@ public class User extends PanacheEntityBase {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     public List<Notification> notifications;
 
+    // WebSocket related fields
+    @Column(name = "is_online")
+    public Boolean isOnline = false;
+
+    @Column(name = "last_seen_at")
+    public LocalDateTime lastSeenAt;
+
+    @Column(name = "socket_session_id")
+    public String socketSessionId;
+
+    // Customer service relationships
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public List<SupportTicket> customerTickets;
+
+    @OneToMany(mappedBy = "assignedAgent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public List<SupportTicket> assignedTickets;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public List<ChatMessage> sentMessages;
+
     // Constructors
     public User() {}
 
@@ -189,6 +209,44 @@ public class User extends PanacheEntityBase {
 
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    // WebSocket helper methods
+    public void setOnline(String socketSessionId) {
+        this.isOnline = true;
+        this.socketSessionId = socketSessionId;
+        this.lastSeenAt = LocalDateTime.now();
+    }
+
+    public void setOffline() {
+        this.isOnline = false;
+        this.socketSessionId = null;
+        this.lastSeenAt = LocalDateTime.now();
+    }
+
+    public void updateLastSeen() {
+        this.lastSeenAt = LocalDateTime.now();
+    }
+
+    public boolean isOnlineNow() {
+        return Boolean.TRUE.equals(isOnline);
+    }
+
+    // Customer service helper methods
+    public static List<User> findOnlineAgents() {
+        return find("role = 'ADMIN' AND isOnline = true").list();
+    }
+
+    public static List<User> findAvailableAgents() {
+        return find("role = 'ADMIN' AND isActive = true").list();
+    }
+
+    public static User findBySocketSessionId(String socketSessionId) {
+        return find("socketSessionId", socketSessionId).firstResult();
+    }
+
+    public static long countOnlineAgents() {
+        return count("role = 'ADMIN' AND isOnline = true");
     }
 
     @Override

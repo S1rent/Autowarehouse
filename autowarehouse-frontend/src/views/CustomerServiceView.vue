@@ -85,6 +85,7 @@
               <input 
                 v-model="newMessage"
                 @keypress.enter="sendMessage"
+                @input="handleTyping"
                 type="text" 
                 placeholder="Ketik pesan Anda..." 
                 class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -146,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
@@ -155,51 +156,19 @@ const router = useRouter()
 const chatMessages = ref(null)
 const newMessage = ref('')
 const isTyping = ref(false)
+const typingUser = ref('')
+const currentTicket = ref(null)
+const websocket = ref(null)
+const isConnected = ref(false)
 
-const messages = ref([
-  {
-    id: 1,
-    text: 'Halo! Selamat datang di Customer Service Autowarehouse. Ada yang bisa saya bantu hari ini?',
-    isUser: false,
-    timestamp: new Date(Date.now() - 300000) // 5 minutes ago
-  },
-  {
-    id: 2,
-    text: 'Halo, saya mengalami masalah dengan pembayaran auction yang sudah saya menangkan',
-    isUser: true,
-    timestamp: new Date(Date.now() - 240000) // 4 minutes ago
-  },
-  {
-    id: 3,
-    text: 'Baik, saya akan membantu Anda mengatasi masalah pembayaran tersebut. Bisakah Anda memberitahu saya detail masalah yang Anda alami?',
-    isUser: false,
-    timestamp: new Date(Date.now() - 180000) // 3 minutes ago
-  },
-  {
-    id: 4,
-    text: 'Saya sudah melakukan pembayaran tapi status auction masih belum berubah ke "completed"',
-    isUser: true,
-    timestamp: new Date(Date.now() - 120000) // 2 minutes ago
-  },
-  {
-    id: 5,
-    text: 'Saya mengerti masalahnya. Biasanya update status membutuhkan waktu 5-10 menit. Boleh saya minta nomor auction atau email yang digunakan untuk pembayaran?',
-    isUser: false,
-    timestamp: new Date(Date.now() - 60000) // 1 minute ago
-  }
-])
+const messages = ref([])
 
-const autoResponses = [
-  "Terima kasih atas informasinya. Saya akan segera mengecek status pembayaran Anda.",
-  "Baik, saya sudah mengecek dan akan memproses update status auction Anda sekarang.",
-  "Status auction Anda sudah berhasil diupdate. Silakan refresh halaman untuk melihat perubahannya.",
-  "Apakah ada hal lain yang bisa saya bantu?",
-  "Saya akan mengirimkan konfirmasi ke email Anda dalam beberapa menit.",
-  "Untuk masalah teknis seperti ini, biasanya tim kami membutuhkan waktu 1-2 jam untuk menyelesaikannya."
-]
+// Mock current user ID - in real app, get from auth store
+const currentUserId = 1
 
 const formatTime = (timestamp) => {
-  return timestamp.toLocaleTimeString('id-ID', { 
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('id-ID', { 
     hour: '2-digit', 
     minute: '2-digit' 
   })
@@ -212,40 +181,234 @@ const scrollToBottom = async () => {
   }
 }
 
+const initWebSocket = () => {
+  try {
+    websocket.value = new WebSocket(`ws://localhost:8080/ws/customer-service/${currentUserId}`)
+    
+    websocket.value.onopen = () => {
+      console.log('WebSocket connected')
+      isConnected.value = true
+      
+      // Create or get existing ticket for this customer
+      createOrGetTicket()
+    }
+    
+    websocket.value.onmessage = (event) => {
+      const message = JSON.parse(event.data)
+      handleWebSocketMessage(message)
+    }
+    
+    websocket.value.onclose = () => {
+      console.log('WebSocket disconnected')
+      isConnected.value = false
+      
+      // Attempt to reconnect after 3 seconds
+      setTimeout(() => {
+        if (!isConnected.value) {
+          initWebSocket()
+        }
+      }, 3000)
+    }
+    
+    websocket.value.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      isConnected.value = false
+    }
+  } catch (error) {
+    console.error('Failed to initialize WebSocket:', error)
+  }
+}
+
+const handleWebSocketMessage = (message) => {
+  switch (message.type) {
+    case 'RECEIVE_MESSAGE':
+      if (message.data && currentTicket.value && message.data.ticketId === currentTicket.value.id) {
+        const newMsg = {
+          id: message.data.id,
+          text: message.data.message,
+          isUser: message.data.senderType === 'CUSTOMER',
+          timestamp: message.data.timestamp,
+          senderName: message.data.senderName
+        }
+        messages.value.push(newMsg)
+        scrollToBottom()
+      }
+      break
+      
+    case 'TYPING_START':
+      if (currentTicket.value && message.ticketId === currentTicket.value.id && message.userId !== currentUserId) {
+        isTyping.value = true
+        typingUser.value = message.userName
+      }
+      break
+      
+    case 'TYPING_STOP':
+      if (currentTicket.value && message.ticketId === currentTicket.value.id) {
+        isTyping.value = false
+        typingUser.value = ''
+      }
+      break
+      
+    case 'SUCCESS':
+      console.log('Success:', message.message)
+      break
+      
+    case 'ERROR':
+      console.error('WebSocket error:', message.message)
+      break
+      
+    case 'NOTIFICATION':
+      console.log('Notification:', message.message)
+      break
+  }
+}
+
+const createOrGetTicket = async () => {
+  try {
+    // First, try to get existing open ticket for this customer
+    const response = await fetch('/api/tickets/my-tickets', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
+      }
+    })
+    
+    if (response.ok) {
+      const tickets = await response.json()
+      const openTicket = tickets.find(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS')
+      
+      if (openTicket) {
+        currentTicket.value = openTicket
+        await loadMessages()
+        joinTicketRoom()
+      } else {
+        // Create new ticket
+        await createNewTicket()
+      }
+    } else {
+      // Create new ticket if can't get existing ones
+      await createNewTicket()
+    }
+  } catch (error) {
+    console.error('Error getting/creating ticket:', error)
+    // Create new ticket as fallback
+    await createNewTicket()
+  }
+}
+
+const createNewTicket = async () => {
+  try {
+    const response = await fetch('/api/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
+      },
+      body: JSON.stringify({
+        subject: 'Customer Service Chat',
+        description: 'Customer service chat session',
+        category: 'GENERAL',
+        priority: 'MEDIUM'
+      })
+    })
+    
+    if (response.ok) {
+      currentTicket.value = await response.json()
+      joinTicketRoom()
+      
+      // Send welcome message
+      setTimeout(() => {
+        const welcomeMessage = {
+          id: Date.now(),
+          text: 'Halo! Selamat datang di Customer Service Autowarehouse. Ada yang bisa saya bantu hari ini?',
+          isUser: false,
+          timestamp: new Date(),
+          senderName: 'Customer Service'
+        }
+        messages.value.push(welcomeMessage)
+        scrollToBottom()
+      }, 1000)
+    }
+  } catch (error) {
+    console.error('Error creating ticket:', error)
+  }
+}
+
+const loadMessages = async () => {
+  if (!currentTicket.value) return
+  
+  try {
+    const response = await fetch(`/api/chat/tickets/${currentTicket.value.id}/messages`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
+      }
+    })
+    
+    if (response.ok) {
+      const chatMessages = await response.json()
+      messages.value = chatMessages.map(msg => ({
+        id: msg.id,
+        text: msg.message,
+        isUser: msg.senderType === 'CUSTOMER',
+        timestamp: msg.timestamp,
+        senderName: msg.senderName
+      }))
+      scrollToBottom()
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error)
+  }
+}
+
+const joinTicketRoom = () => {
+  if (websocket.value && websocket.value.readyState === WebSocket.OPEN && currentTicket.value) {
+    websocket.value.send(JSON.stringify({
+      type: 'JOIN_ROOM',
+      ticketId: currentTicket.value.id
+    }))
+  }
+}
+
 const sendMessage = async () => {
   const text = newMessage.value.trim()
-  if (!text) return
+  if (!text || !currentTicket.value || !websocket.value) return
 
-  // Add user message
-  const userMessage = {
-    id: Date.now(),
-    text: text,
-    isUser: true,
-    timestamp: new Date()
+  try {
+    // Send via WebSocket
+    websocket.value.send(JSON.stringify({
+      type: 'SEND_MESSAGE',
+      ticketId: currentTicket.value.id,
+      message: text
+    }))
+    
+    newMessage.value = ''
+  } catch (error) {
+    console.error('Error sending message:', error)
   }
-  messages.value.push(userMessage)
-  newMessage.value = ''
-  
-  await scrollToBottom()
+}
 
-  // Show typing indicator
-  isTyping.value = true
-  
-  // Simulate CS response after delay
-  setTimeout(async () => {
-    isTyping.value = false
-    
-    const randomResponse = autoResponses[Math.floor(Math.random() * autoResponses.length)]
-    const csMessage = {
-      id: Date.now() + 1,
-      text: randomResponse,
-      isUser: false,
-      timestamp: new Date()
+const handleTyping = () => {
+  if (!currentTicket.value || !websocket.value) return
+
+  // Send typing start
+  websocket.value.send(JSON.stringify({
+    type: 'TYPING_START',
+    ticketId: currentTicket.value.id
+  }))
+
+  // Clear existing timeout
+  if (window.typingTimeout) {
+    clearTimeout(window.typingTimeout)
+  }
+
+  // Set timeout to send typing stop
+  window.typingTimeout = setTimeout(() => {
+    if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+      websocket.value.send(JSON.stringify({
+        type: 'TYPING_STOP',
+        ticketId: currentTicket.value.id
+      }))
     }
-    messages.value.push(csMessage)
-    
-    await scrollToBottom()
-  }, 1000 + Math.random() * 2000)
+  }, 1000)
 }
 
 const goBack = () => {
@@ -253,7 +416,16 @@ const goBack = () => {
 }
 
 onMounted(() => {
-  scrollToBottom()
+  initWebSocket()
+})
+
+onUnmounted(() => {
+  if (websocket.value) {
+    websocket.value.close()
+  }
+  if (window.typingTimeout) {
+    clearTimeout(window.typingTimeout)
+  }
 })
 </script>
 

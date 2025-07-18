@@ -420,24 +420,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+// Types
+interface Customer {
+  name: string
+  email: string
+  phone: string
+  avatar: string
+  memberSince: string
+}
+
+interface Agent {
+  id: number
+  name: string
+  avatar: string
+}
+
+interface Ticket {
+  id: number
+  subject: string
+  message: string
+  status: string
+  priority: string
+  category: string
+  customer: Customer
+  assignedTo?: Agent
+  assignedAgentId?: number
+  createdAt: string
+}
+
+interface Message {
+  id: number
+  text: string
+  isUser: boolean
+  timestamp: string
+  senderName: string
+}
+
+interface WebSocketMessage {
+  type: string
+  data?: any
+  ticketId?: number
+  userId?: number
+  userName?: string
+  message?: string
+}
 
 // State
-const selectedTicket = ref(null)
+const selectedTicket = ref<Ticket | null>(null)
 const statusFilter = ref('')
 const priorityFilter = ref('')
 const showReplyModal = ref(false)
 const replyMessage = ref('')
 const markAsResolved = ref(false)
+const websocket = ref<WebSocket | null>(null)
+const isConnected = ref(false)
+const messages = ref<Message[]>([])
+const newMessage = ref('')
+const isTyping = ref(false)
+const typingUser = ref('')
+
+// Mock current admin user ID - in real app, get from auth store
+const currentUserId = 1
 
 // Stats
 const stats = ref({
-  openTickets: 23,
-  inProgress: 8,
-  resolvedToday: 15,
+  openTickets: 0,
+  inProgress: 0,
+  resolvedToday: 0,
   avgResponseTime: '2.5h',
-  todayTickets: 12,
-  weekTickets: 67,
+  todayTickets: 0,
+  weekTickets: 0,
   resolutionRate: 94,
   satisfaction: 4.8
 })
@@ -449,114 +503,241 @@ const agents = ref([
   { id: 3, name: 'Emily Davis', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face' }
 ])
 
-// Sample tickets data
-const tickets = ref([
-  {
-    id: 1001,
-    subject: 'Payment Issue with Order #12345',
-    message: 'I was charged twice for my recent order. Can you please help me resolve this?',
-    status: 'open',
-    priority: 'high',
-    category: 'Payment',
-    customer: {
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+62 812-3456-7890',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face',
-      memberSince: new Date('2023-01-15')
-    },
-    assignedTo: agents.value[0],
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-  },
-  {
-    id: 1002,
-    subject: 'Product Not Received',
-    message: 'I ordered a laptop 2 weeks ago but haven\'t received it yet. The tracking shows it was delivered but I never got it.',
-    status: 'in-progress',
-    priority: 'high',
-    category: 'Shipping',
-    customer: {
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      phone: '+62 813-4567-8901',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face',
-      memberSince: new Date('2022-08-20')
-    },
-    assignedTo: agents.value[1],
-    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000)
-  },
-  {
-    id: 1003,
-    subject: 'Account Login Problems',
-    message: 'I can\'t log into my account. I keep getting an error message saying my credentials are invalid.',
-    status: 'open',
-    priority: 'medium',
-    category: 'Account',
-    customer: {
-      name: 'Bob Wilson',
-      email: 'bob.wilson@example.com',
-      phone: '+62 814-5678-9012',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-      memberSince: new Date('2023-03-10')
-    },
-    assignedTo: null,
-    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000)
-  },
-  {
-    id: 1004,
-    subject: 'Refund Request',
-    message: 'I would like to return my recent purchase and get a refund. The item doesn\'t match the description.',
-    status: 'resolved',
-    priority: 'medium',
-    category: 'Returns',
-    customer: {
-      name: 'Alice Brown',
-      email: 'alice.brown@example.com',
-      phone: '+62 815-6789-0123',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-      memberSince: new Date('2022-11-05')
-    },
-    assignedTo: agents.value[2],
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-  }
-])
+// Tickets data
+const tickets = ref<Ticket[]>([])
 
 // Computed
 const filteredTickets = computed(() => {
   let filtered = tickets.value
 
   if (statusFilter.value) {
-    filtered = filtered.filter(ticket => ticket.status === statusFilter.value)
+    filtered = filtered.filter(ticket => ticket.status.toLowerCase() === statusFilter.value)
   }
 
   if (priorityFilter.value) {
-    filtered = filtered.filter(ticket => ticket.priority === priorityFilter.value)
+    filtered = filtered.filter(ticket => ticket.priority.toLowerCase() === priorityFilter.value)
   }
 
   return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 })
 
+// WebSocket Methods
+const initWebSocket = () => {
+  try {
+    websocket.value = new WebSocket(`ws://localhost:8080/ws/customer-service/${currentUserId}`)
+    
+    websocket.value.onopen = () => {
+      console.log('Admin WebSocket connected')
+      isConnected.value = true
+    }
+    
+    websocket.value.onmessage = (event) => {
+      const message = JSON.parse(event.data)
+      handleWebSocketMessage(message)
+    }
+    
+    websocket.value.onclose = () => {
+      console.log('Admin WebSocket disconnected')
+      isConnected.value = false
+      
+      // Attempt to reconnect after 3 seconds
+      setTimeout(() => {
+        if (!isConnected.value) {
+          initWebSocket()
+        }
+      }, 3000)
+    }
+    
+    websocket.value.onerror = (error) => {
+      console.error('Admin WebSocket error:', error)
+      isConnected.value = false
+    }
+  } catch (error) {
+    console.error('Failed to initialize WebSocket:', error)
+  }
+}
+
+const handleWebSocketMessage = (message: WebSocketMessage) => {
+  switch (message.type) {
+    case 'RECEIVE_MESSAGE':
+      if (message.data && selectedTicket.value && message.data.ticketId === selectedTicket.value.id) {
+        const newMsg = {
+          id: message.data.id,
+          text: message.data.message,
+          isUser: message.data.senderType === 'CUSTOMER',
+          timestamp: message.data.timestamp,
+          senderName: message.data.senderName
+        }
+        messages.value.push(newMsg)
+      }
+      break
+      
+    case 'TICKET_CREATED':
+      if (message.data) {
+        tickets.value.unshift(message.data)
+        loadStats()
+      }
+      break
+      
+    case 'TICKET_UPDATED':
+      if (message.data) {
+        const index = tickets.value.findIndex(t => t.id === message.data.id)
+        if (index !== -1) {
+          tickets.value[index] = message.data
+        }
+        if (selectedTicket.value && selectedTicket.value.id === message.data.id) {
+          selectedTicket.value = message.data
+        }
+        loadStats()
+      }
+      break
+      
+    case 'TYPING_START':
+      if (selectedTicket.value && message.ticketId === selectedTicket.value.id && message.userId !== currentUserId) {
+        isTyping.value = true
+        typingUser.value = message.userName || ''
+      }
+      break
+      
+    case 'TYPING_STOP':
+      if (selectedTicket.value && message.ticketId === selectedTicket.value.id) {
+        isTyping.value = false
+        typingUser.value = ''
+      }
+      break
+      
+    case 'SUCCESS':
+      console.log('Success:', message.message)
+      break
+      
+    case 'ERROR':
+      console.error('WebSocket error:', message.message)
+      break
+      
+    case 'NOTIFICATION':
+      console.log('Notification:', message.message)
+      break
+  }
+}
+
+// API Methods
+const loadTickets = async () => {
+  try {
+    const response = await fetch('/api/tickets', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
+      }
+    })
+    
+    if (response.ok) {
+      tickets.value = await response.json()
+    }
+  } catch (error) {
+    console.error('Error loading tickets:', error)
+  }
+}
+
+const loadStats = async () => {
+  try {
+    const [openResponse, recentResponse] = await Promise.all([
+      fetch('/api/tickets/stats/open-count', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}` }
+      }),
+      fetch('/api/tickets/stats/recent?days=1', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}` }
+      })
+    ])
+
+    if (openResponse.ok) {
+      const openData = await openResponse.json()
+      stats.value.openTickets = openData.count
+    }
+
+    if (recentResponse.ok) {
+      const recentData = await recentResponse.json()
+      stats.value.todayTickets = recentData.length
+      stats.value.resolvedToday = recentData.filter((t: any) => t.status === 'RESOLVED').length
+    }
+
+    // Calculate other stats from loaded tickets
+    stats.value.inProgress = tickets.value.filter((t: Ticket) => t.status === 'IN_PROGRESS').length
+  } catch (error) {
+    console.error('Error loading stats:', error)
+  }
+}
+
+const loadMessages = async (ticketId: number) => {
+  try {
+    const response = await fetch(`/api/chat/tickets/${ticketId}/messages`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
+      }
+    })
+    
+    if (response.ok) {
+      const chatMessages = await response.json()
+      messages.value = chatMessages.map((msg: any) => ({
+        id: msg.id,
+        text: msg.message,
+        isUser: msg.senderType === 'CUSTOMER',
+        timestamp: msg.timestamp,
+        senderName: msg.senderName
+      }))
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error)
+  }
+}
+
+const joinTicketRoom = (ticketId: number) => {
+  if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+    websocket.value.send(JSON.stringify({
+      type: 'JOIN_ROOM',
+      ticketId: ticketId
+    }))
+  }
+}
+
+const sendMessageViaWebSocket = async () => {
+  const text = newMessage.value.trim()
+  if (!text || !selectedTicket.value || !websocket.value) return
+
+  try {
+    // Send via WebSocket
+    websocket.value.send(JSON.stringify({
+      type: 'SEND_MESSAGE',
+      ticketId: selectedTicket.value.id,
+      message: text
+    }))
+    
+    newMessage.value = ''
+  } catch (error) {
+    console.error('Error sending message:', error)
+  }
+}
+
 // Methods
 const getPriorityClass = (priority: string) => {
   const classes = {
-    'high': 'bg-red-100 text-red-800',
-    'medium': 'bg-yellow-100 text-yellow-800',
-    'low': 'bg-green-100 text-green-800'
+    'HIGH': 'bg-red-100 text-red-800',
+    'MEDIUM': 'bg-yellow-100 text-yellow-800',
+    'LOW': 'bg-green-100 text-green-800'
   }
   return classes[priority as keyof typeof classes] || 'bg-gray-100 text-gray-800'
 }
 
 const getStatusClass = (status: string) => {
   const classes = {
-    'open': 'bg-red-100 text-red-800',
-    'in-progress': 'bg-yellow-100 text-yellow-800',
-    'resolved': 'bg-green-100 text-green-800',
-    'closed': 'bg-gray-100 text-gray-800'
+    'OPEN': 'bg-red-100 text-red-800',
+    'IN_PROGRESS': 'bg-yellow-100 text-yellow-800',
+    'RESOLVED': 'bg-green-100 text-green-800',
+    'CLOSED': 'bg-gray-100 text-gray-800'
   }
   return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
 }
 
-const formatDateTime = (date: Date) => {
+const formatDateTime = (dateString: string) => {
+  const date = new Date(dateString)
   return date.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'short',
@@ -565,7 +746,8 @@ const formatDateTime = (date: Date) => {
   })
 }
 
-const formatDate = (date: Date) => {
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
   return date.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
@@ -573,30 +755,112 @@ const formatDate = (date: Date) => {
   })
 }
 
-const selectTicket = (ticket: any) => {
+const selectTicket = async (ticket: Ticket) => {
   selectedTicket.value = ticket
+  await loadMessages(ticket.id)
+  joinTicketRoom(ticket.id)
 }
 
-const updateTicketStatus = () => {
-  console.log('Updating ticket status:', selectedTicket.value?.status)
-}
-
-const assignTicket = () => {
-  console.log('Assigning ticket to:', selectedTicket.value?.assignedTo)
-}
-
-const sendReply = () => {
-  console.log('Sending reply:', replyMessage.value)
-  if (markAsResolved.value && selectedTicket.value) {
-    selectedTicket.value.status = 'resolved'
+const updateTicketStatus = async () => {
+  if (!selectedTicket.value) return
+  
+  try {
+    const response = await fetch(`/api/tickets/${selectedTicket.value.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
+      },
+      body: JSON.stringify({
+        status: selectedTicket.value.status
+      })
+    })
+    
+    if (response.ok) {
+      const updatedTicket = await response.json()
+      selectedTicket.value = updatedTicket
+      
+      // Update in tickets list
+      const index = tickets.value.findIndex(t => t.id === updatedTicket.id)
+      if (index !== -1) {
+        tickets.value[index] = updatedTicket
+      }
+    }
+  } catch (error) {
+    console.error('Error updating ticket status:', error)
   }
-  showReplyModal.value = false
-  replyMessage.value = ''
-  markAsResolved.value = false
 }
 
-onMounted(() => {
+const assignTicket = async () => {
+  if (!selectedTicket.value || !selectedTicket.value.assignedAgentId) return
+  
+  try {
+    const response = await fetch(`/api/tickets/${selectedTicket.value.id}/assign/${selectedTicket.value.assignedAgentId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
+      }
+    })
+    
+    if (response.ok) {
+      const updatedTicket = await response.json()
+      selectedTicket.value = updatedTicket
+      
+      // Update in tickets list
+      const index = tickets.value.findIndex(t => t.id === updatedTicket.id)
+      if (index !== -1) {
+        tickets.value[index] = updatedTicket
+      }
+    }
+  } catch (error) {
+    console.error('Error assigning ticket:', error)
+  }
+}
+
+const sendReply = async () => {
+  if (!replyMessage.value.trim() || !selectedTicket.value) return
+  
+  try {
+    // Send message via REST API
+    const response = await fetch('/api/chat/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
+      },
+      body: JSON.stringify({
+        ticketId: selectedTicket.value.id,
+        message: replyMessage.value.trim()
+      })
+    })
+    
+    if (response.ok) {
+      // Mark as resolved if requested
+      if (markAsResolved.value) {
+        selectedTicket.value.status = 'RESOLVED'
+        await updateTicketStatus()
+      }
+      
+      showReplyModal.value = false
+      replyMessage.value = ''
+      markAsResolved.value = false
+    }
+  } catch (error) {
+    console.error('Error sending reply:', error)
+  }
+}
+
+onMounted(async () => {
   console.log('Admin Customer Service loaded')
+  await loadTickets()
+  await loadStats()
+  initWebSocket()
+})
+
+onUnmounted(() => {
+  if (websocket.value) {
+    websocket.value.close()
+  }
 })
 </script>
 
