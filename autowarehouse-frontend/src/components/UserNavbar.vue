@@ -29,7 +29,7 @@
           >
             Products
           </router-link>
-          <router-link 
+          <!-- <router-link 
             to="/auctions" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
@@ -40,7 +40,7 @@
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
             My Bids
-          </router-link>
+          </router-link> -->
           <router-link 
             to="/customer-service" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -127,7 +127,7 @@
                 <i class="fa-solid fa-shopping-bag mr-2"></i>
                 Order History
               </router-link>
-              <router-link 
+              <!-- <router-link 
                 to="/bid-history" 
                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 @click="userMenuOpen = false"
@@ -142,7 +142,7 @@
               >
                 <i class="fa-solid fa-trophy mr-2"></i>
                 Won Auctions
-              </router-link>
+              </router-link> -->
               <div class="border-t border-gray-100"></div>
               <button 
                 @click="logout"
@@ -184,7 +184,7 @@
         >
           Products
         </router-link>
-        <router-link 
+        <!-- <router-link 
           to="/auctions" 
           class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"
           @click="mobileMenuOpen = false"
@@ -197,7 +197,7 @@
           @click="mobileMenuOpen = false"
         >
           My Bids
-        </router-link>
+        </router-link> -->
         <router-link 
           to="/customer-service" 
           class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"

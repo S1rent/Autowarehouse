@@ -45,13 +45,13 @@
             <i class="fa-solid fa-shopping-cart mr-2"></i>
             Orders
           </router-link>
-          <router-link 
+          <!-- <router-link 
             to="/admin/auctions" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
             <i class="fa-solid fa-gavel mr-2"></i>
             Auctions
-          </router-link>
+          </router-link> -->
         </div>
 
         <!-- Admin Actions -->
@@ -73,8 +73,8 @@
             class="relative text-gray-700 hover:text-blue-600 p-2 transition-colors"
           >
             <i class="fa-solid fa-headset text-lg"></i>
-            <span v-if="supportTickets > 0" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {{ supportTickets }}
+            <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {{ ' ' }}
             </span>
           </router-link>
 
@@ -150,14 +150,14 @@
           <i class="fa-solid fa-shopping-cart mr-3"></i>
           Orders
         </router-link>
-        <router-link 
+        <!-- <router-link 
           to="/admin/auctions" 
           class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"
           @click="mobileMenuOpen = false"
         >
           <i class="fa-solid fa-gavel mr-3"></i>
           Auctions
-        </router-link>
+        </router-link> -->
         <router-link 
           to="/admin/customer-service" 
           class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium"
