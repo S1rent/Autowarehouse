@@ -123,7 +123,7 @@
                 >
                   <div 
                     :class="message.isAdmin ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'"
-                    class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg"
+                    class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg my-3"
                   >
                     <p class="text-sm">{{ message.text }}</p>
                     <p 
