@@ -3,6 +3,7 @@ package com.autowarehouse.controller;
 import com.autowarehouse.dto.MessageResponse;
 import com.autowarehouse.dto.SendMessageRequest;
 import com.autowarehouse.entity.SenderType;
+import com.autowarehouse.entity.User;
 import com.autowarehouse.service.ChatService;
 import com.autowarehouse.service.WebSocketService;
 import jakarta.annotation.security.RolesAllowed;
@@ -317,21 +318,31 @@ public class ChatController {
         String principal = securityContext.getUserPrincipal().getName();
         
         // For now, we'll extract the user ID from the principal name
-        // In a real JWT implementation, this would be extracted from the token claims
+        // This assumes the JWT subject is set to the user ID
         try {
             // The principal name should contain the user ID
             // This assumes the JWT subject is set to the user ID
             return Long.parseLong(principal);
         } catch (NumberFormatException e) {
-            // Fallback: try to extract from email-based principal
+            // Fallback: look up user by email from database
             // This is a temporary workaround for the current authentication system
-            if (principal.equals("customer@autowarehouse.com")) {
-                return 2L; // Customer user ID
-            } else if (principal.equals("admin@autowarehouse.com")) {
-                return 1L; // Admin user ID
+            User user = User.findByEmail(principal);
+            if (user != null) {
+                return user.id;
             }
-            // Default fallback
-            return 1L;
+            
+            // Legacy fallback for hardcoded emails
+            if (principal.equals("customer@autowarehouse.com")) {
+                User customer = User.findByEmail("customer@autowarehouse.com");
+                return customer != null ? customer.id : 2L;
+            } else if (principal.equals("admin@autowarehouse.com")) {
+                User admin = User.findByEmail("admin@autowarehouse.com");
+                return admin != null ? admin.id : 1L;
+            }
+            
+            // Default fallback - find any admin user
+            User anyAdmin = User.find("role = 'ADMIN'").firstResult();
+            return anyAdmin != null ? anyAdmin.id : 1L;
         }
     }
 

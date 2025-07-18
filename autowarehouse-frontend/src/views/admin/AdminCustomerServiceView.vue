@@ -316,13 +316,22 @@ const handleWebSocketMessage = (message: any) => {
 }
 
 // Methods
-const selectCustomer = (session: ChatSession) => {
+const selectCustomer = async (session: ChatSession) => {
   selectedCustomer.value = session
   session.unreadCount = 0 // Mark as read
   
+  // Clear existing messages first
+  messages.value = []
+  
   // Load chat history for this ticket
   if (session.ticketId) {
-    loadChatHistory(session.ticketId)
+    try {
+      await loadChatHistory(session.ticketId)
+      console.log('Loaded chat history for ticket:', session.ticketId, 'Messages:', messages.value.length)
+    } catch (error) {
+      console.error('Failed to load chat history:', error)
+      // Still allow joining the room even if history fails to load
+    }
   }
   
   // Join chat room via WebSocket using the actual ticket ID
@@ -337,23 +346,42 @@ const selectCustomer = (session: ChatSession) => {
 
 const loadChatHistory = async (ticketId: number) => {
   try {
+    console.log('Loading chat history for ticket:', ticketId)
     // Load real chat history from API using the actual ticket ID
     const chatMessages = await apiService.getTicketMessages(ticketId)
-    messages.value = chatMessages.map(msg => ({
-      id: msg.id,
-      text: msg.message,
-      isAdmin: msg.senderType === 'AGENT',
-      timestamp: msg.timestamp,
-      customerId: msg.senderId
-    }))
+    console.log('Received chat messages:', chatMessages)
+    
+    if (chatMessages && chatMessages.length > 0) {
+      messages.value = chatMessages.map(msg => ({
+        id: msg.id,
+        text: msg.message,
+        isAdmin: msg.senderType === 'AGENT',
+        timestamp: msg.timestamp,
+        customerId: msg.senderId
+      }))
+      console.log('Mapped messages:', messages.value)
+    } else {
+      console.log('No messages found for ticket:', ticketId)
+      messages.value = []
+    }
     
     nextTick(() => {
       scrollToBottom()
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error loading chat history:', error)
-    // Clear messages if no history found
-    messages.value = []
+    
+    // Handle different error types
+    if (error.response?.status === 404) {
+      console.log('No messages found for ticket (404):', ticketId)
+      messages.value = []
+    } else if (error.response?.status === 403) {
+      console.error('Not authorized to view messages for ticket:', ticketId)
+      messages.value = []
+    } else {
+      console.error('Unexpected error loading chat history:', error.message)
+      messages.value = []
+    }
   }
 }
 
@@ -467,9 +495,18 @@ const loadTickets = async () => {
       }
     })
     
-    // Convert map to array
-    chatSessions.value = Array.from(customerMap.values())
+    // Convert map to array and sort by most recent activity
+    chatSessions.value = Array.from(customerMap.values()).sort((a, b) => 
+      new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    )
     console.log('Loaded customer tickets:', chatSessions.value.length)
+    
+    // Auto-select the most recent conversation if available
+    if (chatSessions.value.length > 0 && !selectedCustomer.value) {
+      const mostRecentSession = chatSessions.value[0]
+      console.log('Auto-selecting most recent conversation:', mostRecentSession.customerName)
+      await selectCustomer(mostRecentSession)
+    }
     
     // Auto-join all ticket rooms if WebSocket is connected
     if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
