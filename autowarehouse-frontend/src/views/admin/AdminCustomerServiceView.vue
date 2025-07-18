@@ -453,23 +453,12 @@ const sendMessage = () => {
       message: text
     }))
     
-    // Add to local messages immediately
-    const message: Message = {
-      id: Date.now(),
-      text: text,
-      isAdmin: true,
-      timestamp: new Date().toISOString(),
-      customerId: selectedCustomer.value.customerId
-    }
-    
-    messages.value.push(message)
-    
+    // Don't add to local messages - wait for WebSocket confirmation
     // Update chat session
     selectedCustomer.value.lastMessage = text
-    selectedCustomer.value.lastMessageTime = message.timestamp
+    selectedCustomer.value.lastMessageTime = new Date().toISOString()
     
     newMessage.value = ''
-    scrollToBottom()
   } catch (error) {
     console.error('Error sending message:', error)
   }

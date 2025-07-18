@@ -393,17 +393,8 @@ const sendMessage = async () => {
       message: text
     }))
     
-    // Add to local messages immediately
-    const message: Message = {
-      id: Date.now(),
-      text: text,
-      isUser: true,
-      timestamp: new Date().toISOString()
-    }
-    
-    messages.value.push(message)
+    // Don't add to local messages - wait for WebSocket confirmation
     newMessage.value = ''
-    scrollToBottom()
   } catch (error) {
     console.error('Error sending message:', error)
   }
