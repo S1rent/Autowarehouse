@@ -320,8 +320,10 @@ const selectCustomer = (session: ChatSession) => {
   selectedCustomer.value = session
   session.unreadCount = 0 // Mark as read
   
-  // Load chat history for this customer
-  loadChatHistory(session.customerId)
+  // Load chat history for this ticket
+  if (session.ticketId) {
+    loadChatHistory(session.ticketId)
+  }
   
   // Join chat room via WebSocket using the actual ticket ID
   if (websocket.value && websocket.value.readyState === WebSocket.OPEN && session.ticketId) {
@@ -333,15 +335,26 @@ const selectCustomer = (session: ChatSession) => {
   }
 }
 
-const loadChatHistory = (customerId: number) => {
-  // Filter messages for selected customer
-  messages.value = messages.value.filter(msg => msg.customerId === customerId)
-  
-  // In a real app, you would load from API
-  // For now, we'll just clear and wait for real-time messages
-  nextTick(() => {
-    scrollToBottom()
-  })
+const loadChatHistory = async (ticketId: number) => {
+  try {
+    // Load real chat history from API using the actual ticket ID
+    const chatMessages = await apiService.getTicketMessages(ticketId)
+    messages.value = chatMessages.map(msg => ({
+      id: msg.id,
+      text: msg.message,
+      isAdmin: msg.senderType === 'AGENT',
+      timestamp: msg.timestamp,
+      customerId: msg.senderId
+    }))
+    
+    nextTick(() => {
+      scrollToBottom()
+    })
+  } catch (error) {
+    console.error('Error loading chat history:', error)
+    // Clear messages if no history found
+    messages.value = []
+  }
 }
 
 const sendMessage = () => {
@@ -420,9 +433,10 @@ const formatTime = (dateString: string) => {
 // API Methods
 const loadTickets = async () => {
   try {
+    // Load real tickets from database
     const tickets = await apiService.getAllTickets()
     
-    // Group tickets by customer ID to avoid duplicates, but keep the latest ticket ID
+    // Group tickets by customer ID to show one chat session per customer
     const customerMap = new Map<number, ChatSession>()
     
     tickets.forEach(ticket => {
@@ -433,12 +447,12 @@ const loadTickets = async () => {
         customerMap.set(ticket.customerId, {
           customerId: ticket.customerId,
           customerName: ticket.customerName,
-          customerAvatar: undefined, // Will use default avatar
-          isOnline: false, // Will be updated via WebSocket
+          customerAvatar: undefined,
+          isOnline: false,
           lastMessage: ticket.subject,
           lastMessageTime: ticket.createdAt,
-          unreadCount: 0, // Will be updated via WebSocket
-          ticketId: ticket.id // Store the actual ticket ID
+          unreadCount: 0,
+          ticketId: ticket.id // Use the actual ticket ID
         })
       } else {
         // Update with latest ticket info if this ticket is newer
@@ -455,8 +469,20 @@ const loadTickets = async () => {
     
     // Convert map to array
     chatSessions.value = Array.from(customerMap.values())
+    console.log('Loaded customer tickets:', chatSessions.value.length)
     
-    console.log('Loaded unique customers:', chatSessions.value.length)
+    // Auto-join all ticket rooms if WebSocket is connected
+    if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+      chatSessions.value.forEach(session => {
+        if (session.ticketId) {
+          websocket.value!.send(JSON.stringify({
+            type: 'JOIN_ROOM',
+            ticketId: session.ticketId
+          }))
+          console.log('Admin auto-joined ticket room:', session.ticketId)
+        }
+      })
+    }
   } catch (error) {
     console.error('Error loading tickets:', error)
   }

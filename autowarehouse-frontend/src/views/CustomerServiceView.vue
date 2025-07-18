@@ -340,6 +340,22 @@ const handleWebSocketMessage = (message: any) => {
 }
 
 // API Methods
+const loadChatHistory = async (ticketId: number) => {
+  try {
+    const chatMessages = await apiService.getTicketMessages(ticketId)
+    messages.value = chatMessages.map(msg => ({
+      id: msg.id,
+      text: msg.message,
+      isUser: msg.senderType === 'CUSTOMER',
+      timestamp: msg.timestamp
+    }))
+    scrollToBottom()
+  } catch (error) {
+    console.error('Error loading chat history:', error)
+    throw error
+  }
+}
+
 const createTicketAndInitialize = async (firstMessage: string) => {
   try {
     // Create a new support ticket
@@ -452,9 +468,61 @@ const formatTime = (dateString: string) => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log('Customer Service Chat loaded')
+  
+  // Initialize WebSocket first
   initWebSocket()
+  
+  // Wait a bit for WebSocket to connect, then get or create ticket
+  setTimeout(async () => {
+    if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+      try {
+        // Try to get existing tickets for this customer
+        const existingTickets = await apiService.getMyTickets()
+        
+        if (existingTickets.length > 0) {
+          // Use the most recent ticket
+          const latestTicket = existingTickets.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0]
+          
+          currentTicketId.value = latestTicket.id
+          console.log('Using existing ticket:', currentTicketId.value)
+          
+          // Load existing chat history
+          await loadChatHistory(currentTicketId.value)
+          console.log('Loaded existing chat history')
+        } else {
+          // Create a new ticket for this customer
+          const ticketData: CreateTicketRequest = {
+            subject: 'Customer Support Chat',
+            description: 'Customer support conversation',
+            category: 'GENERAL',
+            priority: 'MEDIUM'
+          }
+          
+          const newTicket = await apiService.createTicket(ticketData)
+          currentTicketId.value = newTicket.id
+          console.log('Created new ticket:', currentTicketId.value)
+        }
+        
+        // Join the ticket room
+        websocket.value.send(JSON.stringify({
+          type: 'JOIN_ROOM',
+          ticketId: currentTicketId.value
+        }))
+        console.log('Customer joined room:', currentTicketId.value)
+        
+        isInitialized.value = true
+        
+      } catch (error) {
+        console.error('Error initializing chat:', error)
+        // Fallback: still set initialized to allow manual ticket creation
+        isInitialized.value = true
+      }
+    }
+  }, 1000)
 })
 
 onUnmounted(() => {
