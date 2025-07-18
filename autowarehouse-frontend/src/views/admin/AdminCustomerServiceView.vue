@@ -86,13 +86,17 @@
           <div class="px-6 py-4">
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-2xl font-bold text-gray-900">Customer Service</h1>
-                <p class="text-gray-600">Manage customer inquiries and support tickets</p>
+                <h1 class="text-2xl font-bold text-gray-900">Customer Service Chat</h1>
+                <p class="text-gray-600">Real-time chat with customers</p>
               </div>
               <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span class="text-sm text-gray-600">{{ onlineCustomers.length }} customers online</span>
+                </div>
                 <button class="relative p-2 text-gray-400 hover:text-gray-600">
                   <i class="fa-solid fa-bell text-xl"></i>
-                  <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                  <span v-if="unreadCount > 0" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{{ unreadCount }}</span>
                 </button>
                 <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <i class="fa-solid fa-user text-white text-sm"></i>
@@ -102,429 +106,219 @@
           </div>
         </header>
 
-        <!-- Content -->
-        <main class="p-6">
-          <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Open Tickets</p>
-                  <p class="text-2xl font-bold text-red-600">{{ stats.openTickets }}</p>
-                </div>
-                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-ticket text-red-600"></i>
+        <!-- Chat Interface -->
+        <main class="flex h-[calc(100vh-120px)]">
+          <!-- Customer List -->
+          <div class="w-80 bg-white border-r border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Customer Chats</h3>
+              <p class="text-sm text-gray-500">{{ chatSessions.length }} active conversations</p>
+            </div>
+            
+            <div class="overflow-y-auto h-full">
+              <div 
+                v-for="session in chatSessions" 
+                :key="session.customerId"
+                @click="selectCustomer(session)"
+                :class="selectedCustomer?.customerId === session.customerId ? 'bg-blue-50 border-r-4 border-blue-600' : 'hover:bg-gray-50'"
+                class="p-4 border-b border-gray-100 cursor-pointer transition-colors"
+              >
+                <div class="flex items-start space-x-3">
+                  <div class="relative">
+                    <img 
+                      :src="session.customerAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'" 
+                      :alt="session.customerName"
+                      class="w-10 h-10 rounded-full"
+                    >
+                    <div 
+                      :class="session.isOnline ? 'bg-green-500' : 'bg-gray-400'"
+                      class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
+                    ></div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <h4 class="font-medium text-gray-900 truncate">{{ session.customerName }}</h4>
+                      <span class="text-xs text-gray-500">{{ formatTime(session.lastMessageTime) }}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 truncate">{{ session.lastMessage || 'No messages yet' }}</p>
+                    <div class="flex items-center justify-between mt-1">
+                      <span class="text-xs text-gray-500">ID: {{ session.customerId }}</span>
+                      <span 
+                        v-if="session.unreadCount > 0"
+                        class="inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs rounded-full"
+                      >
+                        {{ session.unreadCount }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">In Progress</p>
-                  <p class="text-2xl font-bold text-yellow-600">{{ stats.inProgress }}</p>
-                </div>
-                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-clock text-yellow-600"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Resolved Today</p>
-                  <p class="text-2xl font-bold text-green-600">{{ stats.resolvedToday }}</p>
-                </div>
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-check-circle text-green-600"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm text-gray-600">Avg Response Time</p>
-                  <p class="text-2xl font-bold text-blue-600">{{ stats.avgResponseTime }}</p>
-                </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <i class="fa-solid fa-stopwatch text-blue-600"></i>
-                </div>
+              
+              <!-- Empty State -->
+              <div v-if="chatSessions.length === 0" class="p-8 text-center">
+                <i class="fa-solid fa-comments text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Active Chats</h3>
+                <p class="text-gray-500">Waiting for customers to start conversations...</p>
               </div>
             </div>
           </div>
 
-          <!-- Main Content Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Tickets List -->
-            <div class="lg:col-span-2">
-              <div class="bg-white rounded-xl shadow-sm">
-                <div class="px-6 py-4 border-b border-gray-200">
-                  <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Support Tickets</h3>
-                    <div class="flex items-center space-x-2">
-                      <select 
-                        v-model="statusFilter"
-                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">All Status</option>
-                        <option value="open">Open</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="closed">Closed</option>
-                      </select>
-                      <select 
-                        v-model="priorityFilter"
-                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">All Priority</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                      </select>
-                    </div>
+          <!-- Chat Area -->
+          <div class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <div v-if="selectedCustomer" class="bg-white border-b border-gray-200 p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <img 
+                    :src="selectedCustomer.customerAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'" 
+                    :alt="selectedCustomer.customerName"
+                    class="w-10 h-10 rounded-full"
+                  >
+                  <div>
+                    <h3 class="font-semibold text-gray-900">{{ selectedCustomer.customerName }}</h3>
+                    <p class="text-sm text-gray-500">
+                      <span :class="selectedCustomer.isOnline ? 'text-green-600' : 'text-gray-500'">
+                        <i class="fa-solid fa-circle text-xs mr-1"></i>
+                        {{ selectedCustomer.isOnline ? 'Online' : 'Offline' }}
+                      </span>
+                      <span v-if="isTyping" class="ml-2 text-blue-600">
+                        <i class="fa-solid fa-ellipsis animate-pulse"></i>
+                        typing...
+                      </span>
+                    </p>
                   </div>
                 </div>
-                <div class="divide-y divide-gray-200">
+                <div class="flex items-center space-x-2">
+                  <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <i class="fa-solid fa-phone"></i>
+                  </button>
+                  <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <i class="fa-solid fa-video"></i>
+                  </button>
+                  <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" ref="messagesContainer">
+              <div v-if="!selectedCustomer" class="flex items-center justify-center h-full">
+                <div class="text-center">
+                  <i class="fa-solid fa-comments text-6xl text-gray-300 mb-4"></i>
+                  <h3 class="text-xl font-medium text-gray-900 mb-2">Select a Customer</h3>
+                  <p class="text-gray-500">Choose a customer from the list to start chatting</p>
+                </div>
+              </div>
+
+              <div v-else>
+                <div 
+                  v-for="message in messages" 
+                  :key="message.id"
+                  :class="message.isAdmin ? 'justify-end' : 'justify-start'"
+                  class="flex"
+                >
                   <div 
-                    v-for="ticket in filteredTickets" 
-                    :key="ticket.id"
-                    @click="selectTicket(ticket)"
-                    :class="selectedTicket?.id === ticket.id ? 'bg-blue-50' : 'hover:bg-gray-50'"
-                    class="p-6 cursor-pointer transition-colors"
+                    :class="message.isAdmin ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'"
+                    class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg"
                   >
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center space-x-3 mb-2">
-                          <h4 class="font-medium text-gray-900">{{ ticket.subject }}</h4>
-                          <span 
-                            :class="getPriorityClass(ticket.priority)"
-                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                          >
-                            {{ ticket.priority }}
-                          </span>
-                          <span 
-                            :class="getStatusClass(ticket.status)"
-                            class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                          >
-                            {{ ticket.status }}
-                          </span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2">{{ ticket.message }}</p>
-                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>{{ ticket.customer.name }}</span>
-                          <span>{{ ticket.customer.email }}</span>
-                          <span>{{ formatDateTime(ticket.createdAt) }}</span>
-                        </div>
-                      </div>
-                      <div class="flex items-center space-x-2 ml-4">
-                        <img 
-                          :src="ticket.assignedTo?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'" 
-                          :alt="ticket.assignedTo?.name || 'Unassigned'"
-                          class="w-8 h-8 rounded-full"
-                        >
-                        <i class="fa-solid fa-chevron-right text-gray-400"></i>
-                      </div>
-                    </div>
+                    <p class="text-sm">{{ message.text }}</p>
+                    <p 
+                      :class="message.isAdmin ? 'text-blue-100' : 'text-gray-500'"
+                      class="text-xs mt-1"
+                    >
+                      {{ formatTime(message.timestamp) }}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Ticket Detail -->
-            <div class="lg:col-span-1">
-              <div v-if="selectedTicket" class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-semibold text-gray-900">Ticket Details</h3>
-                  <button 
-                    @click="selectedTicket = null"
-                    class="text-gray-400 hover:text-gray-600"
+            <!-- Message Input -->
+            <div v-if="selectedCustomer" class="bg-white border-t border-gray-200 p-4">
+              <form @submit.prevent="sendMessage" class="flex items-center space-x-4">
+                <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
+                  <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <div class="flex-1">
+                  <input 
+                    v-model="newMessage"
+                    @input="handleTyping"
+                    type="text" 
+                    placeholder="Type your message..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <i class="fa-solid fa-times"></i>
-                  </button>
                 </div>
-
-                <!-- Customer Info -->
-                <div class="mb-6">
-                  <h4 class="font-medium text-gray-900 mb-3">Customer Information</h4>
-                  <div class="space-y-2">
-                    <div class="flex items-center space-x-3">
-                      <img 
-                        :src="selectedTicket.customer.avatar" 
-                        :alt="selectedTicket.customer.name"
-                        class="w-10 h-10 rounded-full"
-                      >
-                      <div>
-                        <p class="font-medium text-gray-900">{{ selectedTicket.customer.name }}</p>
-                        <p class="text-sm text-gray-500">{{ selectedTicket.customer.email }}</p>
-                      </div>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                      <p>Phone: {{ selectedTicket.customer.phone }}</p>
-                      <p>Member since: {{ formatDate(selectedTicket.customer.memberSince) }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Ticket Info -->
-                <div class="mb-6">
-                  <h4 class="font-medium text-gray-900 mb-3">Ticket Information</h4>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Ticket ID:</span>
-                      <span class="font-medium">#{{ selectedTicket.id }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Category:</span>
-                      <span class="font-medium">{{ selectedTicket.category }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Priority:</span>
-                      <span 
-                        :class="getPriorityClass(selectedTicket.priority)"
-                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      >
-                        {{ selectedTicket.priority }}
-                      </span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Status:</span>
-                      <span 
-                        :class="getStatusClass(selectedTicket.status)"
-                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      >
-                        {{ selectedTicket.status }}
-                      </span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Created:</span>
-                      <span class="font-medium">{{ formatDateTime(selectedTicket.createdAt) }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="space-y-3">
-                  <select 
-                    v-model="selectedTicket.status"
-                    @change="updateTicketStatus"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                  
-                  <select 
-                    v-model="selectedTicket.assignedTo"
-                    @change="assignTicket"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option :value="null">Unassigned</option>
-                    <option 
-                      v-for="agent in agents" 
-                      :key="agent.id"
-                      :value="agent"
-                    >
-                      {{ agent.name }}
-                    </option>
-                  </select>
-
-                  <button 
-                    @click="showReplyModal = true"
-                    class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <i class="fa-solid fa-reply mr-2"></i>
-                    Reply to Customer
-                  </button>
-                </div>
-              </div>
-
-              <!-- Quick Stats -->
-              <div v-else class="bg-white rounded-xl shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <span class="text-gray-600">Today's Tickets</span>
-                    <span class="font-semibold text-gray-900">{{ stats.todayTickets }}</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-gray-600">This Week</span>
-                    <span class="font-semibold text-gray-900">{{ stats.weekTickets }}</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-gray-600">Resolution Rate</span>
-                    <span class="font-semibold text-green-600">{{ stats.resolutionRate }}%</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-gray-600">Customer Satisfaction</span>
-                    <span class="font-semibold text-blue-600">{{ stats.satisfaction }}/5</span>
-                  </div>
-                </div>
-              </div>
+                <button 
+                  type="submit"
+                  :disabled="!newMessage.trim()"
+                  :class="newMessage.trim() ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300'"
+                  class="px-6 py-2 text-white rounded-lg transition-colors"
+                >
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </form>
             </div>
           </div>
         </main>
-      </div>
-    </div>
-
-    <!-- Reply Modal -->
-    <div v-if="showReplyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-gray-900">Reply to Customer</h3>
-          <button @click="showReplyModal = false" class="text-gray-400 hover:text-gray-600">
-            <i class="fa-solid fa-times"></i>
-          </button>
-        </div>
-        <form @submit.prevent="sendReply" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
-            <textarea 
-              v-model="replyMessage"
-              rows="6" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Type your reply here..."
-              required
-            ></textarea>
-          </div>
-          <div class="flex items-center">
-            <input 
-              v-model="markAsResolved"
-              type="checkbox" 
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            >
-            <label class="ml-2 text-sm text-gray-700">Mark ticket as resolved</label>
-          </div>
-          <div class="flex justify-end space-x-4">
-            <button 
-              type="button"
-              @click="showReplyModal = false"
-              class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Send Reply
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useAuthStore } from '../../stores/auth'
+import { apiService } from '../../services/api'
 
 // Types
-interface Customer {
-  name: string
-  email: string
-  phone: string
-  avatar: string
-  memberSince: string
-}
-
-interface Agent {
-  id: number
-  name: string
-  avatar: string
-}
-
-interface Ticket {
-  id: number
-  subject: string
-  message: string
-  status: string
-  priority: string
-  category: string
-  customer: Customer
-  assignedTo?: Agent
-  assignedAgentId?: number
-  createdAt: string
+interface ChatSession {
+  customerId: number
+  customerName: string
+  customerAvatar?: string
+  isOnline: boolean
+  lastMessage?: string
+  lastMessageTime: string
+  unreadCount: number
 }
 
 interface Message {
   id: number
   text: string
-  isUser: boolean
+  isAdmin: boolean
   timestamp: string
-  senderName: string
-}
-
-interface WebSocketMessage {
-  type: string
-  data?: any
-  ticketId?: number
-  userId?: number
-  userName?: string
-  message?: string
+  customerId: number
 }
 
 // State
-const selectedTicket = ref<Ticket | null>(null)
-const statusFilter = ref('')
-const priorityFilter = ref('')
-const showReplyModal = ref(false)
-const replyMessage = ref('')
-const markAsResolved = ref(false)
+const authStore = useAuthStore()
+const selectedCustomer = ref<ChatSession | null>(null)
 const websocket = ref<WebSocket | null>(null)
 const isConnected = ref(false)
 const messages = ref<Message[]>([])
 const newMessage = ref('')
 const isTyping = ref(false)
-const typingUser = ref('')
+const typingTimeout = ref<NodeJS.Timeout | null>(null)
+const messagesContainer = ref<HTMLElement | null>(null)
 
-// Mock current admin user ID - in real app, get from auth store
-const currentUserId = 1
-
-// Stats
-const stats = ref({
-  openTickets: 0,
-  inProgress: 0,
-  resolvedToday: 0,
-  avgResponseTime: '2.5h',
-  todayTickets: 0,
-  weekTickets: 0,
-  resolutionRate: 94,
-  satisfaction: 4.8
-})
-
-// Agents
-const agents = ref([
-  { id: 1, name: 'Sarah Johnson', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face' },
-  { id: 2, name: 'Mike Chen', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face' },
-  { id: 3, name: 'Emily Davis', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face' }
-])
-
-// Tickets data
-const tickets = ref<Ticket[]>([])
+// Real data from backend
+const chatSessions = ref<ChatSession[]>([])
 
 // Computed
-const filteredTickets = computed(() => {
-  let filtered = tickets.value
-
-  if (statusFilter.value) {
-    filtered = filtered.filter(ticket => ticket.status.toLowerCase() === statusFilter.value)
-  }
-
-  if (priorityFilter.value) {
-    filtered = filtered.filter(ticket => ticket.priority.toLowerCase() === priorityFilter.value)
-  }
-
-  return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-})
+const onlineCustomers = computed(() => chatSessions.value.filter(session => session.isOnline))
+const unreadCount = computed(() => chatSessions.value.reduce((total, session) => total + session.unreadCount, 0))
+const currentUserId = computed(() => authStore.user?.id || 1) // Admin user ID
 
 // WebSocket Methods
 const initWebSocket = () => {
+  if (!currentUserId.value) {
+    console.error('Cannot initialize WebSocket: user not authenticated')
+    return
+  }
+
   try {
-    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId}`)
+    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId.value}`)
     
     websocket.value.onopen = () => {
       console.log('Admin WebSocket connected')
@@ -557,187 +351,172 @@ const initWebSocket = () => {
   }
 }
 
-const handleWebSocketMessage = (message: WebSocketMessage) => {
+const handleWebSocketMessage = (message: any) => {
   switch (message.type) {
     case 'RECEIVE_MESSAGE':
-      if (message.data && selectedTicket.value && message.data.ticketId === selectedTicket.value.id) {
-        const newMsg = {
-          id: message.data.id,
+      if (message.data) {
+        const newMsg: Message = {
+          id: message.data.id || Date.now(),
           text: message.data.message,
-          isUser: message.data.senderType === 'CUSTOMER',
-          timestamp: message.data.timestamp,
-          senderName: message.data.senderName
+          isAdmin: message.data.senderType === 'AGENT',
+          timestamp: message.data.timestamp || new Date().toISOString(),
+          customerId: message.data.senderId
         }
+        
         messages.value.push(newMsg)
+        
+        // Update chat session
+        const session = chatSessions.value.find(s => s.customerId === newMsg.customerId)
+        if (session) {
+          session.lastMessage = newMsg.text
+          session.lastMessageTime = newMsg.timestamp
+          if (!newMsg.isAdmin && selectedCustomer.value?.customerId !== newMsg.customerId) {
+            session.unreadCount++
+          }
+        }
+        
+        scrollToBottom()
       }
       break
       
-    case 'TICKET_CREATED':
-      if (message.data) {
-        tickets.value.unshift(message.data)
-        loadStats()
+    case 'USER_ONLINE':
+      if (message.userId) {
+        const session = chatSessions.value.find(s => s.customerId === message.userId)
+        if (session) {
+          session.isOnline = true
+        }
       }
       break
       
-    case 'TICKET_UPDATED':
-      if (message.data) {
-        const index = tickets.value.findIndex(t => t.id === message.data.id)
-        if (index !== -1) {
-          tickets.value[index] = message.data
+    case 'USER_OFFLINE':
+      if (message.userId) {
+        const session = chatSessions.value.find(s => s.customerId === message.userId)
+        if (session) {
+          session.isOnline = false
         }
-        if (selectedTicket.value && selectedTicket.value.id === message.data.id) {
-          selectedTicket.value = message.data
-        }
-        loadStats()
       }
       break
       
     case 'TYPING_START':
-      if (selectedTicket.value && message.ticketId === selectedTicket.value.id && message.userId !== currentUserId) {
+      if (selectedCustomer.value && message.userId === selectedCustomer.value.customerId) {
         isTyping.value = true
-        typingUser.value = message.userName || ''
       }
       break
       
     case 'TYPING_STOP':
-      if (selectedTicket.value && message.ticketId === selectedTicket.value.id) {
+      if (selectedCustomer.value && message.userId === selectedCustomer.value.customerId) {
         isTyping.value = false
-        typingUser.value = ''
       }
       break
-      
-    case 'SUCCESS':
-      console.log('Success:', message.message)
-      break
-      
-    case 'ERROR':
-      console.error('WebSocket error:', message.message)
-      break
-      
-    case 'NOTIFICATION':
-      console.log('Notification:', message.message)
-      break
   }
 }
 
-// API Methods
-const loadTickets = async () => {
-  try {
-    const response = await fetch('/api/tickets', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
-      }
-    })
-    
-    if (response.ok) {
-      tickets.value = await response.json()
-    }
-  } catch (error) {
-    console.error('Error loading tickets:', error)
-  }
-}
-
-const loadStats = async () => {
-  try {
-    const [openResponse, recentResponse] = await Promise.all([
-      fetch('/api/tickets/stats/open-count', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}` }
-      }),
-      fetch('/api/tickets/stats/recent?days=1', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}` }
-      })
-    ])
-
-    if (openResponse.ok) {
-      const openData = await openResponse.json()
-      stats.value.openTickets = openData.count
-    }
-
-    if (recentResponse.ok) {
-      const recentData = await recentResponse.json()
-      stats.value.todayTickets = recentData.length
-      stats.value.resolvedToday = recentData.filter((t: any) => t.status === 'RESOLVED').length
-    }
-
-    // Calculate other stats from loaded tickets
-    stats.value.inProgress = tickets.value.filter((t: Ticket) => t.status === 'IN_PROGRESS').length
-  } catch (error) {
-    console.error('Error loading stats:', error)
-  }
-}
-
-const loadMessages = async (ticketId: number) => {
-  try {
-    const response = await fetch(`/api/chat/tickets/${ticketId}/messages`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
-      }
-    })
-    
-    if (response.ok) {
-      const chatMessages = await response.json()
-      messages.value = chatMessages.map((msg: any) => ({
-        id: msg.id,
-        text: msg.message,
-        isUser: msg.senderType === 'CUSTOMER',
-        timestamp: msg.timestamp,
-        senderName: msg.senderName
-      }))
-    }
-  } catch (error) {
-    console.error('Error loading messages:', error)
-  }
-}
-
-const joinTicketRoom = (ticketId: number) => {
+// Methods
+const selectCustomer = (session: ChatSession) => {
+  selectedCustomer.value = session
+  session.unreadCount = 0 // Mark as read
+  
+  // Load chat history for this customer
+  loadChatHistory(session.customerId)
+  
+  // Join chat room via WebSocket (we'll need to get the ticket ID for this customer)
   if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+    // For now, we'll use a placeholder - in a real implementation, 
+    // you'd need to get the active ticket ID for this customer
     websocket.value.send(JSON.stringify({
       type: 'JOIN_ROOM',
-      ticketId: ticketId
+      ticketId: session.customerId // Using customerId as placeholder
     }))
   }
 }
 
-const sendMessageViaWebSocket = async () => {
+const loadChatHistory = (customerId: number) => {
+  // Filter messages for selected customer
+  messages.value = messages.value.filter(msg => msg.customerId === customerId)
+  
+  // In a real app, you would load from API
+  // For now, we'll just clear and wait for real-time messages
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
+
+const sendMessage = () => {
   const text = newMessage.value.trim()
-  if (!text || !selectedTicket.value || !websocket.value) return
+  if (!text || !selectedCustomer.value || !websocket.value) return
 
   try {
     // Send via WebSocket
     websocket.value.send(JSON.stringify({
       type: 'SEND_MESSAGE',
-      ticketId: selectedTicket.value.id,
+      customerId: selectedCustomer.value.customerId,
       message: text
     }))
     
+    // Add to local messages immediately
+    const message: Message = {
+      id: Date.now(),
+      text: text,
+      isAdmin: true,
+      timestamp: new Date().toISOString(),
+      customerId: selectedCustomer.value.customerId
+    }
+    
+    messages.value.push(message)
+    
+    // Update chat session
+    selectedCustomer.value.lastMessage = text
+    selectedCustomer.value.lastMessageTime = message.timestamp
+    
     newMessage.value = ''
+    scrollToBottom()
   } catch (error) {
     console.error('Error sending message:', error)
   }
 }
 
-// Methods
-const getPriorityClass = (priority: string) => {
-  const classes = {
-    'HIGH': 'bg-red-100 text-red-800',
-    'MEDIUM': 'bg-yellow-100 text-yellow-800',
-    'LOW': 'bg-green-100 text-green-800'
+const handleTyping = () => {
+  if (!selectedCustomer.value || !websocket.value) return
+  
+  // Send typing start
+  websocket.value.send(JSON.stringify({
+    type: 'TYPING_START',
+    customerId: selectedCustomer.value.customerId
+  }))
+  
+  // Clear existing timeout
+  if (typingTimeout.value) {
+    clearTimeout(typingTimeout.value)
   }
-  return classes[priority as keyof typeof classes] || 'bg-gray-100 text-gray-800'
+  
+  // Set timeout to send typing stop
+  typingTimeout.value = setTimeout(() => {
+    if (websocket.value && selectedCustomer.value) {
+      websocket.value.send(JSON.stringify({
+        type: 'TYPING_STOP',
+        customerId: selectedCustomer.value.customerId
+      }))
+    }
+  }, 1000)
 }
 
-const getStatusClass = (status: string) => {
-  const classes = {
-    'OPEN': 'bg-red-100 text-red-800',
-    'IN_PROGRESS': 'bg-yellow-100 text-yellow-800',
-    'RESOLVED': 'bg-green-100 text-green-800',
-    'CLOSED': 'bg-gray-100 text-gray-800'
-  }
-  return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    }
+  })
 }
 
-const formatDateTime = (dateString: string) => {
+const formatTime = (dateString: string) => {
   const date = new Date(dateString)
+  const now = new Date()
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+  
+  if (diffInMinutes < 1) return 'now'
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+  if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
+  
   return date.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'short',
@@ -746,114 +525,31 @@ const formatDateTime = (dateString: string) => {
   })
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-const selectTicket = async (ticket: Ticket) => {
-  selectedTicket.value = ticket
-  await loadMessages(ticket.id)
-  joinTicketRoom(ticket.id)
-}
-
-const updateTicketStatus = async () => {
-  if (!selectedTicket.value) return
-  
+// API Methods
+const loadTickets = async () => {
   try {
-    const response = await fetch(`/api/tickets/${selectedTicket.value.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
-      },
-      body: JSON.stringify({
-        status: selectedTicket.value.status
-      })
-    })
+    const tickets = await apiService.getAllTickets()
     
-    if (response.ok) {
-      const updatedTicket = await response.json()
-      selectedTicket.value = updatedTicket
-      
-      // Update in tickets list
-      const index = tickets.value.findIndex(t => t.id === updatedTicket.id)
-      if (index !== -1) {
-        tickets.value[index] = updatedTicket
-      }
-    }
+    // Convert tickets to chat sessions
+    chatSessions.value = tickets.map(ticket => ({
+      customerId: ticket.customerId,
+      customerName: ticket.customerName,
+      customerAvatar: undefined, // Will use default avatar
+      isOnline: false, // Will be updated via WebSocket
+      lastMessage: ticket.subject,
+      lastMessageTime: ticket.createdAt,
+      unreadCount: 0 // Will be updated via WebSocket
+    }))
+    
+    console.log('Loaded tickets:', chatSessions.value.length)
   } catch (error) {
-    console.error('Error updating ticket status:', error)
+    console.error('Error loading tickets:', error)
   }
 }
 
-const assignTicket = async () => {
-  if (!selectedTicket.value || !selectedTicket.value.assignedAgentId) return
-  
-  try {
-    const response = await fetch(`/api/tickets/${selectedTicket.value.id}/assign/${selectedTicket.value.assignedAgentId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
-      }
-    })
-    
-    if (response.ok) {
-      const updatedTicket = await response.json()
-      selectedTicket.value = updatedTicket
-      
-      // Update in tickets list
-      const index = tickets.value.findIndex(t => t.id === updatedTicket.id)
-      if (index !== -1) {
-        tickets.value[index] = updatedTicket
-      }
-    }
-  } catch (error) {
-    console.error('Error assigning ticket:', error)
-  }
-}
-
-const sendReply = async () => {
-  if (!replyMessage.value.trim() || !selectedTicket.value) return
-  
-  try {
-    // Send message via REST API
-    const response = await fetch('/api/chat/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-admin-token'}`
-      },
-      body: JSON.stringify({
-        ticketId: selectedTicket.value.id,
-        message: replyMessage.value.trim()
-      })
-    })
-    
-    if (response.ok) {
-      // Mark as resolved if requested
-      if (markAsResolved.value) {
-        selectedTicket.value.status = 'RESOLVED'
-        await updateTicketStatus()
-      }
-      
-      showReplyModal.value = false
-      replyMessage.value = ''
-      markAsResolved.value = false
-    }
-  } catch (error) {
-    console.error('Error sending reply:', error)
-  }
-}
-
-onMounted(async () => {
-  console.log('Admin Customer Service loaded')
-  await loadTickets()
-  await loadStats()
+onMounted(() => {
+  console.log('Admin Customer Service Chat loaded')
+  loadTickets()
   initWebSocket()
 })
 
@@ -861,9 +557,28 @@ onUnmounted(() => {
   if (websocket.value) {
     websocket.value.close()
   }
+  if (typingTimeout.value) {
+    clearTimeout(typingTimeout.value)
+  }
 })
 </script>
 
 <style scoped>
-/* Custom styles */
+/* Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
 </style>

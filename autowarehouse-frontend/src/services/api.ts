@@ -1018,7 +1018,7 @@ class ApiService {
   // Admin Customer Service APIs
   async getAllTickets(status?: string): Promise<SupportTicket[]> {
     const params = status ? `?status=${status}` : ''
-    const response = await api.get<SupportTicket[]>(`/tickets/admin/all${params}`)
+    const response = await api.get<SupportTicket[]>(`/tickets${params}`)
     return response.data
   }
 

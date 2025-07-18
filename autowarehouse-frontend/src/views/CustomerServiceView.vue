@@ -1,213 +1,274 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <UserNavbar />
-
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="mb-8">
-        <div class="flex items-center space-x-3 mb-2">
-          <button @click="goBack" class="text-gray-500 hover:text-gray-700">
-            <i class="fa-solid fa-arrow-left text-lg"></i>
-          </button>
-          <h1 class="text-2xl font-bold text-gray-900">Customer Service</h1>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <router-link to="/" class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-store text-white text-sm"></i>
+              </div>
+              <span class="text-xl font-bold text-gray-900">Autowarehouse</span>
+            </router-link>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <router-link to="/cart" class="text-gray-600 hover:text-gray-900">
+              <i class="fa-solid fa-shopping-cart text-xl"></i>
+            </router-link>
+            <router-link to="/profile" class="text-gray-600 hover:text-gray-900">
+              <i class="fa-solid fa-user text-xl"></i>
+            </router-link>
+          </div>
         </div>
-        <p class="text-gray-600">Hubungi tim customer service untuk bantuan dan dukungan</p>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Customer Support Chat</h1>
+        <p class="text-gray-600">Get instant help from our support team</p>
+        <div class="flex items-center justify-center mt-4 space-x-2">
+          <div :class="isConnected ? 'bg-green-500' : 'bg-red-500'" class="w-3 h-3 rounded-full"></div>
+          <span class="text-sm text-gray-600">
+            {{ isConnected ? 'Connected' : 'Connecting...' }}
+          </span>
+        </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 h-[600px] flex flex-col">
-        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="relative">
-              <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-headset text-white text-sm"></i>
+      <!-- Chat Container -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Chat Header -->
+        <div class="bg-blue-600 text-white p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-headset"></i>
               </div>
-              <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+              <div>
+                <h3 class="font-semibold">Support Team</h3>
+                <p class="text-blue-100 text-sm">
+                  <span v-if="agentTyping" class="flex items-center">
+                    <i class="fa-solid fa-ellipsis animate-pulse mr-1"></i>
+                    Agent is typing...
+                  </span>
+                  <span v-else>We're here to help!</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 class="text-sm font-semibold text-gray-900">Customer Service</h3>
-              <p class="text-xs text-green-600">Online - Biasanya membalas dalam beberapa menit</p>
+            <div class="flex items-center space-x-2">
+              <button class="p-2 text-blue-100 hover:text-white rounded-lg hover:bg-blue-500">
+                <i class="fa-solid fa-phone"></i>
+              </button>
+              <button class="p-2 text-blue-100 hover:text-white rounded-lg hover:bg-blue-500">
+                <i class="fa-solid fa-video"></i>
+              </button>
             </div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-              <i class="fa-solid fa-phone text-sm"></i>
-            </button>
-            <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-              <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
-            </button>
           </div>
         </div>
 
-        <div ref="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-4">
+        <!-- Messages Area -->
+        <div class="h-96 overflow-y-auto p-4 space-y-4" ref="messagesContainer">
+          <!-- Welcome Message -->
+          <div v-if="messages.length === 0" class="text-center py-8">
+            <i class="fa-solid fa-comments text-4xl text-gray-300 mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Start a Conversation</h3>
+            <p class="text-gray-500">Send a message to connect with our support team</p>
+          </div>
+
+          <!-- Messages -->
           <div 
             v-for="message in messages" 
             :key="message.id"
-            :class="['flex items-start space-x-3', message.isUser ? 'justify-end' : '']"
+            :class="message.isUser ? 'justify-end' : 'justify-start'"
+            class="flex"
           >
-            <div v-if="!message.isUser" class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-headset text-white text-xs"></i>
-            </div>
-            <div :class="[
-              'rounded-lg p-3 max-w-xs',
-              message.isUser ? 'bg-blue-600' : 'bg-gray-100'
-            ]">
-              <p :class="['text-sm', message.isUser ? 'text-white' : 'text-gray-800']">
-                {{ message.text }}
-              </p>
-              <span :class="['text-xs mt-1 block', message.isUser ? 'text-blue-200' : 'text-gray-500']">
-                {{ formatTime(message.timestamp) }}
-              </span>
-            </div>
-            <div v-if="message.isUser" class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-user text-white text-xs"></i>
+            <div class="flex items-start space-x-2 max-w-xs lg:max-w-md">
+              <!-- Avatar for agent messages -->
+              <img 
+                v-if="!message.isUser"
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
+                alt="Support Agent"
+                class="w-8 h-8 rounded-full mt-1"
+              >
+              
+              <div 
+                :class="message.isUser ? 'bg-blue-600 text-white ml-auto' : 'bg-gray-200 text-gray-900'"
+                class="px-4 py-2 rounded-lg"
+              >
+                <p class="text-sm">{{ message.text }}</p>
+                <p 
+                  :class="message.isUser ? 'text-blue-100' : 'text-gray-500'"
+                  class="text-xs mt-1"
+                >
+                  {{ formatTime(message.timestamp) }}
+                </p>
+              </div>
+              
+              <!-- Avatar for user messages -->
+              <img 
+                v-if="message.isUser"
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face" 
+                alt="You"
+                class="w-8 h-8 rounded-full mt-1"
+              >
             </div>
           </div>
+        </div>
 
-          <div v-if="isTyping" class="flex items-start space-x-3">
-            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-headset text-white text-xs"></i>
+        <!-- Message Input -->
+        <div class="border-t border-gray-200 p-4">
+          <form @submit.prevent="sendMessage" class="flex items-center space-x-4">
+            <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
+              <i class="fa-solid fa-paperclip"></i>
+            </button>
+            <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
+              <i class="fa-solid fa-smile"></i>
+            </button>
+            <div class="flex-1">
+              <input 
+                v-model="newMessage"
+                @input="handleTyping"
+                type="text" 
+                placeholder="Type your message..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                :disabled="!isConnected"
+              >
             </div>
-            <div class="bg-gray-100 rounded-lg p-3">
-              <div class="flex space-x-1">
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <button 
+              type="submit"
+              :disabled="!newMessage.trim() || !isConnected"
+              :class="newMessage.trim() && isConnected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300'"
+              class="px-6 py-2 text-white rounded-lg transition-colors"
+            >
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button 
+          @click="sendQuickMessage('Hi, I need help with my order')"
+          class="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-shopping-bag text-blue-600"></i>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">Order Help</h4>
+              <p class="text-sm text-gray-500">Get help with your orders</p>
+            </div>
+          </div>
+        </button>
+
+        <button 
+          @click="sendQuickMessage('I have a question about a product')"
+          class="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-box text-green-600"></i>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">Product Info</h4>
+              <p class="text-sm text-gray-500">Ask about products</p>
+            </div>
+          </div>
+        </button>
+
+        <button 
+          @click="sendQuickMessage('I need technical support')"
+          class="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-wrench text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">Technical Support</h4>
+              <p class="text-sm text-gray-500">Get technical help</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Support Info -->
+      <div class="mt-8 bg-blue-50 rounded-lg p-6">
+        <div class="flex items-start space-x-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-info-circle text-blue-600 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-2">Need More Help?</h3>
+            <p class="text-gray-600 mb-4">Our support team is available 24/7 to assist you with any questions or concerns.</p>
+            <div class="flex items-center space-x-6 text-sm text-gray-600">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-clock text-blue-600"></i>
+                <span>24/7 Support</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-bolt text-blue-600"></i>
+                <span>Instant Response</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-shield-alt text-blue-600"></i>
+                <span>Secure Chat</span>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="p-4 border-t border-gray-200">
-          <div class="flex items-center space-x-3">
-            <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full">
-              <i class="fa-solid fa-paperclip"></i>
-            </button>
-            <div class="flex-1 relative">
-              <input 
-                v-model="newMessage"
-                @keypress.enter="sendMessage"
-                @input="handleTyping"
-                type="text" 
-                placeholder="Ketik pesan Anda..." 
-                class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-              >
-              <button class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700">
-                <i class="fa-solid fa-face-smile"></i>
-              </button>
-            </div>
-            <button 
-              @click="sendMessage"
-              class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-            >
-              <i class="fa-solid fa-paper-plane"></i>
-            </button>
-          </div>
-        </div>
       </div>
-
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-question-circle text-blue-600"></i>
-            </div>
-            <div>
-              <h4 class="text-sm font-semibold text-gray-900">FAQ</h4>
-              <p class="text-xs text-gray-600">Pertanyaan yang sering ditanyakan</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-headset text-green-600"></i>
-            </div>
-            <div>
-              <h4 class="text-sm font-semibold text-gray-900">Hubungi Kami</h4>
-              <p class="text-xs text-gray-600">+62 21 1234 5678</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-clock text-yellow-600"></i>
-            </div>
-            <div>
-              <h4 class="text-sm font-semibold text-gray-900">Jam Operasional</h4>
-              <p class="text-xs text-gray-600">24/7 Online</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-    <Footer/>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import UserNavbar from '../components/UserNavbar.vue'
-import Footer from '../components/Footer.vue'
-import { apiService } from '../services/api.ts'
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { apiService, CreateTicketRequest } from '../services/api'
 
-const router = useRouter()
+// Types
+interface Message {
+  id: number
+  text: string
+  isUser: boolean
+  timestamp: string
+}
+
+// State
 const authStore = useAuthStore()
-const chatMessages = ref(null)
-const newMessage = ref('')
-const isTyping = ref(false)
-const typingUser = ref('')
-const currentTicket = ref(null)
-const websocket = ref(null)
+const websocket = ref<WebSocket | null>(null)
 const isConnected = ref(false)
+const messages = ref<Message[]>([])
+const newMessage = ref('')
+const agentTyping = ref(false)
+const typingTimeout = ref<NodeJS.Timeout | null>(null)
+const messagesContainer = ref<HTMLElement | null>(null)
+const currentTicketId = ref<number | null>(null)
 const isInitialized = ref(false)
 
-const messages = ref([])
+// Computed
+const currentUserId = computed(() => authStore.user?.id || 2) // Customer user ID
 
-// Get current user ID from auth store
-const currentUserId = authStore.user?.id
-
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString('id-ID', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  })
-}
-
-const scrollToBottom = async () => {
-  await nextTick()
-  if (chatMessages.value) {
-    chatMessages.value.scrollTop = chatMessages.value.scrollHeight
-  }
-}
-
+// WebSocket Methods
 const initWebSocket = () => {
-  // Check if user is authenticated
-  if (!authStore.isAuthenticated || !currentUserId) {
-    console.error('User not authenticated, redirecting to login')
-    router.push('/login')
+  if (!currentUserId.value) {
+    console.error('Cannot initialize WebSocket: user not authenticated')
     return
   }
 
   try {
-    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId}`)
+    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId.value}`)
     
     websocket.value.onopen = () => {
-      console.log('WebSocket connected for user:', currentUserId)
+      console.log('Customer WebSocket connected')
       isConnected.value = true
-      
-      // Only initialize ticket on first connection, not on reconnections
-      if (!isInitialized.value) {
-        isInitialized.value = true
-        createOrGetTicket()
-      } else if (currentTicket.value) {
-        // If already initialized and we have a ticket, just rejoin the room
-        joinTicketRoom()
-      }
     }
     
     websocket.value.onmessage = (event) => {
@@ -215,23 +276,20 @@ const initWebSocket = () => {
       handleWebSocketMessage(message)
     }
     
-    websocket.value.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason)
+    websocket.value.onclose = () => {
+      console.log('Customer WebSocket disconnected')
       isConnected.value = false
       
-      // Only attempt to reconnect if it's not a normal closure and user is still authenticated
-      if (event.code !== 1000 && authStore.isAuthenticated && currentUserId) {
-        setTimeout(() => {
-          if (!isConnected.value && authStore.isAuthenticated) {
-            console.log('Attempting to reconnect WebSocket...')
-            initWebSocket()
-          }
-        }, 3000)
-      }
+      // Attempt to reconnect after 3 seconds
+      setTimeout(() => {
+        if (!isConnected.value) {
+          initWebSocket()
+        }
+      }, 3000)
     }
     
     websocket.value.onerror = (error) => {
-      console.error('WebSocket error:', error)
+      console.error('Customer WebSocket error:', error)
       isConnected.value = false
     }
   } catch (error) {
@@ -239,33 +297,31 @@ const initWebSocket = () => {
   }
 }
 
-const handleWebSocketMessage = (message) => {
+const handleWebSocketMessage = (message: any) => {
   switch (message.type) {
     case 'RECEIVE_MESSAGE':
-      if (message.data && currentTicket.value && message.data.ticketId === currentTicket.value.id) {
-        const newMsg = {
-          id: message.data.id,
+      if (message.data) {
+        const newMsg: Message = {
+          id: message.data.id || Date.now(),
           text: message.data.message,
           isUser: message.data.senderType === 'CUSTOMER',
-          timestamp: message.data.timestamp,
-          senderName: message.data.senderName
+          timestamp: message.data.timestamp || new Date().toISOString()
         }
+        
         messages.value.push(newMsg)
         scrollToBottom()
       }
       break
       
     case 'TYPING_START':
-      if (currentTicket.value && message.ticketId === currentTicket.value.id && message.userId !== currentUserId) {
-        isTyping.value = true
-        typingUser.value = message.userName
+      if (message.userId !== currentUserId.value) {
+        agentTyping.value = true
       }
       break
       
     case 'TYPING_STOP':
-      if (currentTicket.value && message.ticketId === currentTicket.value.id) {
-        isTyping.value = false
-        typingUser.value = ''
+      if (message.userId !== currentUserId.value) {
+        agentTyping.value = false
       }
       break
       
@@ -283,144 +339,130 @@ const handleWebSocketMessage = (message) => {
   }
 }
 
-const createOrGetTicket = async () => {
+// API Methods
+const createTicketAndInitialize = async (firstMessage: string) => {
   try {
-    // First, try to get existing open ticket for this customer
-    const tickets = await apiService.getMyTickets()
-    const openTicket = tickets.find(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS')
-    
-    if (openTicket) {
-      currentTicket.value = openTicket
-      await loadMessages()
-      joinTicketRoom()
-    } else {
-      // Create new ticket
-      await createNewTicket()
-    }
-  } catch (error) {
-    console.error('Error getting/creating ticket:', error)
-    // Create new ticket as fallback
-    await createNewTicket()
-  }
-}
-
-const createNewTicket = async () => {
-  try {
-    currentTicket.value = await apiService.createTicket({
-      subject: 'Customer Service Chat',
-      description: 'Customer service chat session',
+    // Create a new support ticket
+    const ticketData: CreateTicketRequest = {
+      subject: 'Customer Support Chat',
+      description: firstMessage,
       category: 'GENERAL',
       priority: 'MEDIUM'
-    })
+    }
     
-    joinTicketRoom()
+    const ticket = await apiService.createTicket(ticketData)
+    currentTicketId.value = ticket.id
     
-    // Send welcome message
-    setTimeout(() => {
-      const welcomeMessage = {
-        id: Date.now(),
-        text: 'Halo! Selamat datang di Customer Service Autowarehouse. Ada yang bisa saya bantu hari ini?',
-        isUser: false,
-        timestamp: new Date(),
-        senderName: 'Customer Service'
-      }
-      messages.value.push(welcomeMessage)
-      scrollToBottom()
-    }, 1000)
+    console.log('Created ticket:', ticket.id)
+    
+    // Join the ticket room via WebSocket
+    if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+      websocket.value.send(JSON.stringify({
+        type: 'JOIN_ROOM',
+        ticketId: currentTicketId.value
+      }))
+    }
+    
+    isInitialized.value = true
+    return true
   } catch (error) {
     console.error('Error creating ticket:', error)
+    return false
   }
 }
 
-const loadMessages = async () => {
-  if (!currentTicket.value) return
-  
-  try {
-    const chatMessages = await apiService.getTicketMessages(currentTicket.value.id)
-    messages.value = chatMessages.map(msg => ({
-      id: msg.id,
-      text: msg.message,
-      isUser: msg.senderType === 'CUSTOMER',
-      timestamp: msg.timestamp,
-      senderName: msg.senderName
-    }))
-    scrollToBottom()
-  } catch (error) {
-    console.error('Error loading messages:', error)
-  }
-}
-
-const joinTicketRoom = () => {
-  if (websocket.value && websocket.value.readyState === WebSocket.OPEN && currentTicket.value) {
-    websocket.value.send(JSON.stringify({
-      type: 'JOIN_ROOM',
-      ticketId: currentTicket.value.id
-    }))
-  }
-}
-
+// Methods
 const sendMessage = async () => {
   const text = newMessage.value.trim()
-  if (!text || !currentTicket.value || !websocket.value) {
-    console.warn('Cannot send message: missing requirements', {
-      hasText: !!text,
-      hasTicket: !!currentTicket.value,
-      hasWebSocket: !!websocket.value,
-      wsReadyState: websocket.value?.readyState
-    })
-    return
-  }
-
-  // Check if WebSocket is connected
-  if (websocket.value.readyState !== WebSocket.OPEN) {
-    console.warn('WebSocket is not connected, cannot send message')
-    return
-  }
+  if (!text || !websocket.value || !isConnected.value) return
 
   try {
-    // Send via WebSocket
+    // If not initialized, create ticket first
+    if (!isInitialized.value || !currentTicketId.value) {
+      const success = await createTicketAndInitialize(text)
+      if (!success) {
+        console.error('Failed to initialize chat')
+        return
+      }
+    }
+
+    // Send via WebSocket with ticket ID
     websocket.value.send(JSON.stringify({
       type: 'SEND_MESSAGE',
-      ticketId: currentTicket.value.id,
+      ticketId: currentTicketId.value,
       message: text
     }))
     
+    // Add to local messages immediately
+    const message: Message = {
+      id: Date.now(),
+      text: text,
+      isUser: true,
+      timestamp: new Date().toISOString()
+    }
+    
+    messages.value.push(message)
     newMessage.value = ''
+    scrollToBottom()
   } catch (error) {
     console.error('Error sending message:', error)
   }
 }
 
-const handleTyping = () => {
-  if (!currentTicket.value || !websocket.value) return
+const sendQuickMessage = (text: string) => {
+  newMessage.value = text
+  sendMessage()
+}
 
+const handleTyping = () => {
+  if (!websocket.value || !isConnected.value || !currentTicketId.value) return
+  
   // Send typing start
   websocket.value.send(JSON.stringify({
     type: 'TYPING_START',
-    ticketId: currentTicket.value.id
+    ticketId: currentTicketId.value
   }))
-
+  
   // Clear existing timeout
-  if (window.typingTimeout) {
-    clearTimeout(window.typingTimeout)
+  if (typingTimeout.value) {
+    clearTimeout(typingTimeout.value)
   }
-
+  
   // Set timeout to send typing stop
-  window.typingTimeout = setTimeout(() => {
-    if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
+  typingTimeout.value = setTimeout(() => {
+    if (websocket.value && isConnected.value && currentTicketId.value) {
       websocket.value.send(JSON.stringify({
         type: 'TYPING_STOP',
-        ticketId: currentTicket.value.id
+        ticketId: currentTicketId.value
       }))
     }
   }, 1000)
 }
 
-const goBack = () => {
-  router.go(-1)
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    }
+  })
+}
+
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+  
+  if (diffInMinutes < 1) return 'now'
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+  
+  return date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 onMounted(() => {
+  console.log('Customer Service Chat loaded')
   initWebSocket()
 })
 
@@ -428,23 +470,28 @@ onUnmounted(() => {
   if (websocket.value) {
     websocket.value.close()
   }
-  if (window.typingTimeout) {
-    clearTimeout(window.typingTimeout)
+  if (typingTimeout.value) {
+    clearTimeout(typingTimeout.value)
   }
 })
 </script>
 
 <style scoped>
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-6px);
-  }
+/* Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
 }
 
-.animate-bounce {
-  animation: bounce 1s infinite;
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>

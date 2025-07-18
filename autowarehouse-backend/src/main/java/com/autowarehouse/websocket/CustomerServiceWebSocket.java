@@ -14,6 +14,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 @ServerEndpoint("/ws/customer-service/{userId}")
 @ApplicationScoped
@@ -35,15 +36,14 @@ public class CustomerServiceWebSocket {
         LOG.infof("WebSocket connection opened for user %d", userId);
         
         try {
-            // Validate user exists
-            User user = User.findById(userId);
-            if (user == null) {
-                LOG.errorf("User %d not found, closing connection", userId);
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "User not found"));
+            // Basic validation - just check if userId is valid
+            if (userId == null || userId <= 0) {
+                LOG.errorf("Invalid user ID: %d, closing connection", userId);
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Invalid user ID"));
                 return;
             }
 
-            // Add user session
+            // Add user session (this will handle user validation asynchronously)
             webSocketService.addUserSession(userId, session);
             
             // Send welcome message
@@ -174,20 +174,23 @@ public class CustomerServiceWebSocket {
             return;
         }
 
-        try {
-            // Create send message request
-            SendMessageRequest request = new SendMessageRequest(wsMessage.ticketId, wsMessage.message);
-            
-            // Send message through chat service
-            var messageResponse = chatService.sendMessage(request, userId);
-            
-            // Broadcast to all users in the ticket room
-            webSocketService.broadcastNewMessage(messageResponse);
-            
-        } catch (Exception e) {
-            LOG.errorf("Error sending message for user %d: %s", userId, e.getMessage());
-            webSocketService.sendErrorMessage(userId, "Error sending message: " + e.getMessage());
-        }
+        // Run database operations on a worker thread to avoid blocking IO thread
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Create send message request
+                SendMessageRequest request = new SendMessageRequest(wsMessage.ticketId, wsMessage.message);
+                
+                // Send message through chat service
+                var messageResponse = chatService.sendMessage(request, userId);
+                
+                // Broadcast to all users in the ticket room
+                webSocketService.broadcastNewMessage(messageResponse);
+                
+            } catch (Exception e) {
+                LOG.errorf("Error sending message for user %d: %s", userId, e.getMessage());
+                webSocketService.sendErrorMessage(userId, "Error sending message: " + e.getMessage());
+            }
+        });
     }
 
     private void handleTypingStart(WebSocketMessage wsMessage, Long userId) {
@@ -236,13 +239,16 @@ public class CustomerServiceWebSocket {
             return;
         }
 
-        try {
-            chatService.markMessagesAsRead(wsMessage.ticketId, userId);
-            webSocketService.sendSuccessMessage(userId, "Messages marked as read");
-            
-        } catch (Exception e) {
-            LOG.errorf("Error marking messages as read for user %d: %s", userId, e.getMessage());
-            webSocketService.sendErrorMessage(userId, "Error marking messages as read: " + e.getMessage());
-        }
+        // Run database operations on a worker thread to avoid blocking IO thread
+        CompletableFuture.runAsync(() -> {
+            try {
+                chatService.markMessagesAsRead(wsMessage.ticketId, userId);
+                webSocketService.sendSuccessMessage(userId, "Messages marked as read");
+                
+            } catch (Exception e) {
+                LOG.errorf("Error marking messages as read for user %d: %s", userId, e.getMessage());
+                webSocketService.sendErrorMessage(userId, "Error marking messages as read: " + e.getMessage());
+            }
+        });
     }
 }
