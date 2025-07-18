@@ -151,8 +151,11 @@ import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
+import { apiService } from '../services/api.ts'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const chatMessages = ref(null)
 const newMessage = ref('')
 const isTyping = ref(false)
@@ -160,11 +163,12 @@ const typingUser = ref('')
 const currentTicket = ref(null)
 const websocket = ref(null)
 const isConnected = ref(false)
+const isInitialized = ref(false)
 
 const messages = ref([])
 
-// Mock current user ID - in real app, get from auth store
-const currentUserId = 1
+// Get current user ID from auth store
+const currentUserId = authStore.user?.id
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp)
@@ -182,15 +186,28 @@ const scrollToBottom = async () => {
 }
 
 const initWebSocket = () => {
+  // Check if user is authenticated
+  if (!authStore.isAuthenticated || !currentUserId) {
+    console.error('User not authenticated, redirecting to login')
+    router.push('/login')
+    return
+  }
+
   try {
-    websocket.value = new WebSocket(`ws://localhost:8080/ws/customer-service/${currentUserId}`)
+    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId}`)
     
     websocket.value.onopen = () => {
-      console.log('WebSocket connected')
+      console.log('WebSocket connected for user:', currentUserId)
       isConnected.value = true
       
-      // Create or get existing ticket for this customer
-      createOrGetTicket()
+      // Only initialize ticket on first connection, not on reconnections
+      if (!isInitialized.value) {
+        isInitialized.value = true
+        createOrGetTicket()
+      } else if (currentTicket.value) {
+        // If already initialized and we have a ticket, just rejoin the room
+        joinTicketRoom()
+      }
     }
     
     websocket.value.onmessage = (event) => {
@@ -198,16 +215,19 @@ const initWebSocket = () => {
       handleWebSocketMessage(message)
     }
     
-    websocket.value.onclose = () => {
-      console.log('WebSocket disconnected')
+    websocket.value.onclose = (event) => {
+      console.log('WebSocket disconnected:', event.code, event.reason)
       isConnected.value = false
       
-      // Attempt to reconnect after 3 seconds
-      setTimeout(() => {
-        if (!isConnected.value) {
-          initWebSocket()
-        }
-      }, 3000)
+      // Only attempt to reconnect if it's not a normal closure and user is still authenticated
+      if (event.code !== 1000 && authStore.isAuthenticated && currentUserId) {
+        setTimeout(() => {
+          if (!isConnected.value && authStore.isAuthenticated) {
+            console.log('Attempting to reconnect WebSocket...')
+            initWebSocket()
+          }
+        }, 3000)
+      }
     }
     
     websocket.value.onerror = (error) => {
@@ -266,26 +286,15 @@ const handleWebSocketMessage = (message) => {
 const createOrGetTicket = async () => {
   try {
     // First, try to get existing open ticket for this customer
-    const response = await fetch('/api/tickets/my-tickets', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
-      }
-    })
+    const tickets = await apiService.getMyTickets()
+    const openTicket = tickets.find(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS')
     
-    if (response.ok) {
-      const tickets = await response.json()
-      const openTicket = tickets.find(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS')
-      
-      if (openTicket) {
-        currentTicket.value = openTicket
-        await loadMessages()
-        joinTicketRoom()
-      } else {
-        // Create new ticket
-        await createNewTicket()
-      }
+    if (openTicket) {
+      currentTicket.value = openTicket
+      await loadMessages()
+      joinTicketRoom()
     } else {
-      // Create new ticket if can't get existing ones
+      // Create new ticket
       await createNewTicket()
     }
   } catch (error) {
@@ -297,37 +306,27 @@ const createOrGetTicket = async () => {
 
 const createNewTicket = async () => {
   try {
-    const response = await fetch('/api/tickets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
-      },
-      body: JSON.stringify({
-        subject: 'Customer Service Chat',
-        description: 'Customer service chat session',
-        category: 'GENERAL',
-        priority: 'MEDIUM'
-      })
+    currentTicket.value = await apiService.createTicket({
+      subject: 'Customer Service Chat',
+      description: 'Customer service chat session',
+      category: 'GENERAL',
+      priority: 'MEDIUM'
     })
     
-    if (response.ok) {
-      currentTicket.value = await response.json()
-      joinTicketRoom()
-      
-      // Send welcome message
-      setTimeout(() => {
-        const welcomeMessage = {
-          id: Date.now(),
-          text: 'Halo! Selamat datang di Customer Service Autowarehouse. Ada yang bisa saya bantu hari ini?',
-          isUser: false,
-          timestamp: new Date(),
-          senderName: 'Customer Service'
-        }
-        messages.value.push(welcomeMessage)
-        scrollToBottom()
-      }, 1000)
-    }
+    joinTicketRoom()
+    
+    // Send welcome message
+    setTimeout(() => {
+      const welcomeMessage = {
+        id: Date.now(),
+        text: 'Halo! Selamat datang di Customer Service Autowarehouse. Ada yang bisa saya bantu hari ini?',
+        isUser: false,
+        timestamp: new Date(),
+        senderName: 'Customer Service'
+      }
+      messages.value.push(welcomeMessage)
+      scrollToBottom()
+    }, 1000)
   } catch (error) {
     console.error('Error creating ticket:', error)
   }
@@ -337,23 +336,15 @@ const loadMessages = async () => {
   if (!currentTicket.value) return
   
   try {
-    const response = await fetch(`/api/chat/tickets/${currentTicket.value.id}/messages`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || 'mock-token'}`
-      }
-    })
-    
-    if (response.ok) {
-      const chatMessages = await response.json()
-      messages.value = chatMessages.map(msg => ({
-        id: msg.id,
-        text: msg.message,
-        isUser: msg.senderType === 'CUSTOMER',
-        timestamp: msg.timestamp,
-        senderName: msg.senderName
-      }))
-      scrollToBottom()
-    }
+    const chatMessages = await apiService.getTicketMessages(currentTicket.value.id)
+    messages.value = chatMessages.map(msg => ({
+      id: msg.id,
+      text: msg.message,
+      isUser: msg.senderType === 'CUSTOMER',
+      timestamp: msg.timestamp,
+      senderName: msg.senderName
+    }))
+    scrollToBottom()
   } catch (error) {
     console.error('Error loading messages:', error)
   }
@@ -370,7 +361,21 @@ const joinTicketRoom = () => {
 
 const sendMessage = async () => {
   const text = newMessage.value.trim()
-  if (!text || !currentTicket.value || !websocket.value) return
+  if (!text || !currentTicket.value || !websocket.value) {
+    console.warn('Cannot send message: missing requirements', {
+      hasText: !!text,
+      hasTicket: !!currentTicket.value,
+      hasWebSocket: !!websocket.value,
+      wsReadyState: websocket.value?.readyState
+    })
+    return
+  }
+
+  // Check if WebSocket is connected
+  if (websocket.value.readyState !== WebSocket.OPEN) {
+    console.warn('WebSocket is not connected, cannot send message')
+    return
+  }
 
   try {
     // Send via WebSocket

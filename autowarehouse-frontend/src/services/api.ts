@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
@@ -364,6 +364,49 @@ export interface AddToWishlistRequest {
 export interface RemoveFromWishlistRequest {
   userId: number
   productId: number
+}
+
+// Customer Service Types
+export interface SupportTicket {
+  id: number
+  subject: string
+  description: string
+  category: 'GENERAL' | 'TECHNICAL' | 'BILLING' | 'PRODUCT' | 'ORDER'
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+  customerId: number
+  customerName: string
+  assignedAgentId?: number
+  assignedAgentName?: string
+  createdAt: string
+  updatedAt?: string
+  resolvedAt?: string
+}
+
+export interface CreateTicketRequest {
+  subject: string
+  description: string
+  category: 'GENERAL' | 'TECHNICAL' | 'BILLING' | 'PRODUCT' | 'ORDER'
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+}
+
+export interface UpdateTicketRequest {
+  subject?: string
+  description?: string
+  category?: 'GENERAL' | 'TECHNICAL' | 'BILLING' | 'PRODUCT' | 'ORDER'
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+  assignedAgentId?: number
+}
+
+export interface ChatMessage {
+  id: number
+  ticketId: number
+  message: string
+  senderType: 'CUSTOMER' | 'AGENT'
+  senderId: number
+  senderName: string
+  timestamp: string
 }
 
 // Statistics Types
@@ -943,6 +986,49 @@ class ApiService {
 
   async deleteCategory(categoryId: number): Promise<{ message: string }> {
     const response = await api.delete<{ message: string }>(`/categories/${categoryId}`)
+    return response.data
+  }
+
+  // Customer Service APIs
+  async getMyTickets(): Promise<SupportTicket[]> {
+    const response = await api.get<SupportTicket[]>('/tickets/my-tickets')
+    return response.data
+  }
+
+  async createTicket(ticketData: CreateTicketRequest): Promise<SupportTicket> {
+    const response = await api.post<SupportTicket>('/tickets', ticketData)
+    return response.data
+  }
+
+  async getTicket(ticketId: number): Promise<SupportTicket> {
+    const response = await api.get<SupportTicket>(`/tickets/${ticketId}`)
+    return response.data
+  }
+
+  async updateTicket(ticketId: number, ticketData: UpdateTicketRequest): Promise<SupportTicket> {
+    const response = await api.put<SupportTicket>(`/tickets/${ticketId}`, ticketData)
+    return response.data
+  }
+
+  async getTicketMessages(ticketId: number): Promise<ChatMessage[]> {
+    const response = await api.get<ChatMessage[]>(`/chat/tickets/${ticketId}/messages`)
+    return response.data
+  }
+
+  // Admin Customer Service APIs
+  async getAllTickets(status?: string): Promise<SupportTicket[]> {
+    const params = status ? `?status=${status}` : ''
+    const response = await api.get<SupportTicket[]>(`/tickets/admin/all${params}`)
+    return response.data
+  }
+
+  async assignTicket(ticketId: number, agentId: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/tickets/admin/${ticketId}/assign`, { agentId })
+    return response.data
+  }
+
+  async updateTicketStatus(ticketId: number, status: string): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/tickets/admin/${ticketId}/status`, { status })
     return response.data
   }
 }

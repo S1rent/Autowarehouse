@@ -74,23 +74,23 @@ public class ChatSession extends PanacheEntityBase {
 
     // Static finder methods
     public static ChatSession findByTicketId(Long ticketId) {
-        return find("ticketId", ticketId).firstResult();
+        return find("ticketId = ?1", ticketId).firstResult();
     }
 
     public static List<ChatSession> findByCustomerId(Long customerId) {
-        return find("customerId", customerId).list();
+        return find("customerId = ?1", customerId).list();
     }
 
     public static List<ChatSession> findByAgentId(Long agentId) {
-        return find("agentId", agentId).list();
+        return find("agentId = ?1", agentId).list();
     }
 
     public static List<ChatSession> findByStatus(ChatSessionStatus status) {
-        return find("status", status).list();
+        return find("status = ?1", status).list();
     }
 
     public static List<ChatSession> findActiveSessions() {
-        return find("status", ChatSessionStatus.ACTIVE).list();
+        return find("status = ?1", ChatSessionStatus.ACTIVE).list();
     }
 
     public static List<ChatSession> findActiveSessionsByAgent(Long agentId) {
@@ -107,7 +107,7 @@ public class ChatSession extends PanacheEntityBase {
     }
 
     public static long countActiveSessions() {
-        return count("status", ChatSessionStatus.ACTIVE);
+        return count("status = ?1", ChatSessionStatus.ACTIVE);
     }
 
     public static long countActiveSessionsByAgent(Long agentId) {

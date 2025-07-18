@@ -524,7 +524,7 @@ const filteredTickets = computed(() => {
 // WebSocket Methods
 const initWebSocket = () => {
   try {
-    websocket.value = new WebSocket(`ws://localhost:8080/ws/customer-service/${currentUserId}`)
+    websocket.value = new WebSocket(`ws://localhost:8081/ws/customer-service/${currentUserId}`)
     
     websocket.value.onopen = () => {
       console.log('Admin WebSocket connected')

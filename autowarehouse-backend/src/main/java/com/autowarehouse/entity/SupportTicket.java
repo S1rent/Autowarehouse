@@ -89,23 +89,23 @@ public class SupportTicket extends PanacheEntityBase {
 
     // Static finder methods
     public static List<SupportTicket> findByCustomerId(Long customerId) {
-        return find("customerId", customerId).list();
+        return find("customerId = ?1", customerId).list();
     }
 
     public static List<SupportTicket> findByAgentId(Long agentId) {
-        return find("assignedAgentId", agentId).list();
+        return find("assignedAgentId = ?1", agentId).list();
     }
 
     public static List<SupportTicket> findByStatus(TicketStatus status) {
-        return find("status", status).list();
+        return find("status = ?1", status).list();
     }
 
     public static List<SupportTicket> findByPriority(TicketPriority priority) {
-        return find("priority", priority).list();
+        return find("priority = ?1", priority).list();
     }
 
     public static List<SupportTicket> findByCategory(TicketCategory category) {
-        return find("category", category).list();
+        return find("category = ?1", category).list();
     }
 
     public static List<SupportTicket> findUnassigned() {
@@ -122,11 +122,11 @@ public class SupportTicket extends PanacheEntityBase {
     }
 
     public static long countByStatus(TicketStatus status) {
-        return count("status", status);
+        return count("status = ?1", status);
     }
 
     public static long countByAgentId(Long agentId) {
-        return count("assignedAgentId", agentId);
+        return count("assignedAgentId = ?1", agentId);
     }
 
     public static long countOpenTickets() {

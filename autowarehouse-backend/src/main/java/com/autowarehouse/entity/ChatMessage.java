@@ -79,19 +79,19 @@ public class ChatMessage extends PanacheEntityBase {
 
     // Static finder methods
     public static List<ChatMessage> findByTicketId(Long ticketId) {
-        return find("ticketId ORDER BY timestamp ASC", ticketId).list();
+        return find("ticketId = ?1 ORDER BY timestamp ASC", ticketId).list();
     }
 
     public static List<ChatMessage> findByTicketIdPaginated(Long ticketId, int page, int size) {
-        return find("ticketId ORDER BY timestamp DESC", ticketId).page(page, size).list();
+        return find("ticketId = ?1 ORDER BY timestamp DESC", ticketId).page(page, size).list();
     }
 
     public static List<ChatMessage> findBySenderId(Long senderId) {
-        return find("senderId ORDER BY timestamp DESC", senderId).list();
+        return find("senderId = ?1 ORDER BY timestamp DESC", senderId).list();
     }
 
     public static List<ChatMessage> findBySenderType(SenderType senderType) {
-        return find("senderType ORDER BY timestamp DESC", senderType).list();
+        return find("senderType = ?1 ORDER BY timestamp DESC", senderType).list();
     }
 
     public static List<ChatMessage> findUnreadByTicketId(Long ticketId) {
@@ -108,11 +108,11 @@ public class ChatMessage extends PanacheEntityBase {
     }
 
     public static ChatMessage findLatestByTicketId(Long ticketId) {
-        return find("ticketId ORDER BY timestamp DESC", ticketId).firstResult();
+        return find("ticketId = ?1 ORDER BY timestamp DESC", ticketId).firstResult();
     }
 
     public static long countByTicketId(Long ticketId) {
-        return count("ticketId", ticketId);
+        return count("ticketId = ?1", ticketId);
     }
 
     public static long countUnreadByTicketId(Long ticketId) {
@@ -124,7 +124,7 @@ public class ChatMessage extends PanacheEntityBase {
     }
 
     public static long countMessagesBySender(Long senderId) {
-        return count("senderId", senderId);
+        return count("senderId = ?1", senderId);
     }
 
     // Helper methods
