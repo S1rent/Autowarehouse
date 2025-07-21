@@ -188,34 +188,61 @@ router.beforeEach((to, from, next) => {
   // Routes that should redirect authenticated users away
   const authRoutes = ['Login', 'Register', 'ForgotPassword']
   
-  // If user is authenticated and trying to access auth routes, redirect to home
+  // If user is authenticated and trying to access auth routes, redirect appropriately
   if (isAuthenticated && authRoutes.includes(to.name as string)) {
-    next({ name: 'Home' })
+    if (isAdmin) {
+      next({ name: 'AdminDashboard' })
+    } else {
+      next({ name: 'Home' })
+    }
     return
   }
   
-  // Routes that require authentication
-  const protectedRoutes = [
+  // If admin user is accessing the home page, redirect to admin dashboard
+  if (isAdmin && to.name === 'Home') {
+    next({ name: 'AdminDashboard' })
+    return
+  }
+  
+  // Routes that require authentication (user-only routes)
+  const userOnlyRoutes = [
     'Cart', 'SavedItems', 'Checkout', 'Wishlist', 'MyBids', 'BidHistory', 
     'OrderHistory', 'OrderDetail', 'UserProfile', 'UserNotifications',
     'AuctionWon'
   ]
   
-  // If user is not authenticated and trying to access protected routes, redirect to login
-  if (!isAuthenticated && protectedRoutes.includes(to.name as string)) {
-    next({ name: 'Login' })
-    return
-  }
-  
-  // Admin routes protection
+  // Admin routes - ONLY routes admin can access
   const adminRoutes = [
     'AdminDashboard', 'AdminProducts', 'AdminAuctions', 'AdminCategories',
     'AdminCustomerService', 'AdminNotifications', 'AdminOrders', 'AdminOrderDetail'
   ]
   
+  // Routes that both admin and regular users can access (very limited)
+  const publicRoutes = [
+    'Home', 'UIIndex'
+  ]
+  
+  // If user is not authenticated and trying to access user-only routes, redirect to login
+  if (!isAuthenticated && userOnlyRoutes.includes(to.name as string)) {
+    next({ name: 'Login' })
+    return
+  }
+  
   // If user is not admin and trying to access admin routes, redirect to home
   if (adminRoutes.includes(to.name as string) && !isAdmin) {
     next({ name: 'Home' })
+    return
+  }
+  
+  // If user is admin, only allow access to admin routes and very limited public routes
+  if (isAdmin && !adminRoutes.includes(to.name as string) && !publicRoutes.includes(to.name as string)) {
+    next({ name: 'AdminDashboard' })
+    return
+  }
+  
+  // If user is regular user and trying to access user-only routes, they need to be authenticated
+  if (!isAuthenticated && userOnlyRoutes.includes(to.name as string)) {
+    next({ name: 'Login' })
     return
   }
   
