@@ -51,12 +51,11 @@ public class Review extends PanacheEntityBase {
     @Column(name = "is_approved")
     public Boolean isApproved = true;
 
-    // Temporarily commented out until migration V15 runs
-    // @Column(name = "image_urls", columnDefinition = "TEXT")
-    // public String imageUrls; // JSON array of image URLs from Firebase Storage
+    @Column(name = "image_urls", columnDefinition = "TEXT")
+    public String imageUrls; // JSON array of image URLs from Firebase Storage
 
-    // @Column(name = "video_urls", columnDefinition = "TEXT")
-    // public String videoUrls; // JSON array of video URLs from Firebase Storage
+    @Column(name = "video_urls", columnDefinition = "TEXT")
+    public String videoUrls; // JSON array of video URLs from Firebase Storage
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

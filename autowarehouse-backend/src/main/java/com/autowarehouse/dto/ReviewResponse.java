@@ -51,9 +51,9 @@ public class ReviewResponse {
         this.createdAt = review.createdAt;
         this.updatedAt = review.updatedAt;
 
-        // Temporarily set empty lists until migration V15 runs
-        this.imageUrls = new ArrayList<>();
-        this.videoUrls = new ArrayList<>();
+        // Parse JSON strings to lists
+        this.imageUrls = parseJsonToList(review.imageUrls);
+        this.videoUrls = parseJsonToList(review.videoUrls);
     }
 
     private List<String> parseJsonToList(String jsonString) {

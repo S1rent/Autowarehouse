@@ -95,12 +95,11 @@ public class ReviewService {
         review.isVerifiedPurchase = true; // Since it's from a delivered order
         review.isApproved = true; // Auto-approve for now
 
-        // Temporarily skip image/video URL handling until migration V15 runs
-        // TODO: Uncomment after migration V15 is applied
-        /*
+        // Handle image URLs
         if (request.imageUrls != null && !request.imageUrls.isEmpty()) {
             try {
                 review.imageUrls = objectMapper.writeValueAsString(request.imageUrls);
+                LOG.infof("Saved %d image URLs for review", request.imageUrls.size());
             } catch (JsonProcessingException e) {
                 LOG.warnf("Failed to serialize image URLs: %s", e.getMessage());
                 review.imageUrls = "[]";
@@ -109,9 +108,11 @@ public class ReviewService {
             review.imageUrls = "[]";
         }
 
+        // Handle video URLs
         if (request.videoUrls != null && !request.videoUrls.isEmpty()) {
             try {
                 review.videoUrls = objectMapper.writeValueAsString(request.videoUrls);
+                LOG.infof("Saved %d video URLs for review", request.videoUrls.size());
             } catch (JsonProcessingException e) {
                 LOG.warnf("Failed to serialize video URLs: %s", e.getMessage());
                 review.videoUrls = "[]";
@@ -119,7 +120,6 @@ public class ReviewService {
         } else {
             review.videoUrls = "[]";
         }
-        */
 
         review.persist();
         LOG.infof("Created review %d for product %d", review.id, request.productId);

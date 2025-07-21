@@ -166,11 +166,8 @@
                   </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <div v-if="file.uploading" class="flex items-center space-x-2">
-                    <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <span class="text-xs text-gray-500">{{ file.progress }}%</span>
-                  </div>
-                  <i v-else-if="file.uploaded" class="fa-solid fa-check-circle text-green-500"></i>
+                  <!-- <div v-if="file.uploading" class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <i v-else-if="file.uploaded" class="fa-solid fa-check-circle text-green-500 text-lg"></i> -->
                   <button
                     type="button"
                     @click="removeFile(index)"
@@ -325,7 +322,6 @@ const processFiles = (files) => {
       preview: null,
       uploading: false,
       uploaded: false,
-      progress: 0,
       url: null
     }
     
@@ -348,26 +344,27 @@ const processFiles = (files) => {
 const uploadToFirebase = async (fileObj) => {
   try {
     fileObj.uploading = true
+    fileObj.uploaded = false
     
-    // Fast mock upload for testing - no actual upload needed for now
-    // Simulate quick progress
-    const progressSteps = [20, 40, 60, 80, 100]
+    // Import Firebase upload function
+    const { uploadReviewMedia } = await import('@/services/firebase')
     
-    for (let i = 0; i < progressSteps.length; i++) {
-      fileObj.progress = progressSteps[i]
-      await new Promise(resolve => setTimeout(resolve, 100)) // Much faster
-    }
+    // Upload to Firebase Storage
+    const result = await uploadReviewMedia(fileObj.file)
     
+    // Set success state
     fileObj.uploading = false
     fileObj.uploaded = true
+    fileObj.url = result.url
+    fileObj.path = result.path
     
-    // Mock Firebase URL (replace with actual Firebase Storage URL when needed)
-    fileObj.url = `https://firebasestorage.googleapis.com/v0/b/autowarehouse/o/reviews%2F${Date.now()}_${encodeURIComponent(fileObj.name)}?alt=media`
+    console.log(`Upload completed for ${fileObj.name}:`, result.url)
     
   } catch (error) {
     console.error('Upload error:', error)
     fileObj.uploading = false
-    showError('Upload Error', `Gagal upload ${fileObj.name}`)
+    fileObj.uploaded = false
+    showError('Upload Error', `Gagal upload ${fileObj.name}: ${error.message}`)
   }
 }
 

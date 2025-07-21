@@ -4,13 +4,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'fire
 // Firebase configuration
 // TODO: Replace with your actual Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyBq6004V8DsHp69iG5ljSJbQ0-hc9jhCh4",
-  authDomain: "autowarehouse-c3947.firebaseapp.com",
-  projectId: "autowarehouse-c3947",
-  storageBucket: "autowarehouse-c3947.firebasestorage.app",
-  messagingSenderId: "191069017894",
-  appId: "1:191069017894:web:783ac1cffdab46995ed3e7",
-  measurementId: "G-ZWZH3PT1QG"
+  apiKey: "AIzaSyAJRr2uqhmNIY-YfmjOTN3h7ziWtTvL7bA",
+  authDomain: "autowarehouse-bac37.firebaseapp.com",
+  projectId: "autowarehouse-bac37",
+  storageBucket: "autowarehouse-bac37.firebasestorage.app",
+  messagingSenderId: "716091869764",
+  appId: "1:716091869764:web:2fa14ebf2ec5ac25dd0a11",
+  measurementId: "G-BSJ3M97LRE"
 };
 
 // Initialize Firebase
@@ -216,6 +216,69 @@ export const validateProductImageFile = (file: File): string | null => {
   }
 
   return null
+}
+
+// Upload review media (images and videos) to Firebase Storage
+export const uploadReviewMedia = async (
+  file: File,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<UploadResult> => {
+  try {
+    // Validate file
+    const isImage = file.type.startsWith('image/')
+    const isVideo = file.type.startsWith('video/')
+    
+    if (!isImage && !isVideo) {
+      throw new Error('File harus berupa gambar atau video')
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit for review media
+      throw new Error('Ukuran file terlalu besar. Maksimal 10MB.')
+    }
+
+    // Generate unique filename for reviews folder
+    const fileName = generateFileName(file.name, 'reviews')
+    const storageRef = ref(storage, fileName)
+
+    // Upload file
+    const snapshot = await uploadBytes(storageRef, file)
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(snapshot.ref)
+
+    return {
+      url: downloadURL,
+      path: fileName,
+      name: file.name
+    }
+  } catch (error) {
+    console.error('Error uploading review media:', error)
+    throw error
+  }
+}
+
+// Delete review media from Firebase Storage
+export const deleteReviewMedia = async (mediaPath: string): Promise<void> => {
+  try {
+    if (!mediaPath) return
+    
+    // Extract path from URL if it's a full URL
+    let path = mediaPath
+    if (mediaPath.includes('firebase')) {
+      // Extract path from Firebase URL
+      const url = new URL(mediaPath)
+      const pathMatch = url.pathname.match(/\/o\/(.+)\?/)
+      if (pathMatch) {
+        path = decodeURIComponent(pathMatch[1])
+      }
+    }
+
+    const storageRef = ref(storage, path)
+    await deleteObject(storageRef)
+  } catch (error) {
+    console.error('Error deleting review media:', error)
+    // Don't throw error for delete operations to avoid blocking other operations
+  }
 }
 
 export { storage }
