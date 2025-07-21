@@ -37,14 +37,14 @@
                 </p>
               </div>
             </div>
-            <div class="flex items-center space-x-2">
+            <!-- <div class="flex items-center space-x-2">
               <button class="p-2 text-blue-100 hover:text-white rounded-lg hover:bg-blue-500">
                 <i class="fa-solid fa-phone"></i>
               </button>
               <button class="p-2 text-blue-100 hover:text-white rounded-lg hover:bg-blue-500">
                 <i class="fa-solid fa-video"></i>
               </button>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -100,12 +100,12 @@
         <!-- Message Input -->
         <div class="border-t border-gray-200 p-4">
           <form @submit.prevent="sendMessage" class="flex items-center space-x-4">
-            <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
+            <!-- <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
               <i class="fa-solid fa-paperclip"></i>
             </button>
             <button type="button" class="p-2 text-gray-400 hover:text-gray-600">
               <i class="fa-solid fa-smile"></i>
-            </button>
+            </button> -->
             <div class="flex-1">
               <input 
                 v-model="newMessage"

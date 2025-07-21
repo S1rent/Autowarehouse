@@ -177,7 +177,7 @@
               <i class="fa-solid fa-user-plus text-white text-2xl"></i>
             </div>
             <h3 class="text-xl font-semibold text-dark mb-2">1. Daftar</h3>
-            <p class="text-gray-600">Buat akun dan verifikasi identitas Anda untuk mulai berbelanja</p>
+            <p class="text-gray-600">Buat akun Anda untuk mulai berbelanja</p>
           </div>
           <div class="text-center">
             <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
