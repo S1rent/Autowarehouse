@@ -437,6 +437,35 @@ export interface OrderStats {
   totalRevenue: number
 }
 
+// Review Types
+export interface CreateReviewRequest {
+  productId: number
+  orderId: number
+  rating: number
+  title: string
+  comment: string
+  imageUrls?: string[]
+  videoUrls?: string[]
+}
+
+export interface ReviewResponse {
+  id: number
+  productId: number
+  productName: string
+  userId: number
+  userName: string
+  rating: number
+  title: string
+  comment: string
+  isVerifiedPurchase: boolean
+  helpfulCount: number
+  isApproved: boolean
+  imageUrls: string[]
+  videoUrls: string[]
+  createdAt: string
+  updatedAt: string
+}
+
 // API Service Class
 class ApiService {
   // Authentication APIs
@@ -1029,6 +1058,79 @@ class ApiService {
 
   async updateTicketStatus(ticketId: number, status: string): Promise<{ message: string }> {
     const response = await api.put<{ message: string }>(`/tickets/admin/${ticketId}/status`, { status })
+    return response.data
+  }
+
+  // Review APIs
+  async createReview(reviewData: CreateReviewRequest): Promise<ReviewResponse> {
+    const response = await api.post<ReviewResponse>('/reviews', reviewData)
+    return response.data
+  }
+
+  async getProductReviews(productId: number, limit?: number): Promise<ReviewResponse[]> {
+    const params = limit ? `?limit=${limit}` : ''
+    const response = await api.get<ReviewResponse[]>(`/reviews/product/${productId}${params}`)
+    return response.data
+  }
+
+  async getMyReviews(): Promise<ReviewResponse[]> {
+    const response = await api.get<ReviewResponse[]>('/reviews/user/my-reviews')
+    return response.data
+  }
+
+  async getOrderReviews(orderId: number): Promise<ReviewResponse[]> {
+    const response = await api.get<ReviewResponse[]>(`/reviews/order/${orderId}`)
+    return response.data
+  }
+
+  async getUserProductReview(productId: number): Promise<ReviewResponse | null> {
+    try {
+      const response = await api.get<ReviewResponse>(`/reviews/user/product/${productId}`)
+      return response.data
+    } catch (error: any) {
+      // Return null if no review found (404)
+      if (error.response?.status === 404) {
+        return null
+      }
+      throw error
+    }
+  }
+
+  async getReview(reviewId: number): Promise<ReviewResponse> {
+    const response = await api.get<ReviewResponse>(`/reviews/${reviewId}`)
+    return response.data
+  }
+
+  async deleteReview(reviewId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/reviews/${reviewId}`)
+    return response.data
+  }
+
+  async markReviewHelpful(reviewId: number): Promise<ReviewResponse> {
+    const response = await api.post<ReviewResponse>(`/reviews/${reviewId}/helpful`)
+    return response.data
+  }
+
+  async getProductReviewStats(productId: number): Promise<{
+    productId: number
+    averageRating: number
+    reviewCount: number
+  }> {
+    const response = await api.get(`/reviews/product/${productId}/stats`)
+    return response.data
+  }
+
+  async canUserReviewProduct(productId: number): Promise<{
+    productId: number
+    userId: number
+    canReview: boolean
+  }> {
+    const response = await api.get(`/reviews/product/${productId}/can-review`)
+    return response.data
+  }
+
+  async getRecentReviews(limit: number = 10): Promise<ReviewResponse[]> {
+    const response = await api.get<ReviewResponse[]>(`/reviews/recent?limit=${limit}`)
     return response.data
   }
 }

@@ -3,11 +3,13 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\AuctionResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\SavedItemResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\NotificationService.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\ReviewService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\WebSocketService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\NotificationType.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\Product.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\UpdateTicketRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\ChatSessionStatus.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\CreateReviewRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\MessageResponse.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\OrderService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\WebSocketMessage.java
@@ -47,6 +49,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\SavedItemService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\OrderResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\security\SecurityConfig.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\ReviewResponse.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\NotificationPriority.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\ProductResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\CartResource.java
@@ -61,6 +64,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\SendMessageRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\TicketStatus.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\TicketCategory.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\ReviewResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\AuthResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\PasswordResetRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\controller\SupportTicketController.java

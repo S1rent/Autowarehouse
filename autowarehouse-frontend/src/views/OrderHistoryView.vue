@@ -187,18 +187,41 @@
                   <span class="text-sm font-medium text-gray-700">Produk dalam pesanan:</span>
                   <span class="text-sm text-gray-500">{{ order.items.length }} item</span>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-3">
                   <div 
                     v-for="(item, index) in order.items.slice(0, 2)" 
                     :key="item.id"
-                    class="flex items-center space-x-3"
+                    class="space-y-2"
                   >
-                    <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                      <i class="fa-solid fa-box text-gray-400 text-xs"></i>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                        <i class="fa-solid fa-box text-gray-400 text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
+                        <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × Rp {{ item.productPrice.toLocaleString('id-ID') }}</p>
+                      </div>
                     </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
-                      <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × Rp {{ item.productPrice.toLocaleString('id-ID') }}</p>
+                    
+                    <!-- Show existing review if available -->
+                    <div v-if="productReviews[item.productId]" class="ml-11 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                      <div class="flex items-start space-x-2">
+                        <div class="flex-shrink-0">
+                          <i class="fa-solid fa-star text-yellow-500"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center space-x-2 mb-1">
+                            <div class="flex items-center">
+                              <span v-for="star in 5" :key="star" class="text-yellow-400">
+                                <i :class="star <= productReviews[item.productId].rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
+                              </span>
+                            </div>
+                            <span class="text-xs text-gray-500">{{ formatDate(productReviews[item.productId].createdAt) }}</span>
+                          </div>
+                          <p class="text-sm font-medium text-gray-900 mb-1">{{ productReviews[item.productId].title }}</p>
+                          <p class="text-xs text-gray-600 line-clamp-2">{{ productReviews[item.productId].comment }}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div v-if="order.items.length > 2" class="text-xs text-gray-500 text-center pt-1">
@@ -219,7 +242,7 @@
                 
                 <button 
                   v-if="order.status === 'DELIVERED'"
-                  @click="writeReview(order.id)"
+                  @click="writeReview(order)"
                   class="flex-1 sm:flex-none border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >
                   <i class="fa-solid fa-star mr-2"></i>
@@ -330,6 +353,15 @@
         </div>
       </div>
     </footer>
+
+    <!-- Review Modal -->
+    <ReviewModal
+      :is-visible="showReviewModal"
+      :order-id="selectedOrderForReview?.id"
+      :order-items="selectedOrderForReview?.items || []"
+      @close="closeReviewModal"
+      @success="onReviewSuccess"
+    />
   </div>
 </template>
 
@@ -339,7 +371,9 @@ import { useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import { useAuthStore } from '@/stores/auth'
 import { useNotifications } from '@/composables/useNotifications'
+import { apiService } from '@/services/api'
 import UserNavbar from '../components/UserNavbar.vue'
+import ReviewModal from '../components/ReviewModal.vue'
 
 const router = useRouter()
 const orderStore = useOrderStore()
@@ -350,6 +384,14 @@ const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 5
+
+// Review modal data
+const showReviewModal = ref(false)
+const selectedOrderForReview = ref(null)
+
+// Reviews data
+const orderReviews = ref({}) // Store reviews by order ID
+const productReviews = ref({}) // Store reviews by product ID
 
 // Computed properties
 const stats = computed(() => {
@@ -441,10 +483,35 @@ const viewOrderDetail = (orderId) => {
   router.push(`/order/${orderId}`)
 }
 
-const writeReview = (orderId) => {
-  // Navigate to review page or show review modal
-  console.log('Write review for order:', orderId)
-  // TODO: Implement review functionality
+const writeReview = async (order) => {
+  try {
+    // Fetch complete order details if items are not available
+    if (!order.items || order.items.length === 0) {
+      await orderStore.fetchOrder(order.id)
+      const orderDetail = orderStore.currentOrder
+      if (orderDetail && orderDetail.items) {
+        order.items = orderDetail.items
+      }
+    }
+    
+    selectedOrderForReview.value = order
+    showReviewModal.value = true
+  } catch (error) {
+    console.error('Failed to load order details for review:', error)
+    const { error: showError } = useNotifications()
+    showError('Error', 'Gagal memuat detail pesanan untuk review')
+  }
+}
+
+const closeReviewModal = () => {
+  showReviewModal.value = false
+  selectedOrderForReview.value = null
+}
+
+const onReviewSuccess = () => {
+  const { success } = useNotifications()
+  success('Review Berhasil', 'Terima kasih atas review Anda!')
+  // Optionally refresh orders or update UI
 }
 
 const cancelOrder = async (orderId) => {
@@ -591,6 +658,37 @@ const downloadInvoice = async (orderId) => {
   }
 }
 
+const loadProductReviews = async (orders) => {
+  try {
+    // Get all unique product IDs from all orders
+    const productIds = new Set()
+    orders.forEach(order => {
+      if (order.items) {
+        order.items.forEach(item => {
+          productIds.add(item.productId)
+        })
+      }
+    })
+
+    // Load reviews for each product
+    for (const productId of productIds) {
+      try {
+        const review = await apiService.getUserProductReview(productId)
+        if (review) {
+          productReviews.value[productId] = review
+        }
+      } catch (error) {
+        // Ignore 404 errors (no review found)
+        if (error.response?.status !== 404) {
+          console.error(`Failed to load review for product ${productId}:`, error)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load product reviews:', error)
+  }
+}
+
 const loadOrders = async () => {
   if (!authStore.user?.id) {
     router.push('/login')
@@ -599,6 +697,23 @@ const loadOrders = async () => {
   
   try {
     await orderStore.fetchUserOrders()
+    
+    // Load order details for orders that don't have items
+    const ordersToLoad = orderStore.userOrders.filter(order => !order.items || order.items.length === 0)
+    for (const order of ordersToLoad) {
+      try {
+        await orderStore.fetchOrder(order.id)
+        const orderDetail = orderStore.currentOrder
+        if (orderDetail && orderDetail.items) {
+          order.items = orderDetail.items
+        }
+      } catch (error) {
+        console.error(`Failed to load details for order ${order.id}:`, error)
+      }
+    }
+    
+    // Load reviews for all products in orders
+    await loadProductReviews(orderStore.userOrders)
   } catch (error) {
     console.error('Failed to load orders:', error)
   }

@@ -81,10 +81,10 @@
                 <i 
                   v-for="i in 5" 
                   :key="i"
-                  :class="i <= transformedProduct.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                  :class="i <= Math.round(reviewStats.averageRating) ? 'fa-solid fa-star' : 'fa-regular fa-star'"
                 ></i>
               </div>
-              <span class="text-gray-600">({{ transformedProduct.rating }}) {{ transformedProduct.reviews.toLocaleString() }} reviews</span>
+              <span class="text-gray-600">({{ reviewStats.averageRating.toFixed(1) }}) {{ reviewStats.reviewCount.toLocaleString() }} reviews</span>
             </div>
 
             <!-- Price -->
@@ -219,7 +219,7 @@
                 ? 'border-blue-600 text-blue-600' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             >
-              Reviews ({{ transformedProduct.reviews }})
+              Reviews ({{ reviewStats.reviewCount }})
             </button>
           </nav>
         </div>
@@ -242,10 +242,165 @@
 
           <!-- Reviews Tab -->
           <div v-if="activeTab === 'reviews'" class="space-y-6">
-            <div class="text-center text-gray-500 py-8">
-              <i class="fa-solid fa-comment-slash text-4xl mb-4"></i>
-              <p>Reviews feature coming soon!</p>
-              <p class="text-sm mt-2">We're working on implementing the review system.</p>
+            <!-- Reviews Loading -->
+            <div v-if="reviewsLoading" class="text-center py-8">
+              <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600 mb-4"></i>
+              <p class="text-gray-600">Loading reviews...</p>
+            </div>
+
+            <!-- Reviews Content -->
+            <div v-else>
+              <!-- Reviews Summary -->
+              <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-gray-900">Customer Reviews</h3>
+                  <div class="flex items-center space-x-2">
+                    <div class="flex text-yellow-400">
+                      <i 
+                        v-for="i in 5" 
+                        :key="i"
+                        :class="i <= Math.round(reviewStats.averageRating) ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                      ></i>
+                    </div>
+                    <span class="text-gray-600 font-medium">{{ reviewStats.averageRating.toFixed(1) }}</span>
+                    <span class="text-gray-500">({{ reviewStats.reviewCount }} reviews)</span>
+                  </div>
+                </div>
+
+                <!-- Rating Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div v-for="rating in [5, 4, 3, 2, 1]" :key="rating" class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600 w-8">{{ rating }}★</span>
+                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        class="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                        :style="{ width: getRatingPercentage(rating) + '%' }"
+                      ></div>
+                    </div>
+                    <span class="text-sm text-gray-500 w-8">{{ getRatingCount(rating) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews List -->
+              <div v-if="paginatedReviews.length > 0" class="space-y-6">
+                <div 
+                  v-for="review in paginatedReviews" 
+                  :key="review.id"
+                  class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
+                  <!-- Review Header -->
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-medium text-sm">
+                          {{ getInitials(review.userName) }}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 class="font-medium text-gray-900">{{ review.userName }}</h4>
+                        <div class="flex items-center space-x-2">
+                          <div class="flex text-yellow-400">
+                            <i 
+                              v-for="i in 5" 
+                              :key="i"
+                              :class="i <= review.rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+                              class="text-sm"
+                            ></i>
+                          </div>
+                          <span v-if="review.isVerifiedPurchase" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                            Verified Purchase
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ formatDate(review.createdAt) }}</span>
+                  </div>
+
+                  <!-- Review Content -->
+                  <div class="mb-4">
+                    <h5 v-if="review.title" class="font-medium text-gray-900 mb-2">{{ review.title }}</h5>
+                    <p class="text-gray-700 leading-relaxed">{{ review.comment }}</p>
+                  </div>
+
+                  <!-- Review Images -->
+                  <div v-if="review.imageUrls && review.imageUrls.length > 0" class="mb-4">
+                    <div class="flex space-x-2 overflow-x-auto">
+                      <img 
+                        v-for="(imageUrl, index) in review.imageUrls" 
+                        :key="index"
+                        :src="imageUrl" 
+                        :alt="`Review image ${index + 1}`"
+                        class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80"
+                        @click="openImageModal(imageUrl)"
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Review Actions -->
+                  <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <button 
+                      @click="markHelpful(review.id)"
+                      class="flex items-center space-x-1 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                      <i class="fa-solid fa-thumbs-up"></i>
+                      <span>Helpful ({{ review.helpfulCount }})</span>
+                    </button>
+                    <div class="text-xs text-gray-400">
+                      Review #{{ review.id }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pagination -->
+                <div v-if="totalPages > 1" class="flex items-center justify-center space-x-2 mt-8">
+                  <button 
+                    @click="goToPage(currentPage - 1)"
+                    :disabled="currentPage === 1"
+                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <i class="fa-solid fa-chevron-left"></i>
+                    Previous
+                  </button>
+
+                  <div class="flex space-x-1">
+                    <button
+                      v-for="page in visiblePages"
+                      :key="page"
+                      @click="goToPage(page)"
+                      :class="[
+                        'px-3 py-2 text-sm font-medium rounded-md',
+                        page === currentPage
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                      ]"
+                    >
+                      {{ page }}
+                    </button>
+                  </div>
+
+                  <button 
+                    @click="goToPage(currentPage + 1)"
+                    :disabled="currentPage === totalPages"
+                    class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <i class="fa-solid fa-chevron-right"></i>
+                  </button>
+                </div>
+
+                <!-- Pagination Info -->
+                <div v-if="totalPages > 1" class="text-center text-sm text-gray-500 mt-4">
+                  Showing {{ startIndex + 1 }}-{{ Math.min(endIndex, allReviews.length) }} of {{ allReviews.length }} reviews
+                </div>
+              </div>
+
+              <!-- No Reviews -->
+              <div v-else class="text-center text-gray-500 py-12">
+                <i class="fa-solid fa-comment-dots text-4xl mb-4"></i>
+                <p class="text-lg font-medium mb-2">No reviews yet</p>
+                <p class="text-sm">Be the first to review this product!</p>
+              </div>
             </div>
           </div>
         </div>
@@ -309,7 +464,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useNotifications } from '@/composables/useNotifications'
 import UserNavbar from '../components/UserNavbar.vue'
-import { apiService, type Product } from '@/services/api'
+import { apiService, type Product, type ReviewResponse } from '@/services/api'
 import Footer from '../components/Footer.vue'
 
 const route = useRoute()
@@ -327,6 +482,19 @@ const selectedVariants = reactive({})
 const product = ref<Product | null>(null)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+
+// Reviews state
+const reviews = ref<ReviewResponse[]>([])
+const allReviews = ref<ReviewResponse[]>([])
+const reviewsLoading = ref(false)
+const reviewStats = ref({
+  averageRating: 0,
+  reviewCount: 0
+})
+
+// Pagination state
+const currentPage = ref(1)
+const reviewsPerPage = 10
 
 // Get product ID from route
 const productId = computed(() => {
@@ -363,6 +531,8 @@ const loadProduct = async () => {
 onMounted(async () => {
   await loadProduct()
   await wishlistStore.loadWishlist()
+  // Load reviews immediately when page loads
+  await loadReviews()
 })
 
 // Computed properties
@@ -533,9 +703,128 @@ const isInWishlistComputed = computed(() => {
   return transformedProduct.value ? wishlistStore.isInWishlist(transformedProduct.value.id) : false
 })
 
+// Reviews methods
+const loadReviews = async () => {
+  if (!productId.value) return
+  
+  try {
+    reviewsLoading.value = true
+    
+    // Load reviews and stats in parallel
+    const [reviewsData, statsData] = await Promise.all([
+      apiService.getProductReviews(productId.value),
+      apiService.getProductReviewStats(productId.value)
+    ])
+    
+    allReviews.value = reviewsData
+    reviews.value = reviewsData
+    reviewStats.value = statsData
+    
+  } catch (err) {
+    console.error('Error loading reviews:', err)
+    // Don't show error for reviews, just keep empty state
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+// Pagination computed properties
+const totalPages = computed(() => {
+  return Math.ceil(allReviews.value.length / reviewsPerPage)
+})
+
+const startIndex = computed(() => {
+  return (currentPage.value - 1) * reviewsPerPage
+})
+
+const endIndex = computed(() => {
+  return startIndex.value + reviewsPerPage
+})
+
+const paginatedReviews = computed(() => {
+  return allReviews.value.slice(startIndex.value, endIndex.value)
+})
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+  
+  // Show max 5 pages
+  let start = Math.max(1, current - 2)
+  let end = Math.min(total, start + 4)
+  
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4)
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+  
+  return pages
+})
+
+// Pagination methods
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+// Helper methods for reviews
+const getInitials = (name: string) => {
+  if (!name) return '?'
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const getRatingPercentage = (rating: number) => {
+  if (reviews.value.length === 0) return 0
+  const count = reviews.value.filter(r => r.rating === rating).length
+  return (count / reviews.value.length) * 100
+}
+
+const getRatingCount = (rating: number) => {
+  return reviews.value.filter(r => r.rating === rating).length
+}
+
+const markHelpful = async (reviewId: number) => {
+  try {
+    await apiService.markReviewHelpful(reviewId)
+    // Reload reviews to get updated helpful count
+    await loadReviews()
+    success('Thank you!', 'Your feedback has been recorded.')
+  } catch (error) {
+    console.error('Error marking review as helpful:', error)
+    showError('Error', 'Failed to mark review as helpful.')
+  }
+}
+
+const openImageModal = (imageUrl: string) => {
+  // Simple implementation - open image in new tab
+  window.open(imageUrl, '_blank')
+}
+
 // Watch for product changes to set initial image
 watch(productImages, () => {
   setInitialImage()
+}, { immediate: true })
+
+// Watch for product changes to reload reviews when product ID changes
+watch(productId, (newProductId) => {
+  if (newProductId) {
+    loadReviews()
+  }
 }, { immediate: true })
 </script>
 

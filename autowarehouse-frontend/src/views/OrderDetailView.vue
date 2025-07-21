@@ -104,34 +104,81 @@
               <div class="px-6 py-4 border-b border-gray-100">
                 <h2 class="text-lg font-semibold text-gray-900">Produk yang Dibeli</h2>
               </div>
-              <div class="p-6 space-y-4">
+              <div class="p-6 space-y-6">
                 <div v-if="order.items && order.items.length > 0">
                   <div 
                     v-for="item in order.items" 
                     :key="item.id"
-                    class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    @click="navigateToProduct(item.productId)"
+                    class="space-y-4"
                   >
-                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                      <img 
-                        v-if="item.productImages && item.productImages.length > 0" 
-                        :src="item.productImages[0]" 
-                        :alt="item.productName"
-                        class="w-full h-full object-cover rounded-lg"
-                        @error="handleImageError"
-                      />
-                      <i v-else class="fa-solid fa-box text-gray-400"></i>
-                    </div>
-                    <div class="flex-1">
-                      <h3 class="font-medium text-gray-900 hover:text-blue-600">{{ item.productName }}</h3>
-                      <p class="text-sm text-gray-600">SKU: {{ item.productSku }}</p>
-                      <div class="flex items-center justify-between mt-2">
-                        <span class="text-sm text-gray-600">Qty: {{ item.quantity }}</span>
-                        <span class="font-semibold text-gray-900">Rp {{ item.subtotal.toLocaleString() }}</span>
+                    <div class="flex items-center space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                         @click="navigateToProduct(item.productId)">
+                      <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img 
+                          v-if="item.productImages && item.productImages.length > 0" 
+                          :src="item.productImages[0]" 
+                          :alt="item.productName"
+                          class="w-full h-full object-cover rounded-lg"
+                          @error="handleImageError"
+                        />
+                        <i v-else class="fa-solid fa-box text-gray-400"></i>
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-medium text-gray-900 hover:text-blue-600">{{ item.productName }}</h3>
+                        <p class="text-sm text-gray-600">SKU: {{ item.productSku }}</p>
+                        <div class="flex items-center justify-between mt-2">
+                          <span class="text-sm text-gray-600">Qty: {{ item.quantity }}</span>
+                          <span class="font-semibold text-gray-900">Rp {{ item.subtotal.toLocaleString() }}</span>
+                        </div>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <i class="fa-solid fa-chevron-right text-gray-400"></i>
                       </div>
                     </div>
-                    <div class="flex-shrink-0">
-                      <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                    
+                    <!-- Show existing review if available -->
+                    <div v-if="productReviews[item.productId]" class="ml-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                      <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0">
+                          <i class="fa-solid fa-star text-yellow-500 text-lg"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center space-x-2 mb-2">
+                            <div class="flex items-center">
+                              <span v-for="star in 5" :key="star" class="text-yellow-400">
+                                <i :class="star <= productReviews[item.productId].rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
+                              </span>
+                            </div>
+                            <span class="text-sm text-gray-500">{{ formatDate(productReviews[item.productId].createdAt) }}</span>
+                          </div>
+                          <h4 class="text-base font-medium text-gray-900 mb-2">{{ productReviews[item.productId].title }}</h4>
+                          <p class="text-sm text-gray-700 mb-3">{{ productReviews[item.productId].comment }}</p>
+                          
+                          <!-- Review images if available -->
+                          <div v-if="productReviews[item.productId].imageUrls && productReviews[item.productId].imageUrls.length > 0" 
+                               class="flex space-x-2 mb-2">
+                            <img 
+                              v-for="(imageUrl, index) in productReviews[item.productId].imageUrls.slice(0, 3)" 
+                              :key="index"
+                              :src="imageUrl" 
+                              :alt="`Review image ${index + 1}`"
+                              class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                            />
+                            <div v-if="productReviews[item.productId].imageUrls.length > 3" 
+                                 class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                              <span class="text-xs text-gray-500">+{{ productReviews[item.productId].imageUrls.length - 3 }}</span>
+                            </div>
+                          </div>
+                          
+                          <div class="flex items-center space-x-4 text-xs text-gray-500">
+                            <span v-if="productReviews[item.productId].isVerifiedPurchase" class="flex items-center">
+                              <i class="fa-solid fa-check-circle text-green-500 mr-1"></i>
+                              Verified Purchase
+                            </span>
+                            <span>{{ productReviews[item.productId].helpfulCount }} orang merasa terbantu</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -269,8 +316,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import { useAuthStore } from '@/stores/auth'
+import { apiService } from '@/services/api'
 import UserNavbar from '@/components/UserNavbar.vue'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
+import ReviewModal from '@/components/ReviewModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -280,6 +329,10 @@ const authStore = useAuthStore()
 // Reactive data
 const isLoading = ref(false)
 const error = ref(null)
+
+// Review modal data
+const showReviewModal = ref(false)
+const productReviews = ref({}) // Store reviews by product ID
 
 // Computed properties
 const order = computed(() => orderStore.currentOrder)
@@ -395,6 +448,33 @@ const getStatusText = (status) => {
   return texts[status] || status
 }
 
+const loadProductReviews = async (orderItems) => {
+  try {
+    // Get all unique product IDs from order items
+    const productIds = new Set()
+    orderItems.forEach(item => {
+      productIds.add(item.productId)
+    })
+
+    // Load reviews for each product
+    for (const productId of productIds) {
+      try {
+        const review = await apiService.getUserProductReview(productId)
+        if (review) {
+          productReviews.value[productId] = review
+        }
+      } catch (error) {
+        // Ignore 404 errors (no review found)
+        if (error.response?.status !== 404) {
+          console.error(`Failed to load review for product ${productId}:`, error)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load product reviews:', error)
+  }
+}
+
 const loadOrderDetail = async () => {
   const orderId = parseInt(route.params.id)
   if (!orderId) {
@@ -406,6 +486,11 @@ const loadOrderDetail = async () => {
     isLoading.value = true
     error.value = null
     await orderStore.fetchOrder(orderId)
+    
+    // Load reviews for all products in the order
+    if (order.value && order.value.items) {
+      await loadProductReviews(order.value.items)
+    }
   } catch (err) {
     error.value = err.response?.data?.message || 'Gagal memuat detail pesanan'
     console.error('Error loading order detail:', err)

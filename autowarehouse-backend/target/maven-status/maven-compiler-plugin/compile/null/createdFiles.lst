@@ -23,13 +23,17 @@ com\autowarehouse\entity\Order.class
 com\autowarehouse\service\EmailService.class
 com\autowarehouse\resource\AuctionResource$WatchRequest.class
 com\autowarehouse\service\UserService.class
+com\autowarehouse\dto\ReviewResponse.class
+com\autowarehouse\dto\CreateReviewRequest.class
 com\autowarehouse\dto\AuthResponse.class
 com\autowarehouse\resource\CartResource$CartSummaryResponse.class
+com\autowarehouse\resource\ReviewResource$ErrorResponse.class
 com\autowarehouse\service\AuctionService.class
 com\autowarehouse\resource\AuctionResource$ErrorResponse.class
 com\autowarehouse\entity\TicketCategory.class
 com\autowarehouse\resource\OrderResource$OrderResponse.class
 com\autowarehouse\service\CartService$CartSummary.class
+com\autowarehouse\dto\ReviewResponse$1.class
 com\autowarehouse\resource\OrderResource$ProcessRefundRequest.class
 com\autowarehouse\entity\AuctionWatcher.class
 com\autowarehouse\resource\CartResource$UpdateQuantityRequest.class
@@ -51,6 +55,7 @@ com\autowarehouse\resource\OrderResource$OrderSearchRequest.class
 com\autowarehouse\resource\UserResource$EmailVerificationRequest.class
 com\autowarehouse\entity\Order$OrderStatus.class
 com\autowarehouse\resource\AuctionResource$SuccessResponse.class
+com\autowarehouse\resource\ReviewResource.class
 com\autowarehouse\resource\AuctionResource$AuctionStatsResponse.class
 com\autowarehouse\resource\ProductResource$SuccessResponse.class
 com\autowarehouse\resource\WishlistResource$CountResponse.class
@@ -114,6 +119,8 @@ com\autowarehouse\entity\Order$PaymentStatus.class
 com\autowarehouse\dto\SendMessageRequest.class
 com\autowarehouse\entity\TicketStatus.class
 com\autowarehouse\resource\CartResource$SelectAllRequest.class
+com\autowarehouse\resource\ReviewResource$ReviewStatsResponse.class
+com\autowarehouse\resource\ReviewResource$CanReviewResponse.class
 com\autowarehouse\websocket\CustomerServiceWebSocket.class
 com\autowarehouse\resource\ProductResource$UpdateStockRequest.class
 com\autowarehouse\resource\CategoryResource.class
@@ -129,6 +136,7 @@ com\autowarehouse\resource\AuctionResource$CreateAuctionRequest.class
 com\autowarehouse\resource\WishlistResource$ProductResponse.class
 com\autowarehouse\entity\TicketPriority.class
 com\autowarehouse\resource\AuctionResource$AuctionDetailResponse.class
+com\autowarehouse\service\ReviewService.class
 com\autowarehouse\dto\ChangePasswordRequest.class
 com\autowarehouse\dto\UpdateTicketRequest.class
 com\autowarehouse\entity\NotificationType.class
