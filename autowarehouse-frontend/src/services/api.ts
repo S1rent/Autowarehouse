@@ -1133,6 +1133,101 @@ class ApiService {
     const response = await api.get<ReviewResponse[]>(`/reviews/recent?limit=${limit}`)
     return response.data
   }
+
+  // Admin Dashboard APIs
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    const response = await api.get<DashboardStatsResponse>('/admin/dashboard/stats')
+    return response.data
+  }
+
+  async getPendingOrders(): Promise<PendingOrdersResponse> {
+    const response = await api.get<PendingOrdersResponse>('/admin/dashboard/pending-orders')
+    return response.data
+  }
+
+  async getTopProducts(limit: number = 5): Promise<TopProductResponse> {
+    const response = await api.get<TopProductResponse>(`/admin/dashboard/top-products?limit=${limit}`)
+    return response.data
+  }
+
+  async getRecentSales(limit: number = 5): Promise<RecentSalesResponse> {
+    const response = await api.get<RecentSalesResponse>(`/admin/dashboard/recent-sales?limit=${limit}`)
+    return response.data
+  }
+
+  async getRecentTransactions(limit: number = 5): Promise<RecentTransactionsResponse> {
+    const response = await api.get<RecentTransactionsResponse>(`/admin/dashboard/recent-transactions?limit=${limit}`)
+    return response.data
+  }
+}
+
+// Dashboard Types
+export interface DashboardStatsResponse {
+  totalSalesThisMonth: {
+    amount: number
+    percentage: number
+    trend: string
+  }
+  totalOrdersThisMonth: {
+    count: number
+    percentage: number
+    trend: string
+  }
+  productsSold: {
+    count: number
+    percentage: number
+    trend: string
+  }
+  lowStockAlert: {
+    count: number
+    status: string
+  }
+}
+
+export interface TopProductResponse {
+  topProducts: Array<{
+    rank: number
+    productId: number
+    name: string
+    category: string
+    soldCount: number
+    totalRevenue: number
+    imageUrl?: string
+  }>
+}
+
+export interface RecentSalesResponse {
+  recentSales: Array<{
+    productName: string
+    price: number
+    soldAt: string
+    timeAgo: string
+    orderId: string
+  }>
+}
+
+export interface RecentTransactionsResponse {
+  recentTransactions: Array<{
+    transactionId: string
+    orderId: string
+    customerName: string
+    itemCount: number
+    totalAmount: number
+    status: string
+    statusLabel: string
+    createdAt: string
+  }>
+}
+
+export interface PendingOrdersResponse {
+  pendingOrdersCount: number
+  orders: Array<{
+    id: string
+    customerName: string
+    totalAmount: number
+    status: string
+    createdAt: string
+  }>
 }
 
 // Export singleton instance
