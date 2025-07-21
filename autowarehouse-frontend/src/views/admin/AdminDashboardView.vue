@@ -85,7 +85,7 @@
             <div class="flex-1">
               <p class="text-xs text-gray-500 mb-1">Stok Hampir Habis</p>
               <p class="text-2xl font-bold text-gray-900">
-                {{ formatNumber(dashboardStats?.lowStockAlert?.count || 12) }}
+                {{ formatNumber(dashboardStats?.lowStockAlert?.count || 0) }}
               </p>
               <div class="flex items-center mt-2">
                 <svg class="w-3 h-3 text-red-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
