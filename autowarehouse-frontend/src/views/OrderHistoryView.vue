@@ -182,53 +182,7 @@
               </div>
 
               <!-- Order Items Preview (if available) -->
-              <div v-if="order.items && order.items.length > 0" class="mb-4 p-4 bg-gray-50 rounded-lg">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium text-gray-700">Produk dalam pesanan:</span>
-                  <span class="text-sm text-gray-500">{{ order.items.length }} item</span>
-                </div>
-                <div class="space-y-3">
-                  <div 
-                    v-for="(item, index) in order.items.slice(0, 2)" 
-                    :key="item.id"
-                    class="space-y-2"
-                  >
-                    <div class="flex items-center space-x-3">
-                      <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                        <i class="fa-solid fa-box text-gray-400 text-xs"></i>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ item.productName }}</p>
-                        <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × Rp {{ item.productPrice.toLocaleString('id-ID') }}</p>
-                      </div>
-                    </div>
-                    
-                    <!-- Show existing review if available -->
-                    <div v-if="productReviews[item.productId]" class="ml-11 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                      <div class="flex items-start space-x-2">
-                        <div class="flex-shrink-0">
-                          <i class="fa-solid fa-star text-yellow-500"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="flex items-center space-x-2 mb-1">
-                            <div class="flex items-center">
-                              <span v-for="star in 5" :key="star" class="text-yellow-400">
-                                <i :class="star <= productReviews[item.productId].rating ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
-                              </span>
-                            </div>
-                            <span class="text-xs text-gray-500">{{ formatDate(productReviews[item.productId].createdAt) }}</span>
-                          </div>
-                          <p class="text-sm font-medium text-gray-900 mb-1">{{ productReviews[item.productId].title }}</p>
-                          <p class="text-xs text-gray-600 line-clamp-2">{{ productReviews[item.productId].comment }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div v-if="order.items.length > 2" class="text-xs text-gray-500 text-center pt-1">
-                    +{{ order.items.length - 2 }} produk lainnya
-                  </div>
-                </div>
-              </div>
+              
 
               <!-- Action Buttons -->
               <div class="flex flex-col sm:flex-row gap-3">
@@ -240,14 +194,14 @@
                   Lihat Detail
                 </button>
                 
-                <button 
+                <!-- <button 
                   v-if="order.status === 'DELIVERED'"
                   @click="writeReview(order)"
                   class="flex-1 sm:flex-none border border-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >
                   <i class="fa-solid fa-star mr-2"></i>
                   Tulis Review
-                </button>
+                </button> -->
                 
                 <!-- <button 
                   v-if="['PENDING', 'CONFIRMED'].includes(order.status)"

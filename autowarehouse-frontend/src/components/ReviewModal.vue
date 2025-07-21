@@ -34,7 +34,7 @@
               </div>
               <div class="flex-1">
                 <h4 class="font-medium text-gray-900">{{ item.productName }}</h4>
-                <p class="text-sm text-gray-600">{{ item.productBrand }}</p>
+                <!-- <p class="text-sm text-gray-600">{{ item.productBrand }}</p> -->
                 <p class="text-sm text-gray-500">Qty: {{ item.quantity }}</p>
               </div>
               <button
@@ -212,6 +212,13 @@
         <div v-else-if="orderItems && orderItems.length > 0" class="text-center py-8">
           <i class="fa-solid fa-hand-pointer text-4xl text-gray-300 mb-4"></i>
           <p class="text-gray-600">Pilih produk yang ingin direview</p>
+        </div>
+
+        <!-- No Products to Review -->
+        <div v-else class="text-center py-12">
+          <i class="fa-solid fa-check-circle text-4xl text-green-500 mb-4"></i>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Semua Produk Sudah Direview</h3>
+          <p class="text-gray-600">Anda telah memberikan review untuk semua produk dalam pesanan ini.</p>
         </div>
       </div>
     </div>

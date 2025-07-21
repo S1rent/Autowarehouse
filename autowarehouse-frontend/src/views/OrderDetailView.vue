@@ -202,6 +202,7 @@
                 />
               </div>
             </section>
+
           </div>
 
           <!-- Right Column -->
@@ -272,7 +273,7 @@
           <section class="bg-white rounded-xl shadow-sm">
             <div class="p-6 space-y-3">
               <button 
-                v-if="order.status === 'completed'"
+                v-if="order.status === 'DELIVERED' && !allItemsReviewed"
                 @click="writeReview"
                 class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
@@ -308,6 +309,15 @@
         </div>
       </div>
     </footer>
+
+    <!-- Review Modal -->
+    <ReviewModal
+      :is-visible="showReviewModal"
+      :order-id="order?.id"
+      :order-items="unreviewedItems"
+      @close="showReviewModal = false"
+      @success="handleReviewSuccess"
+    />
   </div>
 </template>
 
@@ -336,6 +346,28 @@ const productReviews = ref({}) // Store reviews by product ID
 
 // Computed properties
 const order = computed(() => orderStore.currentOrder)
+
+const hasUserReviews = computed(() => {
+  return Object.keys(productReviews.value).length > 0
+})
+
+// Get items that haven't been reviewed yet
+const unreviewedItems = computed(() => {
+  if (!order.value || !order.value.items) return []
+  
+  return order.value.items.filter(item => {
+    return !productReviews.value[item.productId]
+  })
+})
+
+// Check if all items have been reviewed
+const allItemsReviewed = computed(() => {
+  if (!order.value || !order.value.items) return false
+  
+  return order.value.items.every(item => {
+    return productReviews.value[item.productId]
+  })
+})
 
 const shippingStatus = computed(() => {
   if (!order.value) return []
@@ -456,20 +488,21 @@ const loadProductReviews = async (orderItems) => {
       productIds.add(item.productId)
     })
 
-    // Load reviews for each product
-    for (const productId of productIds) {
-      try {
-        const review = await apiService.getUserProductReview(productId)
-        if (review) {
-          productReviews.value[productId] = review
-        }
-      } catch (error) {
-        // Ignore 404 errors (no review found)
-        if (error.response?.status !== 404) {
-          console.error(`Failed to load review for product ${productId}:`, error)
-        }
+    console.log('Loading reviews for product IDs:', Array.from(productIds))
+
+    // Get all user reviews
+    const userReviews = await apiService.getMyReviews()
+    console.log('All user reviews:', userReviews)
+
+    // Filter reviews for products in this order
+    userReviews.forEach(review => {
+      if (productIds.has(review.productId)) {
+        productReviews.value[review.productId] = review
+        console.log(`Found review for product ${review.productId}:`, review)
       }
-    }
+    })
+    
+    console.log('Final productReviews:', productReviews.value)
   } catch (error) {
     console.error('Failed to load product reviews:', error)
   }
@@ -500,8 +533,14 @@ const loadOrderDetail = async () => {
 }
 
 const writeReview = () => {
-  // Navigate to review page or show review modal
-  console.log('Write review for order:', order.value.orderNumber)
+  showReviewModal.value = true
+}
+
+const handleReviewSuccess = async () => {
+  // Reload reviews after successful submission
+  if (order.value && order.value.items) {
+    await loadProductReviews(order.value.items)
+  }
 }
 
 const navigateToProduct = (productId) => {
@@ -639,6 +678,12 @@ const downloadInvoice = async () => {
 const contactCustomerService = () => {
   // Navigate to customer service or open chat
   router.push('/customer-service')
+}
+
+
+const openImageModal = (imageUrl) => {
+  // TODO: Implement image modal functionality
+  window.open(imageUrl, '_blank')
 }
 
 onMounted(() => {

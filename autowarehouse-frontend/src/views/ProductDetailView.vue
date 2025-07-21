@@ -159,7 +159,7 @@
           </div>
 
           <!-- Product Features -->
-          <div class="border-t pt-6">
+          <!-- <div class="border-t pt-6">
             <h3 class="font-semibold text-gray-900 mb-4">Key Features</h3>
             <ul class="space-y-2">
               <li v-for="feature in transformedProduct.features" :key="feature" class="flex items-center">
@@ -167,7 +167,7 @@
                 <span class="text-gray-700">{{ feature }}</span>
               </li>
             </ul>
-          </div>
+          </div> -->
 
           <!-- Shipping Info -->
           <div class="border-t pt-6">
