@@ -8,9 +8,9 @@
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-3xl font-bold text-gray-900">Notifications</h1>
-            <p class="text-gray-600 mt-1">Kelola notifikasi sistem dan komunikasi</p>
+            <p class="text-gray-600 mt-1">Kelola notifikasi</p>
           </div>
-          <div class="flex space-x-3">
+          <!-- <div class="flex space-x-3">
             <button 
               @click="markAllAsRead"
               class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
@@ -19,12 +19,12 @@
               <span>Mark All Read</span>
             </button>
             
-          </div>
+          </div> -->
         </div>
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <!-- <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex items-center">
             <div class="p-3 rounded-full bg-blue-100">
@@ -50,7 +50,7 @@
         </div>
 
         
-      </div>
+      </div> -->
 
       <!-- Filters -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -117,21 +117,21 @@
                   </div>
                   <div class="flex items-center space-x-2">
                     <span class="text-xs text-gray-500">{{ formatTime(notification.timestamp) }}</span>
-                    <button 
+                    <!-- <button 
                       @click="toggleRead(notification)"
                       :class="notification.isRead ? 'text-gray-400' : 'text-blue-600'"
                       class="hover:text-blue-700"
                       :title="notification.isRead ? 'Mark as unread' : 'Mark as read'"
                     >
                       <i :class="notification.isRead ? 'fa-regular fa-envelope-open' : 'fa-regular fa-envelope'"></i>
-                    </button>
-                    <button 
+                    </button> -->
+                    <!-- <button 
                       @click="deleteNotification(notification.id)"
                       class="text-red-600 hover:text-red-700"
                       title="Delete"
                     >
                       <i class="fa-solid fa-trash"></i>
-                    </button>
+                    </button> -->
                   </div>
                 </div>
                 
@@ -267,6 +267,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AdminNavbar from '../../components/AdminNavbar.vue'
+import { useAuthStore } from '@/stores/auth'
+import api from '@/services/api'
 
 interface NotificationAction {
   label: string
@@ -292,12 +294,16 @@ const statusFilter = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 const showCreateModal = ref(false)
+const loading = ref(false)
+const error = ref('')
+
+const authStore = useAuthStore()
 
 const stats = ref({
-  total: 156,
-  unread: 23,
-  sentToday: 12,
-  totalRecipients: 2847
+  total: 0,
+  unread: 0,
+  sentToday: 0,
+  totalRecipients: 0
 })
 
 const newNotification = ref({
@@ -308,56 +314,148 @@ const newNotification = ref({
   priority: 'medium'
 })
 
-const notifications = ref<Notification[]>([
-  {
-    id: '1',
-    type: 'order',
-    title: 'Pesanan Baru #12345',
-    message: 'Pesanan baru dari John Doe senilai Rp 1.500.000 perlu diproses.',
-    timestamp: '2024-12-15T10:30:00',
-    isRead: false,
-    recipient: 'Admin Team',
-    priority: 'high',
-    actions: [
-      { label: 'View Order', type: 'primary', action: 'view-order' },
-      { label: 'Process', type: 'secondary', action: 'process-order' }
-    ]
-  },
-  {
-    id: '2',
-    type: 'system',
-    title: 'Server Maintenance',
-    message: 'Maintenance server dijadwalkan pada 16 Desember 2024 pukul 02:00 WIB.',
-    timestamp: '2024-12-15T09:15:00',
-    isRead: true,
-    recipient: 'All Users',
-    priority: 'medium'
-  },
-  {
-    id: '3',
-    type: 'promotion',
-    title: 'Flash Sale Berakhir',
-    message: 'Flash sale elektronik akan berakhir dalam 2 jam. Pastikan stok mencukupi.',
-    timestamp: '2024-12-15T08:45:00',
-    isRead: false,
-    recipient: 'Sales Team',
-    priority: 'high'
-  },
-  {
-    id: '4',
-    type: 'security',
-    title: 'Login Mencurigakan',
-    message: 'Terdeteksi login dari IP address yang tidak dikenal pada akun admin.',
-    timestamp: '2024-12-14T22:30:00',
-    isRead: true,
-    recipient: 'Security Team',
-    priority: 'high',
-    actions: [
-      { label: 'Investigate', type: 'primary', action: 'investigate' },
-      { label: 'Block IP', type: 'secondary', action: 'block-ip' }
-    ]
+const notifications = ref<Notification[]>([])
+
+// API Methods
+const fetchNotifications = async () => {
+  try {
+    console.log('Starting fetchNotifications...')
+    loading.value = true
+    
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      params: {
+        page: 0,
+        size: 50,
+        type: typeFilter.value || undefined
+      }
+    }
+    
+    console.log('Request config:', requestConfig)
+    console.log('Making API call to /api/admin/notifications/all')
+    
+    const response = await api.get('/admin/notifications/all', requestConfig)
+    
+    console.log('API Response:', response)
+    console.log('Response data:', response.data)
+    
+    if (response.data && response.data.notifications) {
+      console.log('Processing notifications:', response.data.notifications)
+      notifications.value = response.data.notifications.map((notif: any) => ({
+        id: notif.id.toString(),
+        title: notif.title,
+        message: notif.message,
+        type: mapNotificationType(notif.type) || 'system',
+        timestamp: notif.createdAt,
+        isRead: notif.isRead,
+        recipient: notif.user?.fullName || 'Unknown User',
+        priority: mapNotificationPriority(notif.priority) || 'medium'
+      }))
+      console.log('Processed notifications:', notifications.value)
+    } else {
+      console.log('No notifications in response')
+    }
+  } catch (err: any) {
+    console.error('Error fetching notifications:', err)
+    console.error('Error response:', err.response)
+    console.error('Error status:', err.response?.status)
+    console.error('Error data:', err.response?.data)
+    error.value = err.response?.data?.error || 'Failed to fetch notifications'
+  } finally {
+    loading.value = false
   }
-])
+}
+
+const fetchStats = async () => {
+  try {
+    console.log('Starting fetchStats...')
+    
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    }
+    
+    console.log('Making API call to /api/admin/notifications/stats')
+    
+    const response = await api.get('/admin/notifications/stats', requestConfig)
+    
+    console.log('Stats API Response:', response)
+    console.log('Stats Response data:', response.data)
+    
+    if (response.data) {
+      stats.value = {
+        total: response.data.totalCount || 0,
+        unread: response.data.unreadCount || 0,
+        sentToday: response.data.todayCount || 0,
+        totalRecipients: response.data.totalCount || 0
+      }
+      
+      console.log('Updated stats:', stats.value)
+    }
+  } catch (err: any) {
+    console.error('Error fetching stats:', err)
+    console.error('Stats error response:', err.response)
+    console.error('Stats error status:', err.response?.status)
+    console.error('Stats error data:', err.response?.data)
+  }
+}
+
+const createNotification = async (notificationData: any) => {
+  try {
+    loading.value = true
+    
+    // Use admin broadcast API for sending notifications to multiple users
+    const response = await api.post('/admin/notifications/broadcast', {
+      type: notificationData.type.toUpperCase(),
+      audience: notificationData.recipient || 'all',
+      title: notificationData.title,
+      message: notificationData.message,
+      priority: notificationData.priority.toUpperCase()
+    }, {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    })
+    
+    if (response.data) {
+      // Refresh notifications list
+      await fetchNotifications()
+      await fetchStats()
+      return true
+    }
+  } catch (err: any) {
+    console.error('Error creating notification:', err)
+    error.value = err.response?.data?.error || 'Failed to create notification'
+    return false
+  } finally {
+    loading.value = false
+  }
+}
+
+// Helper functions to map API data to frontend types
+const mapNotificationType = (apiType: string): 'order' | 'system' | 'promotion' | 'security' => {
+  const typeMap: Record<string, 'order' | 'system' | 'promotion' | 'security'> = {
+    'ORDER': 'order',
+    'SYSTEM': 'system',
+    'MARKETING': 'promotion',
+    'SECURITY': 'security',
+    'CUSTOMER_SERVICE': 'system',
+    'AUCTION': 'system'
+  }
+  return typeMap[apiType] || 'system'
+}
+
+const mapNotificationPriority = (apiPriority: string): 'low' | 'medium' | 'high' => {
+  const priorityMap: Record<string, 'low' | 'medium' | 'high'> = {
+    'LOW': 'low',
+    'NORMAL': 'medium',
+    'HIGH': 'high'
+  }
+  return priorityMap[apiPriority] || 'medium'
+}
 
 const filteredNotifications = computed(() => {
   let filtered = notifications.value
@@ -501,37 +599,27 @@ const handleAction = (action: NotificationAction, notification: Notification) =>
   alert(`Action: ${action.action} for notification: ${notification.title}`)
 }
 
-const sendNotification = () => {
-  const notification: Notification = {
-    id: Date.now().toString(),
-    type: newNotification.value.type as any,
-    title: newNotification.value.title,
-    message: newNotification.value.message,
-    timestamp: new Date().toISOString(),
-    isRead: false,
-    recipient: newNotification.value.recipient,
-    priority: newNotification.value.priority as any
+const sendNotification = async () => {
+  const success = await createNotification(newNotification.value)
+  if (success) {
+    showCreateModal.value = false
+    // Reset form
+    newNotification.value = {
+      type: 'system',
+      title: '',
+      message: '',
+      recipient: 'all',
+      priority: 'medium'
+    }
+    alert('Notification sent successfully!')
+  } else {
+    alert('Failed to send notification: ' + error.value)
   }
-  
-  notifications.value.unshift(notification)
-  stats.value.total++
-  stats.value.unread++
-  stats.value.sentToday++
-  
-  showCreateModal.value = false
-  newNotification.value = {
-    type: 'system',
-    title: '',
-    message: '',
-    recipient: 'all',
-    priority: 'medium'
-  }
-  
-  alert('Notification sent successfully!')
 }
 
-const refreshNotifications = () => {
-  alert('Notifications refreshed!')
+const refreshNotifications = async () => {
+  await fetchNotifications()
+  await fetchStats()
 }
 
 const previousPage = () => {
@@ -550,7 +638,26 @@ const goToPage = (page: number) => {
   currentPage.value = page
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log('Admin Notifications loaded')
+  console.log('Auth token:', authStore.token)
+  console.log('User role:', authStore.user?.role)
+  
+  if (!authStore.token) {
+    console.error('No auth token found')
+    error.value = 'Authentication required'
+    return
+  }
+  
+  if (authStore.user?.role !== 'ADMIN') {
+    console.error('User is not admin:', authStore.user?.role)
+    error.value = 'Admin access required'
+    return
+  }
+  
+  console.log('Fetching notifications...')
+  await fetchNotifications()
+  console.log('Fetching stats...')
+  await fetchStats()
 })
 </script>
