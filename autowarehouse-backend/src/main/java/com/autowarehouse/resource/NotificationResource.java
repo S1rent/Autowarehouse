@@ -31,14 +31,38 @@ public class NotificationResource {
     NotificationService notificationService;
 
     @GET
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     public Response getUserNotifications(@Context SecurityContext ctx,
                                        @QueryParam("page") @DefaultValue("0") int page,
                                        @QueryParam("size") @DefaultValue("20") int size,
                                        @QueryParam("type") String type,
                                        @QueryParam("unreadOnly") @DefaultValue("false") boolean unreadOnly) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            // Debug logging
+            LOG.infof("JWT Subject: %s", jwt.getSubject());
+            LOG.infof("JWT Claims: %s", jwt.getClaimNames());
+            
+            Object userIdClaim = jwt.getClaim("userId");
+            LOG.infof("UserID Claim: %s (type: %s)", userIdClaim, userIdClaim != null ? userIdClaim.getClass().getName() : "null");
+            
+            Long userId = null;
+            if (userIdClaim != null) {
+                LOG.infof("Parsing userIdClaim: %s", userIdClaim);
+                try {
+                    userId = Long.parseLong(userIdClaim.toString());
+                    LOG.infof("Parsed userId using toString(): %d", userId);
+                } catch (NumberFormatException e) {
+                    LOG.infof("Cannot parse userIdClaim to Long: %s", userIdClaim);
+                }
+            } else {
+                LOG.errorf("userIdClaim is null");
+            }
+            
+            if (userId == null) {
+                LOG.errorf("Failed to extract userId from token. Available claims: %s", jwt.getClaimNames());
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -95,10 +119,15 @@ public class NotificationResource {
 
     @GET
     @Path("/unread")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     public Response getUnreadNotifications(@Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -122,10 +151,15 @@ public class NotificationResource {
 
     @GET
     @Path("/count/unread")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     public Response getUnreadCount(@Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -145,11 +179,16 @@ public class NotificationResource {
 
     @PUT
     @Path("/{id}/read")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     @Transactional
     public Response markAsRead(@PathParam("id") Long notificationId, @Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -182,11 +221,16 @@ public class NotificationResource {
 
     @PUT
     @Path("/read-all")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     @Transactional
     public Response markAllAsRead(@Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -211,11 +255,16 @@ public class NotificationResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     @Transactional
     public Response deleteNotification(@PathParam("id") Long notificationId, @Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -247,11 +296,16 @@ public class NotificationResource {
 
     @DELETE
     @Path("/clear-all")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     @Transactional
     public Response clearAllNotifications(@Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {
@@ -275,10 +329,15 @@ public class NotificationResource {
 
     @GET
     @Path("/stats")
-    @RolesAllowed({"USER", "ADMIN"})
+    @RolesAllowed({"CUSTOMER", "ADMIN"})
     public Response getNotificationStats(@Context SecurityContext ctx) {
         try {
-            Long userId = Long.parseLong(jwt.getSubject());
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = userIdClaim instanceof Number ? ((Number) userIdClaim).longValue() : null;
+            if (userId == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("Invalid user ID in token")).build();
+            }
             User user = User.findById(userId);
             
             if (user == null) {

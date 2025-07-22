@@ -22,7 +22,6 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Filter</h3>
             <div class="space-y-3">
               <button 
-                @click="activeFilter = 'all'"
                 :class="activeFilter === 'all' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
                 class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
               >
@@ -34,30 +33,8 @@
                   :class="activeFilter === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-600'"
                   class="text-xs px-2 py-1 rounded-full"
                 >
-                  {{ notifications.length }}
+                  {{ totalCount }}
                 </span>
-              </button>
-              <button 
-                @click="activeFilter = 'customerService'"
-                :class="activeFilter === 'customerService' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
-                class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
-              >
-                <div class="flex items-center space-x-3">
-                  <i class="fa-solid fa-circle text-red-500 text-xs"></i>
-                  <span class="text-sm font-medium text-gray-700">Customer Service</span>
-                </div>
-                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">{{ unreadCount }}</span>
-              </button>
-              <button 
-                @click="activeFilter = 'order'"
-                :class="activeFilter === 'order' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
-                class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
-              >
-                <div class="flex items-center space-x-3">
-                  <i class="fa-solid fa-star text-yellow-500"></i>
-                  <span class="text-sm font-medium text-gray-700">Order</span>
-                </div>
-                <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">{{ importantCount }}</span>
               </button>
             </div>
           </div>
@@ -109,7 +86,7 @@
             <div class="p-6 border-b border-gray-200">
               <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900">Latest Notifications</h3>
-                <div class="flex items-center space-x-2">
+                <!-- <div class="flex items-center space-x-2">
                   <button 
                     @click="markAllAsRead"
                     class="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -124,7 +101,7 @@
                     <i class="fa-solid fa-trash mr-1"></i>
                     Delete All
                   </button>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -151,32 +128,50 @@
                       <p class="text-sm font-semibold text-gray-900">{{ notification.title }}</p>
                       <div class="flex items-center space-x-2">
                         <span 
-                          v-if="!notification.read"
+                          v-if="!notification.isRead"
                           :class="getUnreadDotClass(notification.type)"
                           class="w-2 h-2 rounded-full"
                         ></span>
-                        <span class="text-xs text-gray-500">{{ formatTime(notification.timestamp) }}</span>
+                        <span class="text-xs text-gray-500">{{ formatTime(notification.createdAt) }}</span>
                       </div>
                     </div>
                     <p class="text-sm text-gray-600 mt-1">{{ notification.message }}</p>
-                    <div v-if="notification.actions" class="flex items-center space-x-3 mt-3">
-                      <button 
-                        v-for="action in notification.actions" 
-                        :key="action.label"
-                        @click.stop="handleAction(action, notification.id)"
-                        :class="action.primary ? getActionButtonClass(notification.type) : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-                        class="text-xs px-3 py-1 rounded-full transition-colors"
-                      >
-                        {{ action.label }}
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- Error State -->
+            <div v-if="error" class="p-12 text-center">
+              <i class="fa-solid fa-exclamation-triangle text-4xl text-red-300 mb-4"></i>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Unable to load notifications</h3>
+              <p class="text-gray-500 mb-4">{{ error }}</p>
+              <div class="flex justify-center space-x-3">
+                <button 
+                  v-if="error.includes('login')"
+                  @click="$router.push('/login')"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Go to Login
+                </button>
+                <button 
+                  @click="loadNotifications"
+                  class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div v-else-if="loading" class="p-12 text-center">
+              <i class="fa-solid fa-spinner fa-spin text-4xl text-gray-300 mb-4"></i>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Loading notifications...</h3>
+              <p class="text-gray-500">Please wait while we fetch your notifications.</p>
+            </div>
+
             <!-- Empty State -->
-            <div v-if="filteredNotifications.length === 0" class="p-12 text-center">
+            <div v-else-if="filteredNotifications.length === 0" class="p-12 text-center">
               <i class="fa-solid fa-bell-slash text-4xl text-gray-300 mb-4"></i>
               <h3 class="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
               <p class="text-gray-500">You're all caught up! No new notifications to show.</p>
@@ -197,9 +192,9 @@
                     <i class="fa-solid fa-chevron-left"></i>
                   </button>
                   <button 
-                    v-for="page in totalPages" 
+                    v-for="page in totalPagesComputed" 
                     :key="page"
-                    @click="currentPage = page"
+                    @click="currentPage = page; loadNotifications()"
                     :class="currentPage === page ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-700'"
                     class="px-3 py-1 text-sm rounded"
                   >
@@ -207,7 +202,7 @@
                   </button>
                   <button 
                     @click="nextPage"
-                    :disabled="currentPage === totalPages"
+                    :disabled="currentPage === totalPagesComputed"
                     class="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
                   >
                     <i class="fa-solid fa-chevron-right"></i>
@@ -224,8 +219,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiService, type NotificationResponse, type NotificationListResponse } from '../services/api'
 
 import UserNavbar from '../components/UserNavbar.vue'
 import Footer from '../components/Footer.vue'
@@ -236,6 +232,8 @@ const router = useRouter()
 const activeFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 5
+const loading = ref(false)
+const error = ref('')
 
 // Settings
 const settings = reactive({
@@ -244,71 +242,56 @@ const settings = reactive({
   smsNotifications: false
 })
 
-// Sample notifications data
-const notifications = ref([
-  {
-    id: 1,
-    type: 'security',
-    title: 'Security Warning',
-    message: 'Login attempt from new device detected. If this wasn\'t you, please change your password immediately.',
-    timestamp: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
-    read: false,
-    important: true,
-    actions: [
-      { label: 'View Details', primary: true },
-      { label: 'Dismiss', primary: false }
-    ]
-  },
-  {
-    id: 2,
-    type: 'info',
-    title: 'System Update',
-    message: 'System will be updated tonight at 02:00 WIB. Service may be interrupted for 30 minutes.',
-    timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-    read: false,
-    important: false,
-    actions: [
-      { label: 'Learn More', primary: true }
-    ]
-  },
-  {
-    id: 3,
-    type: 'success',
-    title: 'Payment Successful',
-    message: 'Your premium subscription payment of Rp 99,000 has been successfully processed.',
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-    read: false,
-    important: false,
-    actions: [
-      { label: 'View Invoice', primary: true }
-    ]
-  },
-  {
-    id: 4,
-    type: 'social',
-    title: 'Friend Request',
-    message: 'John Doe sent you a friend request.',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    read: true,
-    important: false,
-    actions: [
-      { label: 'Accept', primary: true },
-      { label: 'Decline', primary: false }
-    ]
-  },
-  {
-    id: 5,
-    type: 'promotion',
-    title: 'Special Promotion',
-    message: 'Get 50% discount for premium upgrade. Limited time offer!',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    read: true,
-    important: false,
-    actions: [
-      { label: 'Claim Now', primary: true }
-    ]
+// Notifications data
+const notifications = ref<NotificationResponse[]>([])
+const totalCount = ref(0)
+
+// Get user data from localStorage
+const getUserData = () => {
+  const userData = localStorage.getItem('user_data')
+  return userData ? JSON.parse(userData) : null
+}
+
+// Load notifications from API
+const loadNotifications = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+    
+    // Check if user is logged in
+    const token = localStorage.getItem('auth_token')
+    if (!token) {
+      // If no token, show empty state but don't show error
+      notifications.value = []
+      totalCount.value = 0
+      return
+    }
+    
+    const response = await apiService.getNotifications({
+      page: currentPage.value - 1, // API uses 0-based pagination
+      size: itemsPerPage,
+      type: activeFilter.value === 'all' ? undefined : activeFilter.value,
+      unreadOnly: activeFilter.value === 'customerService'
+    })
+    
+    notifications.value = response.notifications
+    totalCount.value = response.totalCount
+  } catch (err: any) {
+    console.error('Error loading notifications:', err)
+    
+    // Handle different error types
+    // if (err.response?.status === 401 || err.response?.status === 403) {
+    //   // Authentication/authorization error - redirect to login or show login prompt
+    //   error.value = 'Please login to view notifications'
+    //   notifications.value = []
+    //   totalCount.value = 0
+    // } else {
+    //   error.value = err.message || 'Failed to load notifications'
+    // }
+  } finally {
+    loading.value = false
   }
-])
+}
 
 // Computed properties
 const filteredNotifications = computed(() => {
@@ -316,25 +299,23 @@ const filteredNotifications = computed(() => {
   
   switch (activeFilter.value) {
     case 'customerService':
-      filtered = notifications.value.filter(n => !n.read)
+      filtered = notifications.value.filter(n => !n.isRead)
       break
     case 'order':
-      filtered = notifications.value.filter(n => n.important)
+      filtered = notifications.value.filter(n => n.type === 'ORDER' || n.priority === 'HIGH')
       break
     case 'read':
-      filtered = notifications.value.filter(n => n.read)
+      filtered = notifications.value.filter(n => n.isRead)
       break
   }
   
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filtered.slice(start, end)
+  return filtered
 })
 
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
-const importantCount = computed(() => notifications.value.filter(n => n.important).length)
-const readCount = computed(() => notifications.value.filter(n => n.read).length)
-const totalPages = computed(() => Math.ceil(notifications.value.length / itemsPerPage))
+const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
+const importantCount = computed(() => notifications.value.filter(n => n.type === 'ORDER' || n.priority === 'HIGH').length)
+const readCount = computed(() => notifications.value.filter(n => n.isRead).length)
+const totalPagesComputed = computed(() => Math.ceil(totalCount.value / itemsPerPage))
 
 // Methods
 const getNotificationClasses = (notification: any) => {
@@ -417,9 +398,10 @@ const getActionButtonClass = (type: string) => {
   }
 }
 
-const formatTime = (timestamp: Date) => {
+const formatTime = (timestamp: string) => {
+  const date = new Date(timestamp)
   const now = new Date()
-  const diff = now.getTime() - timestamp.getTime()
+  const diff = now.getTime() - date.getTime()
   
   const minutes = Math.floor(diff / (1000 * 60))
   const hours = Math.floor(diff / (1000 * 60 * 60))
@@ -434,22 +416,37 @@ const formatTime = (timestamp: Date) => {
   }
 }
 
-const markAsRead = (id: number) => {
-  const notification = notifications.value.find(n => n.id === id)
-  if (notification) {
-    notification.read = true
+const markAsRead = async (id: number) => {
+  try {
+    await apiService.markNotificationAsRead(id)
+    const notification = notifications.value.find(n => n.id === id)
+    if (notification) {
+      notification.isRead = true
+    }
+  } catch (err) {
+    console.error('Error marking notification as read:', err)
   }
 }
 
-const markAllAsRead = () => {
-  notifications.value.forEach(notification => {
-    notification.read = true
-  })
+const markAllAsRead = async () => {
+  try {
+    await apiService.markAllNotificationsAsRead()
+    notifications.value.forEach(notification => {
+      notification.isRead = true
+    })
+  } catch (err) {
+    console.error('Error marking all notifications as read:', err)
+  }
 }
 
-const deleteAll = () => {
+const deleteAll = async () => {
   if (confirm('Are you sure you want to delete all notifications?')) {
-    notifications.value.splice(0)
+    try {
+      await apiService.clearAllNotifications()
+      notifications.value.splice(0)
+    } catch (err) {
+      console.error('Error clearing all notifications:', err)
+    }
   }
 }
 
@@ -461,14 +458,28 @@ const handleAction = (action: any, notificationId: number) => {
 const previousPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
+    loadNotifications()
   }
 }
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
+  if (currentPage.value < totalPagesComputed.value) {
     currentPage.value++
+    loadNotifications()
   }
 }
+
+// Watch for filter changes
+const changeFilter = (filter: string) => {
+  activeFilter.value = filter
+  currentPage.value = 1
+  loadNotifications()
+}
+
+// Initialize
+onMounted(() => {
+  loadNotifications()
+})
 </script>
 
 <style scoped>

@@ -32,12 +32,12 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user_data')
-      window.location.href = '/login'
-    }
+    // if (error.response?.status === 401) {
+    //   // Token expired or invalid
+    //   localStorage.removeItem('auth_token')
+    //   localStorage.removeItem('user_data')
+    //   window.location.href = '/login'
+    // }
     return Promise.reject(error)
   }
 )
@@ -435,6 +435,39 @@ export interface OrderStats {
   pendingOrders: number
   completedOrders: number
   totalRevenue: number
+}
+
+// Notification Types
+export interface NotificationResponse {
+  id: number
+  title: string
+  message: string
+  type: string
+  isRead: boolean
+  referenceId?: number
+  referenceType?: string
+  iconClass?: string
+  priority: string
+  createdAt: string
+  user?: {
+    id: number
+    email: string
+    fullName: string
+  }
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationResponse[]
+  totalCount: number
+  currentPage: number
+  pageSize: number
+  totalPages: number
+}
+
+export interface NotificationStatsResponse {
+  totalCount: number
+  unreadCount: number
+  readCount: number
 }
 
 // Review Types
@@ -1136,6 +1169,77 @@ class ApiService {
 
   async getRecentReviews(limit: number = 10): Promise<ReviewResponse[]> {
     const response = await api.get<ReviewResponse[]>(`/reviews/recent?limit=${limit}`)
+    return response.data
+  }
+
+  // Notification APIs
+  async getNotifications(params?: {
+    page?: number
+    size?: number
+    type?: string
+    unreadOnly?: boolean
+  }): Promise<NotificationListResponse> {
+    // Check if user is authenticated
+    const token = localStorage.getItem('auth_token')
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const queryParams = new URLSearchParams()
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString())
+        }
+      })
+    }
+    
+    try {
+      const response = await api.get<NotificationListResponse>(`/notifications?${queryParams.toString()}`)
+      return response.data
+    } catch (error: any) {
+      // if (error.response?.status === 401 || error.response?.status === 403) {
+      //   // Clear invalid token
+      //   localStorage.removeItem('auth_token')
+      //   localStorage.removeItem('user_data')
+      //   throw new Error('Please login to view notifications')
+      // }
+      throw error
+    }
+  }
+
+  async getUnreadNotifications(): Promise<NotificationResponse[]> {
+    const response = await api.get<NotificationResponse[]>('/notifications/unread')
+    return response.data
+  }
+
+  async getUnreadNotificationCount(): Promise<{ count: number }> {
+    const response = await api.get<{ count: number }>('/notifications/count/unread')
+    return response.data
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<NotificationResponse> {
+    const response = await api.put<NotificationResponse>(`/notifications/${notificationId}/read`)
+    return response.data
+  }
+
+  async markAllNotificationsAsRead(): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>('/notifications/read-all')
+    return response.data
+  }
+
+  async deleteNotification(notificationId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/notifications/${notificationId}`)
+    return response.data
+  }
+
+  async clearAllNotifications(): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>('/notifications/clear-all')
+    return response.data
+  }
+
+  async getNotificationStats(): Promise<NotificationStatsResponse> {
+    const response = await api.get<NotificationStatsResponse>('/notifications/stats')
     return response.data
   }
 
