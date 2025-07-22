@@ -70,13 +70,13 @@ export const useOrderStore = defineStore('order', () => {
       }
       
       // Fetch status history if available
-      try {
-        const statusHistory = await apiService.getOrderStatusHistory(orderId)
-        order.statusHistory = statusHistory
-      } catch (historyErr) {
-        console.warn('Could not fetch order status history:', historyErr)
-        // Continue without status history
-      }
+      // try {
+      //   const statusHistory = await apiService.getOrderStatusHistory(orderId)
+      //   order.statusHistory = statusHistory
+      // } catch (historyErr) {
+      //   console.warn('Could not fetch order status history:', historyErr)
+      //   // Continue without status history
+      // }
       
       currentOrder.value = order
     } catch (err: any) {

@@ -653,7 +653,7 @@ const loadOrders = async () => {
     }
     
     // Load reviews for all products in orders
-    await loadProductReviews(orderStore.userOrders)
+    // await loadProductReviews(orderStore.userOrders)
   } catch (error) {
     console.error('Failed to load orders:', error)
   }
