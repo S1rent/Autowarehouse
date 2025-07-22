@@ -78,11 +78,10 @@ public class ChatService {
                 // Customer sent message, notify admins (adminCustomerService)
                 List<User> adminUsers = User.find("role = ?1", "ADMIN").list();
                 for (User admin : adminUsers) {
-                    notificationProducer.sendCustomerServiceNotification(
-                        "adminCustomerService", 
+                    notificationProducer.sendAdminCustomerServiceNotification(
                         request.ticketId, 
                         admin.id, 
-                        "New message from " + sender.getFullName(),
+                        sender.getFullName(),
                         truncateMessage(sanitizedMessage, 100)
                     );
                 }
@@ -93,16 +92,15 @@ public class ChatService {
                     request.ticketId, 
                     senderId, 
                     ticket.customerId, 
-                    sanitizedMessage
+                    sanitizedMessage,
+                    "CUSTOMER"
                 );
                 
             } else {
                 // Admin sent message, notify customer (customerService)
-                notificationProducer.sendCustomerServiceNotification(
-                    "customerService", 
+                notificationProducer.sendCustomerServiceMessageNotification(
                     request.ticketId, 
                     ticket.customerId, 
-                    "New message from support",
                     truncateMessage(sanitizedMessage, 100)
                 );
                 
@@ -112,7 +110,8 @@ public class ChatService {
                     request.ticketId, 
                     senderId, 
                     ticket.customerId, 
-                    sanitizedMessage
+                    sanitizedMessage,
+                    "ADMIN"
                 );
             }
             

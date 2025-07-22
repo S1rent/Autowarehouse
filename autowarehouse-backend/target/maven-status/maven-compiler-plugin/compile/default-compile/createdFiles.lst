@@ -8,11 +8,13 @@ com\autowarehouse\resource\UserResource$UpdateRoleRequest.class
 com\autowarehouse\dto\DashboardStatsResponse$LowStockAlert.class
 com\autowarehouse\resource\OrderResource$OrderAnalyticsResponse.class
 com\autowarehouse\service\AdminDashboardService$1.class
+com\autowarehouse\resource\NotificationResource$NotificationResponse$UserInfo.class
 com\autowarehouse\entity\Product.class
 com\autowarehouse\service\AdminDashboardService.class
 com\autowarehouse\service\CartService.class
 com\autowarehouse\service\CategoryService.class
 com\autowarehouse\resource\CartResource.class
+com\autowarehouse\resource\NotificationResource$NotificationListResponse.class
 com\autowarehouse\entity\Order.class
 com\autowarehouse\resource\AuctionResource$WatchRequest.class
 com\autowarehouse\entity\TicketCategory.class
@@ -24,7 +26,9 @@ com\autowarehouse\resource\OrderResource$CheckoutOrderRequest.class
 com\autowarehouse\resource\OrderResource$UpdateStatusRequest.class
 com\autowarehouse\resource\OrderResource$CreateOrderRequest.class
 com\autowarehouse\resource\ProductResource.class
+com\autowarehouse\resource\NotificationResource$MessageResponse.class
 com\autowarehouse\security\JwtAuthenticationRequest.class
+com\autowarehouse\resource\NotificationResource.class
 com\autowarehouse\resource\CartResource$ExistsResponse.class
 com\autowarehouse\resource\OrderResource$OrderSearchRequest.class
 com\autowarehouse\resource\UserResource$EmailVerificationRequest.class
@@ -38,6 +42,7 @@ com\autowarehouse\entity\ChatSessionStatus.class
 com\autowarehouse\entity\Bid.class
 com\autowarehouse\service\InvoiceService.class
 com\autowarehouse\resource\WishlistResource$ErrorResponse.class
+com\autowarehouse\resource\NotificationResource$ErrorResponse.class
 com\autowarehouse\dto\PendingOrdersResponse$PendingOrder.class
 com\autowarehouse\controller\SupportTicketController$CountResponse.class
 com\autowarehouse\entity\Notification.class
@@ -76,6 +81,7 @@ com\autowarehouse\resource\ProductResource$UpdateStockRequest.class
 com\autowarehouse\resource\CategoryResource.class
 com\autowarehouse\controller\ChatController$SuccessResponse.class
 com\autowarehouse\security\SecurityConfig.class
+com\autowarehouse\resource\NotificationResource$UnreadCountResponse.class
 com\autowarehouse\entity\ChatMessage.class
 com\autowarehouse\resource\CartResource$AddToCartRequest.class
 com\autowarehouse\service\WebSocketNotificationService$NotificationWebSocketDTO.class
@@ -126,11 +132,13 @@ com\autowarehouse\resource\OrderResource$UpdatePaymentRequest.class
 com\autowarehouse\dto\TopProductResponse$TopProduct.class
 com\autowarehouse\service\WishlistService.class
 com\autowarehouse\dto\PasswordResetConfirmRequest.class
+com\autowarehouse\resource\NotificationResource$NotificationStatsResponse.class
 com\autowarehouse\resource\UserResource.class
 com\autowarehouse\controller\SupportTicketController$ErrorResponse.class
 com\autowarehouse\resource\OrderResource$OrderAnalyticsResponse$OrderAnalyticsData.class
 com\autowarehouse\entity\Order$OrderStatus.class
 com\autowarehouse\resource\AuctionResource$AuctionStatsResponse.class
+com\autowarehouse\resource\NotificationResource$NotificationResponse.class
 com\autowarehouse\dto\UpdateProfileRequest.class
 com\autowarehouse\resource\OrderResource$OrderSearchResponse.class
 com\autowarehouse\entity\MessageType.class

@@ -1,6 +1,7 @@
 package com.autowarehouse.resource;
 
 import com.autowarehouse.entity.Notification;
+import com.autowarehouse.entity.NotificationType;
 import com.autowarehouse.entity.User;
 import com.autowarehouse.service.NotificationService;
 import jakarta.annotation.security.RolesAllowed;
@@ -50,9 +51,15 @@ public class NotificationResource {
             if (unreadOnly) {
                 notifications = Notification.findUnreadByUser(user);
             } else if (type != null && !type.trim().isEmpty()) {
-                notifications = Notification.findByUserAndType(user, type);
+                try {
+                    NotificationType notificationType = NotificationType.valueOf(type.toUpperCase());
+                    notifications = Notification.findByUserAndType(user, notificationType);
+                } catch (IllegalArgumentException e) {
+                    notifications = Notification.findByUser(user);
+                }
             } else {
-                notifications = Notification.findByUserPaginated(user, page, size);
+                notifications = Notification.find("user = ?1 order by createdAt desc", user)
+                    .page(page, size).list();
             }
 
             // Convert to response DTOs
@@ -62,7 +69,7 @@ public class NotificationResource {
 
             long totalCount = unreadOnly ? 
                 Notification.countUnreadByUser(user) : 
-                Notification.countByUser(user);
+                Notification.count("user = ?1", user);
 
             NotificationListResponse response = new NotificationListResponse(
                 notificationResponses, 
@@ -74,7 +81,13 @@ public class NotificationResource {
             return Response.ok(response).build();
             
         } catch (Exception e) {
-            LOG.errorf(e, "Error fetching notifications for user %d", userId);
+            Long userId = null;
+            try {
+                userId = Long.parseLong(jwt.getSubject());
+            } catch (Exception ex) {
+                // Ignore parsing error
+            }
+            LOG.errorf(e, "Error fetching notifications for user %s", userId);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(new ErrorResponse("Error fetching notifications: " + e.getMessage())).build();
         }
@@ -273,7 +286,7 @@ public class NotificationResource {
                     .entity(new ErrorResponse("User not found")).build();
             }
 
-            long totalCount = Notification.countByUser(user);
+            long totalCount = Notification.count("user = ?1", user);
             long unreadCount = Notification.countUnreadByUser(user);
             long readCount = totalCount - unreadCount;
 
@@ -315,7 +328,7 @@ public class NotificationResource {
             this.referenceId = notification.referenceId;
             this.referenceType = notification.referenceType;
             this.iconClass = notification.type != null ? notification.type.getDefaultIcon() : "fas fa-bell";
-            this.priority = notification.priority != null ? notification.priority : "NORMAL";
+            this.priority = notification.priority != null ? notification.priority.name() : "NORMAL";
             this.createdAt = notification.createdAt != null ? notification.createdAt.toString() : null;
             this.user = notification.user != null ? new UserInfo(notification.user) : null;
         }
