@@ -18,13 +18,7 @@
               <i class="fa-solid fa-check-double text-sm"></i>
               <span>Mark All Read</span>
             </button>
-            <button 
-              @click="showCreateModal = true"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-            >
-              <i class="fa-solid fa-plus text-sm"></i>
-              <span>Send Notification</span>
-            </button>
+            
           </div>
         </div>
       </div>
@@ -55,29 +49,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100">
-              <i class="fa-solid fa-paper-plane text-green-600 text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Terkirim Hari Ini</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.sentToday }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center">
-            <div class="p-3 rounded-full bg-purple-100">
-              <i class="fa-solid fa-users text-purple-600 text-xl"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Total Penerima</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.totalRecipients }}</p>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <!-- Filters -->
@@ -99,9 +71,7 @@
             >
               <option value="">Semua Tipe</option>
               <option value="order">Pesanan</option>
-              <option value="system">Sistem</option>
-              <option value="promotion">Promosi</option>
-              <option value="security">Keamanan</option>
+              <option value="customerService">Customer Service</option>
             </select>
             <select 
               v-model="statusFilter"
