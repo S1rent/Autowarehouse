@@ -5,6 +5,7 @@ com\autowarehouse\dto\LoginRequest.class
 com\autowarehouse\resource\OrderResource$ErrorResponse.class
 com\autowarehouse\resource\UserResource$LoginResponse.class
 com\autowarehouse\resource\UserResource$UpdateRoleRequest.class
+com\autowarehouse\dto\DashboardStatsResponse$LowStockAlert.class
 com\autowarehouse\resource\OrderResource$OrderAnalyticsResponse.class
 com\autowarehouse\service\AdminDashboardService$1.class
 com\autowarehouse\entity\Product.class
@@ -18,6 +19,7 @@ com\autowarehouse\entity\TicketCategory.class
 com\autowarehouse\service\CartService$CartSummary.class
 com\autowarehouse\resource\OrderResource$ProcessRefundRequest.class
 com\autowarehouse\entity\AuctionWatcher.class
+com\autowarehouse\dto\DashboardStatsResponse$TotalOrdersThisMonth.class
 com\autowarehouse\resource\OrderResource$CheckoutOrderRequest.class
 com\autowarehouse\resource\OrderResource$UpdateStatusRequest.class
 com\autowarehouse\resource\OrderResource$CreateOrderRequest.class
@@ -35,6 +37,7 @@ com\autowarehouse\entity\ChatSessionStatus.class
 com\autowarehouse\entity\Bid.class
 com\autowarehouse\service\InvoiceService.class
 com\autowarehouse\resource\WishlistResource$ErrorResponse.class
+com\autowarehouse\dto\PendingOrdersResponse$PendingOrder.class
 com\autowarehouse\controller\SupportTicketController$CountResponse.class
 com\autowarehouse\entity\Notification.class
 com\autowarehouse\resource\ProductResource$ProductDetailResponse.class
@@ -49,6 +52,7 @@ com\autowarehouse\service\ProductService.class
 com\autowarehouse\entity\Category.class
 com\autowarehouse\resource\SavedItemResource$CartItemResponse.class
 com\autowarehouse\resource\SavedItemResource.class
+com\autowarehouse\dto\DashboardStatsResponse$ProductsSold.class
 com\autowarehouse\resource\ProductResource$UpdateProductRequest.class
 com\autowarehouse\resource\AuctionResource$AuctionResponse.class
 com\autowarehouse\resource\UserResource$LoginRequest.class
@@ -61,6 +65,7 @@ com\autowarehouse\resource\OrderResource$BulkUpdateResponse.class
 com\autowarehouse\resource\WishlistResource$RemoveFromWishlistRequest.class
 com\autowarehouse\resource\OrderResource$OrderAnalyticsResponse$OrderSummary.class
 com\autowarehouse\entity\NotificationPriority$1.class
+com\autowarehouse\dto\PendingOrdersResponse.class
 com\autowarehouse\entity\TicketStatus.class
 com\autowarehouse\resource\ReviewResource$CanReviewResponse.class
 com\autowarehouse\websocket\CustomerServiceWebSocket.class
@@ -73,6 +78,7 @@ com\autowarehouse\resource\CartResource$AddToCartRequest.class
 com\autowarehouse\resource\AuctionResource$CreateAuctionRequest.class
 com\autowarehouse\resource\CartResource$CartItemResponse.class
 com\autowarehouse\resource\OrderResource$OrderItemResponse.class
+com\autowarehouse\dto\DashboardStatsResponse.class
 com\autowarehouse\resource\SavedItemResource$ExistsResponse.class
 com\autowarehouse\service\SavedItemService.class
 com\autowarehouse\resource\OrderResource$BulkStatusUpdateRequest.class
@@ -140,6 +146,7 @@ com\autowarehouse\resource\UserResource$UserResponse.class
 com\autowarehouse\entity\OrderStatusHistory.class
 com\autowarehouse\entity\ChatSession.class
 com\autowarehouse\entity\User.class
+com\autowarehouse\dto\DashboardStatsResponse$TotalSalesThisMonth.class
 com\autowarehouse\resource\WishlistResource$AddToWishlistRequest.class
 com\autowarehouse\controller\ChatController$ErrorResponse.class
 com\autowarehouse\dto\RecentTransactionsResponse.class

@@ -489,11 +489,12 @@ const loadProductReviews = async (orderItems) => {
     const userReviews = await apiService.getMyReviews()
     console.log('All user reviews:', userReviews)
 
-    // Filter reviews for products in this order
+    // Filter reviews for products in this specific order
+    // IMPORTANT: Only show reviews that are specifically for this order ID
     userReviews.forEach(review => {
-      if (productIds.has(review.productId)) {
+      if (productIds.has(review.productId) && review.orderId === order.value.id) {
         productReviews.value[review.productId] = review
-        console.log(`Found review for product ${review.productId}:`, review)
+        console.log(`Found review for product ${review.productId} in order ${order.value.id}:`, review)
       }
     })
     

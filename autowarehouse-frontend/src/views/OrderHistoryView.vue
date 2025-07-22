@@ -609,30 +609,21 @@ const downloadInvoice = async (orderId) => {
 
 const loadProductReviews = async (orders) => {
   try {
-    // Get all unique product IDs from all orders
-    const productIds = new Set()
-    orders.forEach(order => {
-      if (order.items) {
-        order.items.forEach(item => {
-          productIds.add(item.productId)
-        })
+    // Get all user reviews
+    const userReviews = await apiService.getMyReviews()
+    console.log('All user reviews:', userReviews)
+
+    // Create a map of reviews by order ID and product ID combination
+    userReviews.forEach(review => {
+      if (review.orderId && review.productId) {
+        // Store review by order-product combination
+        const key = `${review.orderId}-${review.productId}`
+        productReviews.value[key] = review
+        console.log(`Found review for order ${review.orderId}, product ${review.productId}:`, review)
       }
     })
-
-    // Load reviews for each product
-    for (const productId of productIds) {
-      try {
-        const review = await apiService.getUserProductReview(productId)
-        if (review) {
-          productReviews.value[productId] = review
-        }
-      } catch (error) {
-        // Ignore 404 errors (no review found)
-        if (error.response?.status !== 404) {
-          console.error(`Failed to load review for product ${productId}:`, error)
-        }
-      }
-    }
+    
+    console.log('Final productReviews:', productReviews.value)
   } catch (error) {
     console.error('Failed to load product reviews:', error)
   }

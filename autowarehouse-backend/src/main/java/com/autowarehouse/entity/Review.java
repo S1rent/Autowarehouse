@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "reviews", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "user_id"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "user_id", "order_id"}))
 public class Review extends PanacheEntityBase {
 
     @Id
@@ -29,6 +29,11 @@ public class Review extends PanacheEntityBase {
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull
     public User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    @NotNull
+    public Order order;
 
     @Column(nullable = false)
     @NotNull
@@ -83,6 +88,10 @@ public class Review extends PanacheEntityBase {
 
     public static Review findByProductIdAndUserId(Long productId, Long userId) {
         return find("product.id = ?1 and user.id = ?2", productId, userId).firstResult();
+    }
+
+    public static Review findByProductIdUserIdAndOrderId(Long productId, Long userId, Long orderId) {
+        return find("product.id = ?1 and user.id = ?2 and order.id = ?3", productId, userId, orderId).firstResult();
     }
 
     public static List<Review> findByProduct(Product product) {

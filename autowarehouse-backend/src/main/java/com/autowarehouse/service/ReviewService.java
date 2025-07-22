@@ -62,11 +62,11 @@ public class ReviewService {
             throw new BadRequestException("Can only review delivered orders");
         }
 
-        // Check if user has already reviewed this product
-        Review existingReview = Review.findByProductIdAndUserId(request.productId, userId);
+        // Check if user has already reviewed this product for this specific order
+        Review existingReview = Review.findByProductIdUserIdAndOrderId(request.productId, userId, request.orderId);
         if (existingReview != null) {
-            LOG.errorf("User %d already reviewed product %d", userId, request.productId);
-            throw new BadRequestException("You have already reviewed this product");
+            LOG.errorf("User %d already reviewed product %d for order %d", userId, request.productId, request.orderId);
+            throw new BadRequestException("You have already reviewed this product for this order");
         }
 
         // Verify that the product was actually in the order
@@ -89,6 +89,7 @@ public class ReviewService {
         Review review = new Review();
         review.product = product;
         review.user = user;
+        review.order = order;
         review.rating = request.rating;
         review.title = request.title;
         review.comment = request.comment;
@@ -233,16 +234,27 @@ public class ReviewService {
     }
 
     public boolean canUserReviewProduct(Long userId, Long productId) {
-        // Check if user has already reviewed this product
-        if (Review.existsByProductIdAndUserId(productId, userId)) {
-            return false;
-        }
-
         // Check if user has purchased and received this product
         List<Order> userOrders = Order.find("user.id = ?1 and status = ?2", userId, Order.OrderStatus.DELIVERED).list();
         
         return userOrders.stream()
                 .flatMap(order -> order.items.stream())
+                .anyMatch(item -> item.product.id.equals(productId));
+    }
+
+    public boolean canUserReviewProductForOrder(Long userId, Long productId, Long orderId) {
+        // Check if user has already reviewed this product for this specific order
+        if (Review.findByProductIdUserIdAndOrderId(productId, userId, orderId) != null) {
+            return false;
+        }
+
+        // Check if the order exists, belongs to user, is delivered, and contains the product
+        Order order = Order.findById(orderId);
+        if (order == null || !order.user.id.equals(userId) || order.status != Order.OrderStatus.DELIVERED) {
+            return false;
+        }
+
+        return order.items.stream()
                 .anyMatch(item -> item.product.id.equals(productId));
     }
 }

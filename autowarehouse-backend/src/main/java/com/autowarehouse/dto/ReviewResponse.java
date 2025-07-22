@@ -17,6 +17,8 @@ public class ReviewResponse {
     public String productName;
     public Long userId;
     public String userName;
+    public Long orderId;
+    public String orderNumber;
     public Integer rating;
     public String title;
     public String comment;
@@ -42,6 +44,8 @@ public class ReviewResponse {
         this.userId = review.user != null ? review.user.id : null;
         this.userName = review.user != null ? 
             (review.user.firstName + " " + review.user.lastName).trim() : null;
+        this.orderId = review.order != null ? review.order.id : null;
+        this.orderNumber = review.order != null ? review.order.orderNumber : null;
         this.rating = review.rating;
         this.title = review.title;
         this.comment = review.comment;
