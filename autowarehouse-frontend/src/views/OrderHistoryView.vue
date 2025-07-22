@@ -87,6 +87,41 @@
         </div>
       </section>
 
+      <!-- Order Status Legend -->
+      <section class="my-8 bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Status Pesanan</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+            <div>
+              <p class="font-medium text-gray-900">Pending</p>
+              <p class="text-sm text-gray-600">Pesanan menunggu konfirmasi</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-purple-400 rounded-full"></div>
+            <div>
+              <p class="font-medium text-gray-900">Diproses</p>
+              <p class="text-sm text-gray-600">Pesanan sedang disiapkan</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+            <div>
+              <p class="font-medium text-gray-900">Dikirim</p>
+              <p class="text-sm text-gray-600">Pesanan dalam perjalanan</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+            <div>
+              <p class="font-medium text-gray-900">Selesai</p>
+              <p class="text-sm text-gray-600">Pesanan telah diterima</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Orders List - Card Layout for Better UX -->
       <section class="space-y-4">
         <!-- Loading state -->
@@ -262,51 +297,10 @@
           </div>
         </div>
       </section>
-
-      <!-- Order Status Legend -->
-      <section class="mt-8 bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Status Pesanan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-            <div>
-              <p class="font-medium text-gray-900">Pending</p>
-              <p class="text-sm text-gray-600">Pesanan menunggu konfirmasi</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-purple-400 rounded-full"></div>
-            <div>
-              <p class="font-medium text-gray-900">Diproses</p>
-              <p class="text-sm text-gray-600">Pesanan sedang disiapkan</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
-            <div>
-              <p class="font-medium text-gray-900">Dikirim</p>
-              <p class="text-sm text-gray-600">Pesanan dalam perjalanan</p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-            <div>
-              <p class="font-medium text-gray-900">Selesai</p>
-              <p class="text-sm text-gray-600">Pesanan telah diterima</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 mt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="text-center text-gray-600">
-          <p>© 2024 Autowarehouse. Semua hak dilindungi.</p>
-        </div>
-      </div>
-    </footer>
+    <Footer/>
 
     <!-- Review Modal -->
     <ReviewModal
@@ -328,6 +322,7 @@ import { useNotifications } from '@/composables/useNotifications'
 import { apiService } from '@/services/api'
 import UserNavbar from '../components/UserNavbar.vue'
 import ReviewModal from '../components/ReviewModal.vue'
+import Footer from '../components/Footer.vue'
 
 const router = useRouter()
 const orderStore = useOrderStore()

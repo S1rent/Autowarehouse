@@ -24,12 +24,6 @@
               >
                 <i class="fa-solid fa-shopping-bag mr-2"></i>Belanja Sekarang
               </router-link>
-              <router-link 
-                to="/auctions" 
-                class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-primary transition-all inline-flex items-center justify-center"
-              >
-                <i class="fa-solid fa-gavel mr-2"></i>Cek Auction
-              </router-link>
             </div>
           </div>
           <div class="relative">
@@ -127,29 +121,29 @@
     <section class="py-16 bg-gradient-to-r from-red-500 to-pink-500 text-white">
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold mb-4">⚡ Flash Sale</h2>
+          <h2 class="text-4xl font-bold mb-4">⚡ Hot Items</h2>
           <p class="text-xl opacity-90">Penawaran terbatas, buruan sebelum kehabisan!</p>
           <div class="inline-flex items-center space-x-4 mt-4 bg-white/20 rounded-xl px-6 py-3">
-            <span class="text-lg font-semibold">Berakhir dalam:</span>
-            <div class="flex space-x-2">
+            <span class="text-lg font-semibold">Produk yang paling banyak dibeli</span>
+            <!-- <div class="flex space-x-2">
               <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.hours }}</div>
               <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.minutes }}</div>
               <div class="bg-white text-red-500 px-3 py-2 rounded-lg font-bold">{{ countdown.seconds }}</div>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
           <div v-for="product in flashSaleProducts" :key="product.id" class="bg-white rounded-2xl p-6 text-dark shadow-xl">
             <div class="relative mb-4">
               <img :src="product.image" :alt="product.name" class="w-full h-40 object-cover rounded-xl">
-              <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
+              <!-- <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
                 -{{ product.discount }}%
-              </div>
+              </div> -->
             </div>
             <h3 class="font-bold mb-2">{{ product.name }}</h3>
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-2xl font-bold text-primary">{{ formatPrice(product.salePrice) }}</span>
-              <span class="text-gray-500 line-through">{{ formatPrice(product.originalPrice) }}</span>
+              <!-- <span class="text-gray-500 line-through">{{ formatPrice(product.originalPrice) }}</span> -->
             </div>
             <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
               Beli Sekarang

@@ -302,13 +302,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 mt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="text-center text-gray-600">
-          <p>© 2024 Autowarehouse. Semua hak dilindungi.</p>
-        </div>
-      </div>
-    </footer>
+    <Footer/>
 
     <!-- Review Modal -->
     <ReviewModal
@@ -330,6 +324,7 @@ import { apiService } from '@/services/api'
 import UserNavbar from '@/components/UserNavbar.vue'
 import OrderStatusTimeline from '@/components/OrderStatusTimeline.vue'
 import ReviewModal from '@/components/ReviewModal.vue'
+import Footer from '../components/Footer.vue'
 
 const route = useRoute()
 const router = useRouter()
