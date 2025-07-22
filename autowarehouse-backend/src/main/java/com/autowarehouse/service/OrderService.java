@@ -19,6 +19,9 @@ public class OrderService {
     @Inject
     NotificationService notificationService;
 
+    @Inject
+    NotificationProducer notificationProducer;
+
     @Transactional
     public Order createOrder(User user, List<CartItem> cartItems) {
         if (cartItems == null || cartItems.isEmpty()) {
@@ -212,6 +215,22 @@ public class OrderService {
 
         // Send order confirmation notification
         notificationService.notifyOrderCreated(user, order);
+        
+        // Send Kafka notification to admin about new order
+        try {
+            // Find admin users to notify (assuming role-based notification)
+            List<User> adminUsers = User.find("role = ?1", "ADMIN").list();
+            for (User admin : adminUsers) {
+                notificationProducer.sendOrderConfirmedNotification(order.id, admin.id);
+            }
+            
+            // Send order creation event
+            notificationProducer.sendOrderEvent("orderCreated", order.id, user.id, 
+                                               order.status.toString(), null);
+        } catch (Exception e) {
+            // Log error but don't fail the transaction
+            System.err.println("Failed to send Kafka notification for new order " + order.id + ": " + e.getMessage());
+        }
 
         return order;
     }
@@ -296,24 +315,47 @@ public class OrderService {
         order.updateStatus(newStatus);
         order.persist();
 
-        // Send notifications based on status change
-        switch (newStatus) {
-            case CONFIRMED:
-                notificationService.notifyOrderConfirmed(order.user, order);
-                break;
-            case SHIPPED:
-                notificationService.notifyOrderShipped(order.user, order);
-                break;
-            case DELIVERED:
-                notificationService.notifyOrderDelivered(order.user, order);
-                break;
-            case CANCELLED:
-                notificationService.notifyOrderCancelled(order.user, order);
-                // Restore product stock if order was cancelled
-                if (oldStatus == Order.OrderStatus.PENDING || oldStatus == Order.OrderStatus.CONFIRMED) {
-                    restoreProductStock(order);
-                }
-                break;
+        // Send notifications based on status change via Kafka
+        try {
+            switch (newStatus) {
+                case CONFIRMED:
+                    // Send Kafka notification for admin (new order confirmed)
+                    notificationProducer.sendOrderConfirmedNotification(order.id, order.user.id);
+                    // Also send traditional notification
+                    notificationService.notifyOrderConfirmed(order.user, order);
+                    break;
+                case SHIPPED:
+                    // Send Kafka notification for customer (order shipped)
+                    notificationProducer.sendOrderShippedNotification(order.id, order.user.id);
+                    notificationService.notifyOrderShipped(order.user, order);
+                    break;
+                case DELIVERED:
+                    // Send Kafka notification for customer (order delivered)
+                    notificationProducer.sendOrderDeliveredNotification(order.id, order.user.id);
+                    notificationService.notifyOrderDelivered(order.user, order);
+                    break;
+                case CANCELLED:
+                    // Send Kafka notification for customer (order cancelled)
+                    notificationProducer.sendOrderCancelledNotification(order.id, order.user.id);
+                    notificationService.notifyOrderCancelled(order.user, order);
+                    // Restore product stock if order was cancelled
+                    if (oldStatus == Order.OrderStatus.PENDING || oldStatus == Order.OrderStatus.CONFIRMED) {
+                        restoreProductStock(order);
+                    }
+                    break;
+                case REFUNDED:
+                    // Send Kafka notification for customer (order refunded)
+                    notificationProducer.sendOrderRefundedNotification(order.id, order.user.id);
+                    break;
+            }
+            
+            // Send order event to Kafka for analytics/tracking
+            notificationProducer.sendOrderEvent("orderStatusChanged", order.id, order.user.id, 
+                                               newStatus.toString(), oldStatus.toString());
+                                               
+        } catch (Exception e) {
+            // Log error but don't fail the transaction
+            System.err.println("Failed to send Kafka notification for order " + order.id + ": " + e.getMessage());
         }
     }
 

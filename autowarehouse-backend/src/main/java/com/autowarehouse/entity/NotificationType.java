@@ -5,6 +5,9 @@ public enum NotificationType {
     ORDER_SHIPPED("order_shipped"),
     ORDER_DELIVERED("order_delivered"),
     ORDER_CANCELLED("order_cancelled"),
+    ORDER_REFUNDED("order_refunded"),
+    CUSTOMER_SERVICE_MESSAGE("customer_service_message"),
+    ADMIN_CUSTOMER_SERVICE_MESSAGE("admin_customer_service_message"),
     AUCTION_STARTED("auction_started"),
     AUCTION_ENDING_SOON("auction_ending_soon"),
     AUCTION_WON("auction_won"),
@@ -50,6 +53,9 @@ public enum NotificationType {
             case ORDER_SHIPPED: return "Order Shipped";
             case ORDER_DELIVERED: return "Order Delivered";
             case ORDER_CANCELLED: return "Order Cancelled";
+            case ORDER_REFUNDED: return "Order Refunded";
+            case CUSTOMER_SERVICE_MESSAGE: return "Customer Service Message";
+            case ADMIN_CUSTOMER_SERVICE_MESSAGE: return "Admin Message";
             case AUCTION_STARTED: return "Auction Started";
             case AUCTION_ENDING_SOON: return "Auction Ending Soon";
             case AUCTION_WON: return "Auction Won";
@@ -74,6 +80,9 @@ public enum NotificationType {
             case ORDER_SHIPPED:
             case ORDER_DELIVERED: return "fas fa-box";
             case ORDER_CANCELLED: return "fas fa-times-circle";
+            case ORDER_REFUNDED: return "fas fa-undo";
+            case CUSTOMER_SERVICE_MESSAGE:
+            case ADMIN_CUSTOMER_SERVICE_MESSAGE: return "fas fa-comments";
             case AUCTION_STARTED:
             case AUCTION_ENDING_SOON:
             case AUCTION_WON:

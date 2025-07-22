@@ -20,6 +20,9 @@ public class ChatService {
     @Inject
     ChatSessionService chatSessionService;
 
+    @Inject
+    NotificationProducer notificationProducer;
+
     @Transactional
     public MessageResponse sendMessage(SendMessageRequest request, Long senderId) {
         LOG.infof("Sending message from user %d to ticket %d", senderId, request.ticketId);
@@ -68,6 +71,59 @@ public class ChatService {
 
         // Update ticket status if needed
         updateTicketStatusOnMessage(ticket, senderType);
+
+        // Send Kafka notifications for chat messages
+        try {
+            if (senderType == SenderType.CUSTOMER) {
+                // Customer sent message, notify admins (adminCustomerService)
+                List<User> adminUsers = User.find("role = ?1", "ADMIN").list();
+                for (User admin : adminUsers) {
+                    notificationProducer.sendCustomerServiceNotification(
+                        "adminCustomerService", 
+                        request.ticketId, 
+                        admin.id, 
+                        "New message from " + sender.getFullName(),
+                        truncateMessage(sanitizedMessage, 100)
+                    );
+                }
+                
+                // Send customer service event to Kafka
+                notificationProducer.sendCustomerServiceEvent(
+                    "messageReceived", 
+                    request.ticketId, 
+                    senderId, 
+                    ticket.customerId, 
+                    sanitizedMessage
+                );
+                
+            } else {
+                // Admin sent message, notify customer (customerService)
+                notificationProducer.sendCustomerServiceNotification(
+                    "customerService", 
+                    request.ticketId, 
+                    ticket.customerId, 
+                    "New message from support",
+                    truncateMessage(sanitizedMessage, 100)
+                );
+                
+                // Send customer service event to Kafka
+                notificationProducer.sendCustomerServiceEvent(
+                    "messageReceived", 
+                    request.ticketId, 
+                    senderId, 
+                    ticket.customerId, 
+                    sanitizedMessage
+                );
+            }
+            
+            LOG.infof("Sent Kafka notification for message from %s to ticket %d", 
+                     senderType == SenderType.CUSTOMER ? "customer" : "admin", request.ticketId);
+                     
+        } catch (Exception e) {
+            // Log error but don't fail the transaction
+            LOG.errorf(e, "Failed to send Kafka notification for chat message in ticket %d: %s", 
+                      request.ticketId, e.getMessage());
+        }
 
         return new MessageResponse(message);
     }
@@ -312,6 +368,18 @@ public class ChatService {
         }
         
         return sanitized;
+    }
+
+    private String truncateMessage(String message, int maxLength) {
+        if (message == null) {
+            return "";
+        }
+        
+        if (message.length() <= maxLength) {
+            return message;
+        }
+        
+        return message.substring(0, maxLength - 3) + "...";
     }
 
     @Transactional

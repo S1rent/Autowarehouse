@@ -38,37 +38,26 @@
                 </span>
               </button>
               <button 
-                @click="activeFilter = 'unread'"
-                :class="activeFilter === 'unread' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
+                @click="activeFilter = 'customerService'"
+                :class="activeFilter === 'customerService' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
                 class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
               >
                 <div class="flex items-center space-x-3">
                   <i class="fa-solid fa-circle text-red-500 text-xs"></i>
-                  <span class="text-sm font-medium text-gray-700">Unread</span>
+                  <span class="text-sm font-medium text-gray-700">Customer Service</span>
                 </div>
                 <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">{{ unreadCount }}</span>
               </button>
               <button 
-                @click="activeFilter = 'important'"
-                :class="activeFilter === 'important' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
+                @click="activeFilter = 'order'"
+                :class="activeFilter === 'order' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
                 class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
               >
                 <div class="flex items-center space-x-3">
                   <i class="fa-solid fa-star text-yellow-500"></i>
-                  <span class="text-sm font-medium text-gray-700">Important</span>
+                  <span class="text-sm font-medium text-gray-700">Order</span>
                 </div>
                 <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">{{ importantCount }}</span>
-              </button>
-              <button 
-                @click="activeFilter = 'read'"
-                :class="activeFilter === 'read' ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'"
-                class="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors"
-              >
-                <div class="flex items-center space-x-3">
-                  <i class="fa-solid fa-check text-green-500"></i>
-                  <span class="text-sm font-medium text-gray-700">Read</span>
-                </div>
-                <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">{{ readCount }}</span>
               </button>
             </div>
           </div>
@@ -111,8 +100,8 @@
                 </label>
               </div>
             </div>
-          </div>
-        </div> -->
+          </div> -->
+        </div>
 
         <!-- Notification Content -->
         <div class="lg:col-span-3">
@@ -326,10 +315,10 @@ const filteredNotifications = computed(() => {
   let filtered = notifications.value
   
   switch (activeFilter.value) {
-    case 'unread':
+    case 'customerService':
       filtered = notifications.value.filter(n => !n.read)
       break
-    case 'important':
+    case 'order':
       filtered = notifications.value.filter(n => n.important)
       break
     case 'read':

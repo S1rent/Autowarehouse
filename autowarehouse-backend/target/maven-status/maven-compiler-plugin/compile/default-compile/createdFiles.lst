@@ -33,6 +33,7 @@ com\autowarehouse\resource\ReviewResource.class
 com\autowarehouse\resource\ProductResource$SuccessResponse.class
 com\autowarehouse\resource\WishlistResource$CountResponse.class
 com\autowarehouse\resource\SavedItemResource$SaveForLaterRequest.class
+com\autowarehouse\dto\CustomerServiceEvent.class
 com\autowarehouse\entity\ChatSessionStatus.class
 com\autowarehouse\entity\Bid.class
 com\autowarehouse\service\InvoiceService.class
@@ -53,6 +54,8 @@ com\autowarehouse\entity\Category.class
 com\autowarehouse\resource\SavedItemResource$CartItemResponse.class
 com\autowarehouse\resource\SavedItemResource.class
 com\autowarehouse\dto\DashboardStatsResponse$ProductsSold.class
+com\autowarehouse\dto\NotificationEvent.class
+com\autowarehouse\dto\OrderEvent.class
 com\autowarehouse\resource\ProductResource$UpdateProductRequest.class
 com\autowarehouse\resource\AuctionResource$AuctionResponse.class
 com\autowarehouse\resource\UserResource$LoginRequest.class
@@ -75,6 +78,7 @@ com\autowarehouse\controller\ChatController$SuccessResponse.class
 com\autowarehouse\security\SecurityConfig.class
 com\autowarehouse\entity\ChatMessage.class
 com\autowarehouse\resource\CartResource$AddToCartRequest.class
+com\autowarehouse\service\WebSocketNotificationService$NotificationWebSocketDTO.class
 com\autowarehouse\resource\AuctionResource$CreateAuctionRequest.class
 com\autowarehouse\resource\CartResource$CartItemResponse.class
 com\autowarehouse\resource\OrderResource$OrderItemResponse.class
@@ -96,6 +100,7 @@ com\autowarehouse\resource\ProductResource$CountResponse.class
 com\autowarehouse\service\SupportTicketService.class
 com\autowarehouse\resource\ProductResource$SetSalePriceRequest.class
 com\autowarehouse\dto\TicketResponse.class
+com\autowarehouse\service\NotificationProducer.class
 com\autowarehouse\dto\RegisterRequest.class
 com\autowarehouse\resource\ProductResource$ProductResponse.class
 com\autowarehouse\resource\SavedItemResource$SuccessResponse.class
@@ -165,6 +170,7 @@ com\autowarehouse\dto\RecentSalesResponse.class
 com\autowarehouse\entity\SupportTicket.class
 com\autowarehouse\resource\UserResource$RegisterRequest.class
 com\autowarehouse\service\JwtService.class
+com\autowarehouse\service\WebSocketNotificationService.class
 com\autowarehouse\resource\WishlistResource$ProductResponse.class
 com\autowarehouse\entity\TicketPriority.class
 com\autowarehouse\resource\AuctionResource$AuctionDetailResponse.class
@@ -175,6 +181,7 @@ com\autowarehouse\entity\NotificationType.class
 com\autowarehouse\entity\WishlistItem.class
 com\autowarehouse\dto\WebSocketMessage.class
 META-INF\panache-archive.marker
+com\autowarehouse\service\NotificationConsumer.class
 com\autowarehouse\resource\InvoiceResource.class
 com\autowarehouse\entity\Auction$AuctionStatus.class
 com\autowarehouse\resource\SavedItemResource$UpdateQuantityRequest.class
