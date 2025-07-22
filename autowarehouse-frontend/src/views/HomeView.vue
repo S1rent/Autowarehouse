@@ -181,7 +181,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center text-yellow-500">
                 <i class="fa-solid fa-star text-sm"></i>
-                <span class="ml-1 text-sm text-gray-600">{{ product.rating || 0 }} ({{ product.reviewCount || 0 }})</span>
+                <span class="ml-1 text-sm text-gray-600">{{ formatRating(product.rating || 0) }} ({{ product.reviewCount || 0 }})</span>
               </div>
               <span class="text-sm text-gray-500">{{ product.categoryName }}</span>
             </div>
@@ -385,7 +385,29 @@ const loadPopularProducts = async () => {
   try {
     isLoadingProducts.value = true
     const response = await apiService.getPopularProducts(3) // Get 3 popular products
-    popularProducts.value = response
+    
+    // Load review stats for each product
+    const productsWithStats = await Promise.all(
+      response.map(async (product: any) => {
+        try {
+          const reviewStats = await apiService.getProductReviewStats(product.id)
+          return {
+            ...product,
+            rating: reviewStats.averageRating || 0,
+            reviewCount: reviewStats.reviewCount || 0
+          }
+        } catch (error) {
+          console.error(`Failed to load review stats for product ${product.id}:`, error)
+          return {
+            ...product,
+            rating: 0,
+            reviewCount: 0
+          }
+        }
+      })
+    )
+    
+    popularProducts.value = productsWithStats
   } catch (error) {
     console.error('Failed to load popular products:', error)
     // Keep empty array if API fails
@@ -450,13 +472,18 @@ const formatPrice = (price: number): string => {
   }).format(price)
 }
 
+// Format rating to 1 decimal place
+const formatRating = (rating: number): string => {
+  return rating.toFixed(1)
+}
+
 // Get product image with fallback
 const getProductImage = (product: any): string => {
+  if (product.imageUrls && product.imageUrls.length > 0) {
+    return product.imageUrls[0].url || product.imageUrls[0]
+  }
   if (product.imageUrl) {
     return product.imageUrl
-  }
-  if (product.images && product.images.length > 0) {
-    return product.images[0].url || product.images[0]
   }
   // Fallback to a default product image
   return 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
