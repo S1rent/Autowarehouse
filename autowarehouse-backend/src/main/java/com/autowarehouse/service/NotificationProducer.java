@@ -4,7 +4,7 @@ import com.autowarehouse.dto.NotificationEvent;
 import com.autowarehouse.dto.OrderEvent;
 import com.autowarehouse.dto.CustomerServiceEvent;
 import com.autowarehouse.entity.NotificationType;
-import io.smallrye.reactive.messaging.annotations.Channel;
+import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
 

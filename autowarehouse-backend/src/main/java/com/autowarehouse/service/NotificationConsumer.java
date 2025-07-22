@@ -24,7 +24,7 @@ public class NotificationConsumer {
     @Inject
     WebSocketNotificationService webSocketService;
 
-    @Incoming("notification-events-in")
+    @Incoming("notification-events-consumer")
     @Transactional
     public void processNotificationEvent(NotificationEvent event) {
         try {
@@ -70,7 +70,7 @@ public class NotificationConsumer {
         }
     }
 
-    @Incoming("order-events-in")
+    @Incoming("order-events-consumer")
     @Transactional
     public void processOrderEvent(OrderEvent event) {
         try {
@@ -94,7 +94,7 @@ public class NotificationConsumer {
         }
     }
 
-    @Incoming("customer-service-events-in")
+    @Incoming("customer-service-events-consumer")
     @Transactional
     public void processCustomerServiceEvent(CustomerServiceEvent event) {
         try {
