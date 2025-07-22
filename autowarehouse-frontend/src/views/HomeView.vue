@@ -216,6 +216,86 @@
       </div>
     </section>
 
+    <!-- Latest Reviews -->
+    <section class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-dark mb-4">💬 Apa Kata Pelanggan</h2>
+          <p class="text-xl text-gray-600">Testimoni terbaru dari pelanggan yang puas</p>
+        </div>
+        
+        <!-- Loading state for reviews -->
+        <div v-if="isLoadingReviews" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="i in 6" :key="i" class="bg-white rounded-2xl p-6 shadow-md animate-pulse">
+            <div class="flex items-center mb-4">
+              <div class="bg-gray-200 w-12 h-12 rounded-full mr-3"></div>
+              <div class="flex-1">
+                <div class="bg-gray-200 h-4 rounded mb-2 w-3/4"></div>
+                <div class="bg-gray-200 h-3 rounded w-1/2"></div>
+              </div>
+            </div>
+            <div class="bg-gray-200 h-20 rounded mb-4"></div>
+            <div class="bg-gray-200 h-4 rounded mb-2"></div>
+            <div class="bg-gray-200 h-3 rounded w-2/3"></div>
+          </div>
+        </div>
+        
+        <!-- Reviews from database -->
+        <div v-else-if="latestReviews.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div 
+            v-for="review in latestReviews" 
+            :key="review.id"
+            class="bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow min-h-[280px]"
+          >
+            <!-- User info and product -->
+            <div class="flex items-start mb-4">
+              <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold mr-4 flex-shrink-0">
+                {{ getInitials(review.userName) }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-dark mb-1">{{ review.userName }}</h4>
+                <p class="text-sm text-gray-500 break-words leading-tight">{{ review.productName }}</p>
+              </div>
+            </div>
+            
+            <!-- Rating -->
+            <div class="flex items-center mb-4">
+              <div class="flex text-yellow-500 mr-2">
+                <i v-for="star in 5" :key="star" :class="[
+                  'fa-star text-sm',
+                  star <= review.rating ? 'fa-solid' : 'fa-regular'
+                ]"></i>
+              </div>
+              <span class="text-sm text-gray-600">{{ formatRating(review.rating) }}</span>
+            </div>
+            
+            <!-- Review title and comment -->
+            <div class="mb-4 flex-1">
+              <h5 class="font-semibold text-dark mb-2 line-clamp-2 leading-tight">{{ review.title }}</h5>
+              <p class="text-gray-600 text-sm line-clamp-4 leading-relaxed">{{ review.comment }}</p>
+            </div>
+            
+            <!-- Verified purchase badge -->
+            <div class="flex items-center justify-between mt-auto pt-2">
+              <span v-if="review.isVerifiedPurchase" class="inline-flex items-center text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full flex-shrink-0">
+                <i class="fa-solid fa-check-circle mr-1"></i>
+                Verified
+              </span>
+              <span class="text-xs text-gray-400 ml-2">{{ formatDate(review.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fallback if no reviews -->
+        <div v-else class="text-center py-12">
+          <div class="text-gray-500 mb-4">
+            <i class="fa-solid fa-comments text-4xl"></i>
+          </div>
+          <p class="text-gray-600">Belum ada review dari pelanggan</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Cara Kerja -->
     <section class="py-16 bg-white">
       <div class="container mx-auto px-4">
@@ -300,6 +380,10 @@ const isLoadingCategories = ref(true)
 const popularProducts = ref<any[]>([])
 const isLoadingProducts = ref(true)
 
+// Latest reviews from database
+const latestReviews = ref<any[]>([])
+const isLoadingReviews = ref(true)
+
 // Category icons mapping
 const categoryIcons: { [key: string]: { icon: string; color: string; bgColor: string } } = {
   'processor': { icon: 'fa-microchip', color: 'text-blue-600', bgColor: 'bg-blue-100' },
@@ -348,7 +432,8 @@ onMounted(async () => {
   await Promise.all([
     loadActiveProductCount(),
     loadCategories(),
-    loadPopularProducts()
+    loadPopularProducts(),
+    loadLatestReviews()
   ])
 })
 
@@ -505,6 +590,53 @@ const handleCategoryImageError = (event: Event) => {
     if (imageContainer) {
       imageContainer.style.display = 'none'
     }
+  }
+}
+
+// Load latest reviews from database
+const loadLatestReviews = async () => {
+  try {
+    isLoadingReviews.value = true
+    const response = await apiService.getRecentReviews(6) // Get 6 latest reviews
+    latestReviews.value = response
+  } catch (error) {
+    console.error('Failed to load latest reviews:', error)
+    // Keep empty array if API fails
+    latestReviews.value = []
+  } finally {
+    isLoadingReviews.value = false
+  }
+}
+
+// Get user initials from name
+const getInitials = (name: string): string => {
+  if (!name) return 'U'
+  const names = name.split(' ')
+  if (names.length >= 2) {
+    return (names[0][0] + names[1][0]).toUpperCase()
+  }
+  return name[0].toUpperCase()
+}
+
+// Format date to relative time
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+  
+  if (diffInDays === 0) {
+    return 'Hari ini'
+  } else if (diffInDays === 1) {
+    return 'Kemarin'
+  } else if (diffInDays < 7) {
+    return `${diffInDays} hari lalu`
+  } else if (diffInDays < 30) {
+    const weeks = Math.floor(diffInDays / 7)
+    return `${weeks} minggu lalu`
+  } else {
+    const months = Math.floor(diffInDays / 30)
+    return `${months} bulan lalu`
   }
 }
 
