@@ -7,6 +7,7 @@ import com.autowarehouse.entity.Notification;
 import com.autowarehouse.entity.User;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,9 +25,22 @@ public class NotificationConsumer {
     @Inject
     WebSocketNotificationService webSocketService;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @Incoming("notification-events-consumer")
     @Transactional
-    public void processNotificationEvent(NotificationEvent event) {
+    public void processNotificationEvent(String eventJson) {
+        try {
+            NotificationEvent event = objectMapper.readValue(eventJson, NotificationEvent.class);
+            processNotificationEventInternal(event);
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to deserialize notification event: %s", eventJson);
+            throw new RuntimeException("Failed to process notification event", e);
+        }
+    }
+
+    private void processNotificationEventInternal(NotificationEvent event) {
         try {
             LOG.infof("Processing notification event: %s for user %d", event.getEventType(), event.getUserId());
 
@@ -72,7 +86,17 @@ public class NotificationConsumer {
 
     @Incoming("order-events-consumer")
     @Transactional
-    public void processOrderEvent(OrderEvent event) {
+    public void processOrderEvent(String eventJson) {
+        try {
+            OrderEvent event = objectMapper.readValue(eventJson, OrderEvent.class);
+            processOrderEventInternal(event);
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to deserialize order event: %s", eventJson);
+            throw new RuntimeException("Failed to process order event", e);
+        }
+    }
+
+    private void processOrderEventInternal(OrderEvent event) {
         try {
             LOG.infof("Processing order event: %s for order %d", event.getEventType(), event.getOrderId());
 
@@ -96,7 +120,17 @@ public class NotificationConsumer {
 
     @Incoming("customer-service-events-consumer")
     @Transactional
-    public void processCustomerServiceEvent(CustomerServiceEvent event) {
+    public void processCustomerServiceEvent(String eventJson) {
+        try {
+            CustomerServiceEvent event = objectMapper.readValue(eventJson, CustomerServiceEvent.class);
+            processCustomerServiceEventInternal(event);
+        } catch (Exception e) {
+            LOG.errorf(e, "Failed to deserialize customer service event: %s", eventJson);
+            throw new RuntimeException("Failed to process customer service event", e);
+        }
+    }
+
+    private void processCustomerServiceEventInternal(CustomerServiceEvent event) {
         try {
             LOG.infof("Processing customer service event: %s for chat %d", event.getEventType(), event.getChatId());
 
