@@ -639,18 +639,18 @@ const loadOrders = async () => {
     await orderStore.fetchUserOrders()
     
     // Load order details for orders that don't have items
-    const ordersToLoad = orderStore.userOrders.filter(order => !order.items || order.items.length === 0)
-    for (const order of ordersToLoad) {
-      try {
-        await orderStore.fetchOrder(order.id)
-        const orderDetail = orderStore.currentOrder
-        if (orderDetail && orderDetail.items) {
-          order.items = orderDetail.items
-        }
-      } catch (error) {
-        console.error(`Failed to load details for order ${order.id}:`, error)
-      }
-    }
+    // const ordersToLoad = orderStore.userOrders.filter(order => !order.items || order.items.length === 0)
+    // for (const order of ordersToLoad) {
+    //   try {
+    //     await orderStore.fetchOrder(order.id)
+    //     const orderDetail = orderStore.currentOrder
+    //     if (orderDetail && orderDetail.items) {
+    //       order.items = orderDetail.items
+    //     }
+    //   } catch (error) {
+    //     console.error(`Failed to load details for order ${order.id}:`, error)
+    //   }
+    // }
     
     // Load reviews for all products in orders
     // await loadProductReviews(orderStore.userOrders)
