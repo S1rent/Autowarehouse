@@ -44,7 +44,7 @@
       <div class="container mx-auto px-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <div class="text-3xl font-bold text-primary mb-2">50K+</div>
+            <div class="text-3xl font-bold text-primary mb-2">{{ formatProductCount(activeProductCount) }}+</div>
             <div class="text-gray-600">Produk Tersedia</div>
           </div>
           <div>
@@ -66,54 +66,64 @@
     <!-- Kategori Produk -->
     <section class="py-20 bg-gray-50">
       <div class="container mx-auto px-4">
-        <div class="text-center mb-16">
-          <h2 class="text-4xl font-bold text-dark mb-4">Kategori Produk</h2>
-          <p class="text-xl text-gray-600">Temukan komponen dan aksesoris PC terbaik</p>
+        <div class="flex justify-between items-center mb-16">
+          <div class="text-center flex-1">
+            <h2 class="text-4xl font-bold text-dark mb-4">Kategori Produk</h2>
+            <p class="text-xl text-gray-600">Temukan komponen dan aksesoris PC terbaik</p>
+          </div>
+          
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-microchip text-2xl text-primary group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">Processor</h3>
-            <p class="text-sm text-gray-500 text-center">Intel & AMD</p>
-          </div>
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-memory text-2xl text-green-600 group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">RAM</h3>
-            <p class="text-sm text-gray-500 text-center">DDR4 & DDR5</p>
-          </div>
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-purple-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-hard-drive text-2xl text-purple-600 group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">Storage</h3>
-            <p class="text-sm text-gray-500 text-center">SSD & HDD</p>
-          </div>
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-red-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-display text-2xl text-red-600 group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">VGA Card</h3>
-            <p class="text-sm text-gray-500 text-center">NVIDIA & AMD</p>
-          </div>
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-yellow-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-keyboard text-2xl text-yellow-600 group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">Gaming</h3>
-            <p class="text-sm text-gray-500 text-center">Keyboard & Mouse</p>
-          </div>
-          <div class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group">
-            <div class="bg-indigo-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors">
-              <i class="fa-solid fa-headset text-2xl text-indigo-600 group-hover:text-white"></i>
-            </div>
-            <h3 class="font-bold text-dark text-center mb-2">Audio</h3>
-            <p class="text-sm text-gray-500 text-center">Headset & Speaker</p>
+        
+        <!-- Loading state -->
+        <div v-if="isLoadingCategories" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div v-for="i in 6" :key="i" class="bg-white p-8 rounded-2xl shadow-md animate-pulse">
+            <div class="bg-gray-200 w-16 h-16 rounded-xl mx-auto mb-4"></div>
+            <div class="bg-gray-200 h-4 rounded mx-auto mb-2 w-20"></div>
+            <div class="bg-gray-200 h-3 rounded mx-auto w-16"></div>
           </div>
         </div>
+        
+        <!-- Categories from database -->
+        <div v-else-if="categories.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <router-link 
+            v-for="category in categories" 
+            :key="category.id"
+            :to="`/products?category=${category.id}`"
+            class="category-card bg-white p-8 rounded-2xl shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group block"
+          >
+            <!-- Use imageUrl if available, otherwise use icon -->
+            <div v-if="category.imageUrl" class="w-16 h-16 rounded-xl mx-auto mb-4 overflow-hidden">
+              <img 
+                :src="category.imageUrl" 
+                :alt="category.name" 
+                class="w-full h-full object-cover"
+                @error="handleCategoryImageError"
+              >
+            </div>
+            <div v-else :class="[getCategoryIcon(category).bgColor, 'w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary transition-colors']">
+              <i :class="['fa-solid', getCategoryIcon(category).icon, 'text-2xl', getCategoryIcon(category).color, 'group-hover:text-white']"></i>
+            </div>
+            <h3 class="font-bold text-dark text-center mb-2">{{ category.name }}</h3>
+            <p class="text-sm text-gray-500 text-center">{{ category.description || 'Berbagai pilihan terbaik' }}</p>
+          </router-link>
+        </div>
+        
+        <!-- Fallback if no categories -->
+        <div v-else class="text-center py-12">
+          <div class="text-gray-500 mb-4">
+            <i class="fa-solid fa-box-open text-4xl"></i>
+          </div>
+          <p class="text-gray-600">Kategori produk akan segera tersedia</p>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <router-link 
+          to="/categories" 
+          class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+        >
+          <span class="mr-2">Lihat Semua Kategori</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </router-link>
       </div>
     </section>
 
@@ -132,24 +142,72 @@
             </div> -->
           </div>
         </div>
-        <div class="grid md:grid-cols-3 gap-6">
+        <!-- Loading state for products -->
+        <div v-if="isLoadingProducts" class="grid md:grid-cols-3 gap-6">
+          <div v-for="i in 3" :key="i" class="bg-white rounded-2xl p-6 shadow-xl animate-pulse">
+            <div class="bg-gray-200 w-full h-40 rounded-xl mb-4"></div>
+            <div class="bg-gray-200 h-4 rounded mb-2 w-3/4"></div>
+            <div class="bg-gray-200 h-6 rounded mb-3 w-1/2"></div>
+            <div class="bg-gray-200 h-8 rounded w-full"></div>
+          </div>
+        </div>
+        
+        <!-- Products from database -->
+        <div v-else-if="popularProducts.length > 0" class="grid md:grid-cols-3 gap-6">
+          <router-link 
+            v-for="product in popularProducts" 
+            :key="product.id"
+            :to="`/products/${product.id}`"
+            class="bg-white rounded-2xl p-6 text-dark shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 block"
+          >
+            <div class="relative mb-4">
+              <img 
+                :src="getProductImage(product)" 
+                :alt="product.name" 
+                class="w-full h-40 object-cover rounded-xl"
+                @error="handleImageError"
+              >
+              <div v-if="product.isOnSale" class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
+                Sale
+              </div>
+            </div>
+            <h3 class="font-bold mb-2 line-clamp-2">{{ product.name }}</h3>
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-2xl font-bold text-primary">{{ formatPrice(product.price) }}</span>
+              <span v-if="product.originalPrice && product.originalPrice > product.price" class="text-gray-500 line-through text-sm">
+                {{ formatPrice(product.originalPrice) }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center text-yellow-500">
+                <i class="fa-solid fa-star text-sm"></i>
+                <span class="ml-1 text-sm text-gray-600">{{ product.rating || 0 }} ({{ product.reviewCount || 0 }})</span>
+              </div>
+              <span class="text-sm text-gray-500">{{ product.categoryName }}</span>
+            </div>
+          </router-link>
+        </div>
+        
+        <!-- Fallback products -->
+        <!-- <div v-else class="grid md:grid-cols-3 gap-6">
           <div v-for="product in flashSaleProducts" :key="product.id" class="bg-white rounded-2xl p-6 text-dark shadow-xl">
             <div class="relative mb-4">
               <img :src="product.image" :alt="product.name" class="w-full h-40 object-cover rounded-xl">
-              <!-- <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
+              <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-bold">
                 -{{ product.discount }}%
-              </div> -->
+              </div>
             </div>
             <h3 class="font-bold mb-2">{{ product.name }}</h3>
             <div class="flex items-center space-x-2 mb-3">
               <span class="text-2xl font-bold text-primary">{{ formatPrice(product.salePrice) }}</span>
-              <!-- <span class="text-gray-500 line-through">{{ formatPrice(product.originalPrice) }}</span> -->
+              <span class="text-gray-500 line-through">{{ formatPrice(product.originalPrice) }}</span>
             </div>
             <button class="w-full bg-primary text-white py-2 rounded-xl hover:bg-blue-700 transition-colors">
               Beli Sekarang
             </button>
           </div>
-        </div>
+        </div> -->
+        
         <div class="text-center mt-8">
           <router-link to="/products" class="bg-secondary text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors inline-block">
             Lihat Semua Produk
@@ -196,11 +254,20 @@
       <div class="container mx-auto px-4 text-center">
         <h2 class="text-4xl font-bold mb-4">Siap Memulai Belanja?</h2>
         <p class="text-xl mb-8 opacity-90">Bergabunglah dengan ribuan pengguna yang telah merasakan pengalaman belanja terbaik</p>
-        <div class="flex justify-center space-x-4">
+        
+        <!-- Show different buttons based on authentication status -->
+        <div v-if="!authStore.isAuthenticated" class="flex justify-center space-x-4">
           <router-link to="/login" class="bg-accent text-white px-8 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
             Daftar Gratis
           </router-link>
           <router-link to="/products" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors">
+            Mulai Belanja
+          </router-link>
+        </div>
+        
+        <!-- Show only "Mulai Belanja" button for authenticated users -->
+        <div v-else class="flex justify-center">
+          <router-link to="/products" class="bg-accent text-white px-8 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
             Mulai Belanja
           </router-link>
         </div>
@@ -215,16 +282,126 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { apiService, type Category } from '@/services/api'
 import UserNavbar from '../components/UserNavbar.vue'
 import GuestNavbar from '../components/GuestNavbar.vue'
 import Footer from '../components/Footer.vue'
 
 const authStore = useAuthStore()
 
-// Initialize auth on component mount
-onMounted(() => {
+// Product count from database
+const activeProductCount = ref(0)
+
+// Categories from database
+const categories = ref<Category[]>([])
+const isLoadingCategories = ref(true)
+
+// Popular products from database
+const popularProducts = ref<any[]>([])
+const isLoadingProducts = ref(true)
+
+// Category icons mapping
+const categoryIcons: { [key: string]: { icon: string; color: string; bgColor: string } } = {
+  'processor': { icon: 'fa-microchip', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  'cpu': { icon: 'fa-microchip', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  'ram': { icon: 'fa-memory', color: 'text-green-600', bgColor: 'bg-green-100' },
+  'memory': { icon: 'fa-memory', color: 'text-green-600', bgColor: 'bg-green-100' },
+  'storage': { icon: 'fa-hard-drive', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  'ssd': { icon: 'fa-hard-drive', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  'hdd': { icon: 'fa-hard-drive', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  'vga': { icon: 'fa-display', color: 'text-red-600', bgColor: 'bg-red-100' },
+  'gpu': { icon: 'fa-display', color: 'text-red-600', bgColor: 'bg-red-100' },
+  'graphics': { icon: 'fa-display', color: 'text-red-600', bgColor: 'bg-red-100' },
+  'gaming': { icon: 'fa-gamepad', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  'keyboard': { icon: 'fa-keyboard', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  'mouse': { icon: 'fa-computer-mouse', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  'audio': { icon: 'fa-headset', color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  'headset': { icon: 'fa-headset', color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  'speaker': { icon: 'fa-volume-high', color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  'motherboard': { icon: 'fa-microchip', color: 'text-teal-600', bgColor: 'bg-teal-100' },
+  'power': { icon: 'fa-plug', color: 'text-orange-600', bgColor: 'bg-orange-100' },
+  'psu': { icon: 'fa-plug', color: 'text-orange-600', bgColor: 'bg-orange-100' },
+  'case': { icon: 'fa-computer', color: 'text-gray-600', bgColor: 'bg-gray-100' },
+  'cooling': { icon: 'fa-fan', color: 'text-cyan-600', bgColor: 'bg-cyan-100' },
+  'monitor': { icon: 'fa-desktop', color: 'text-pink-600', bgColor: 'bg-pink-100' }
+}
+
+// Get category icon based on name or slug
+const getCategoryIcon = (category: Category) => {
+  const slug = category.slug.toLowerCase()
+  const name = category.name.toLowerCase()
+  
+  // Try to match by slug first, then by name
+  for (const [key, value] of Object.entries(categoryIcons)) {
+    if (slug.includes(key) || name.includes(key)) {
+      return value
+    }
+  }
+  
+  // Default icon
+  return { icon: 'fa-cube', color: 'text-gray-600', bgColor: 'bg-gray-100' }
+}
+
+// Initialize auth and load data on component mount
+onMounted(async () => {
   authStore.initializeAuth()
+  await Promise.all([
+    loadActiveProductCount(),
+    loadCategories(),
+    loadPopularProducts()
+  ])
 })
+
+// Load active product count from database
+const loadActiveProductCount = async () => {
+  try {
+    const response = await apiService.getActiveProductCount()
+    activeProductCount.value = response.count
+  } catch (error) {
+    console.error('Failed to load active product count:', error)
+    // Keep default value if API fails
+    activeProductCount.value = 100
+  }
+}
+
+// Load categories from database
+const loadCategories = async () => {
+  try {
+    isLoadingCategories.value = true
+    const response = await apiService.getRootCategories()
+    // Limit to 6 categories as requested
+    categories.value = response.slice(0, 6)
+  } catch (error) {
+    console.error('Failed to load categories:', error)
+    // Keep empty array if API fails
+    categories.value = []
+  } finally {
+    isLoadingCategories.value = false
+  }
+}
+
+// Load popular products from database
+const loadPopularProducts = async () => {
+  try {
+    isLoadingProducts.value = true
+    const response = await apiService.getPopularProducts(3) // Get 3 popular products
+    popularProducts.value = response
+  } catch (error) {
+    console.error('Failed to load popular products:', error)
+    // Keep empty array if API fails
+    popularProducts.value = []
+  } finally {
+    isLoadingProducts.value = false
+  }
+}
+
+// Format number with K suffix
+const formatProductCount = (count: number): string => {
+  if (count >= 1000) {
+    return Math.floor(count / 1000) + 'K+'
+  }
+  return count.toString()
+}
 
 // Countdown timer
 const countdown = reactive({
@@ -271,6 +448,37 @@ const formatPrice = (price: number): string => {
     currency: 'IDR',
     minimumFractionDigits: 0
   }).format(price)
+}
+
+// Get product image with fallback
+const getProductImage = (product: any): string => {
+  if (product.imageUrl) {
+    return product.imageUrl
+  }
+  if (product.images && product.images.length > 0) {
+    return product.images[0].url || product.images[0]
+  }
+  // Fallback to a default product image
+  return 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+}
+
+// Handle image error
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+}
+
+// Handle category image error - fallback to icon
+const handleCategoryImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  const categoryCard = img.closest('.category-card')
+  if (categoryCard) {
+    // Hide the image container and show icon fallback
+    const imageContainer = img.closest('div')
+    if (imageContainer) {
+      imageContainer.style.display = 'none'
+    }
+  }
 }
 
 // Update countdown timer

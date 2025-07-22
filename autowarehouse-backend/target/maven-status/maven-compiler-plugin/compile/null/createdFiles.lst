@@ -86,6 +86,7 @@ com\autowarehouse\resource\OrderResource$CancelOrderRequest.class
 com\autowarehouse\resource\WishlistResource$SuccessResponse.class
 com\autowarehouse\controller\AdminDashboardController.class
 com\autowarehouse\resource\UserResource$ForgotPasswordRequest.class
+com\autowarehouse\resource\ProductResource$CountResponse.class
 com\autowarehouse\service\SupportTicketService.class
 com\autowarehouse\resource\ProductResource$SetSalePriceRequest.class
 com\autowarehouse\dto\TicketResponse.class

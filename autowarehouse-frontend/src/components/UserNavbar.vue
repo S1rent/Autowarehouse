@@ -29,6 +29,12 @@
           >
             Products
           </router-link>
+          <router-link 
+            to="/order-history" 
+            class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Order History
+          </router-link>
           <!-- <router-link 
             to="/auctions" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -118,14 +124,6 @@
               >
                 <i class="fa-solid fa-user mr-2"></i>
                 Profile
-              </router-link>
-              <router-link 
-                to="/order-history" 
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                @click="userMenuOpen = false"
-              >
-                <i class="fa-solid fa-shopping-bag mr-2"></i>
-                Order History
               </router-link>
               <!-- <router-link 
                 to="/bid-history" 

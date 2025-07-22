@@ -29,12 +29,12 @@
           >
             Products
           </router-link>
-          <router-link 
+          <!-- <router-link 
             to="/auctions" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
             Live Auctions
-          </router-link>
+          </router-link> -->
           <router-link 
             to="/customer-service" 
             class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"

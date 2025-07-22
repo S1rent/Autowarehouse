@@ -593,6 +593,11 @@ class ApiService {
     return response.data
   }
 
+  async getActiveProductCount(): Promise<{ count: number }> {
+    const response = await api.get<{ count: number }>('/products/active/count')
+    return response.data
+  }
+
   async getLowStockProducts(threshold: number = 10): Promise<Product[]> {
     const response = await api.get<Product[]>(`/products/admin/low-stock?threshold=${threshold}`)
     return response.data

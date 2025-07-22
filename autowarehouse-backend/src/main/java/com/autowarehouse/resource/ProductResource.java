@@ -149,6 +149,19 @@ public class ProductResource {
         return Response.ok(response).build();
     }
 
+    @GET
+    @Path("/active/count")
+    public Response getActiveProductCount() {
+        try {
+            long count = productService.getActiveProductsCount();
+            return Response.ok(new CountResponse(count)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Failed to get active product count"))
+                    .build();
+        }
+    }
+
     // Admin endpoints
     @POST
     @Path("/admin")
@@ -442,6 +455,14 @@ public class ProductResource {
 
         public SuccessResponse(String message) {
             this.message = message;
+        }
+    }
+
+    public static class CountResponse {
+        public long count;
+
+        public CountResponse(long count) {
+            this.count = count;
         }
     }
 }
