@@ -63,7 +63,7 @@
           >
             <i class="fa-solid fa-bell text-lg"></i>
             <span v-if="notificationCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {{ notificationCount }}
+              <!-- {{ notificationCount }} -->
             </span>
           </router-link>
 
@@ -172,7 +172,7 @@
           @click="mobileMenuOpen = false"
         >
           <i class="fa-solid fa-bell mr-3"></i>
-          Notifications ({{ notificationCount }})
+          <!-- Notifications ({{ notificationCount }}) -->
         </router-link>
         
         <div class="border-t border-gray-200 pt-4 pb-3">

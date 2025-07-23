@@ -13,8 +13,24 @@
           <!-- Customer List -->
           <div class="w-80 bg-white border-r border-gray-200">
             <div class="p-4 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">Customer Chats</h3>
-              <p class="text-sm text-gray-500">{{ chatSessions.length }} active conversations</p>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Customer Chats</h3>
+                  <p class="text-sm text-gray-500">{{ chatSessions.length }} active conversations</p>
+                </div>
+                <button 
+                  @click="refreshChatSessions"
+                  :disabled="isRefreshing"
+                  :class="isRefreshing ? 'animate-spin' : 'hover:bg-gray-100'"
+                  class="p-2 text-gray-500 hover:text-gray-700 rounded-lg transition-colors"
+                  title="Refresh chat sessions"
+                >
+                  <i class="fa-solid fa-refresh text-lg"></i>
+                </button>
+              </div>
+              <div v-if="lastRefreshTime" class="text-xs text-gray-400 mt-1">
+                Last updated: {{ formatTime(lastRefreshTime) }}
+              </div>
             </div>
             
             <div class="overflow-y-auto h-full">
@@ -206,6 +222,11 @@ const isTyping = ref(false)
 const typingTimeout = ref<NodeJS.Timeout | null>(null)
 const messagesContainer = ref<HTMLElement | null>(null)
 
+// Refresh state
+const isRefreshing = ref(false)
+const lastRefreshTime = ref<string | null>(null)
+const autoRefreshInterval = ref<NodeJS.Timeout | null>(null)
+
 // Real data from backend
 const chatSessions = ref<ChatSession[]>([])
 
@@ -277,6 +298,11 @@ const handleWebSocketMessage = (message: any) => {
           if (!newMsg.isAdmin && selectedCustomer.value?.customerId !== newMsg.customerId) {
             session.unreadCount++
           }
+          
+          // Re-sort chat sessions to move this conversation to the top
+          chatSessions.value.sort((a, b) => 
+            new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+          )
         }
         
         scrollToBottom()
@@ -402,6 +428,11 @@ const sendMessage = () => {
     selectedCustomer.value.lastMessage = text
     selectedCustomer.value.lastMessageTime = new Date().toISOString()
     
+    // Re-sort chat sessions to move this conversation to the top
+    chatSessions.value.sort((a, b) => 
+      new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    )
+    
     newMessage.value = ''
   } catch (error) {
     console.error('Error sending message:', error)
@@ -495,7 +526,7 @@ const loadTickets = async () => {
       }
     })
     
-    // Convert map to array and sort by most recent activity
+    // Convert map to array and sort by most recent activity (latest message first)
     chatSessions.value = Array.from(customerMap.values()).sort((a, b) => 
       new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
     )
@@ -525,10 +556,62 @@ const loadTickets = async () => {
   }
 }
 
+// Refresh Methods
+const refreshChatSessions = async () => {
+  if (isRefreshing.value) return
+  
+  console.log('Manual refresh triggered')
+  isRefreshing.value = true
+  
+  try {
+    await loadTickets()
+    lastRefreshTime.value = new Date().toISOString()
+    console.log('Chat sessions refreshed successfully')
+  } catch (error) {
+    console.error('Error refreshing chat sessions:', error)
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
+const setupAutoRefresh = () => {
+  // Clear existing interval if any
+  if (autoRefreshInterval.value) {
+    clearInterval(autoRefreshInterval.value)
+  }
+  
+  // Set up auto-refresh every 1 minute (60000ms)
+  autoRefreshInterval.value = setInterval(async () => {
+    console.log('Auto-refresh triggered')
+    
+    // Only auto-refresh if not currently refreshing manually
+    if (!isRefreshing.value) {
+      try {
+        await loadTickets()
+        lastRefreshTime.value = new Date().toISOString()
+        console.log('Auto-refresh completed')
+      } catch (error) {
+        console.error('Error during auto-refresh:', error)
+      }
+    }
+  }, 60000) // 1 minute
+  
+  console.log('Auto-refresh setup: every 1 minute')
+}
+
+const stopAutoRefresh = () => {
+  if (autoRefreshInterval.value) {
+    clearInterval(autoRefreshInterval.value)
+    autoRefreshInterval.value = null
+    console.log('Auto-refresh stopped')
+  }
+}
+
 onMounted(() => {
   console.log('Admin Customer Service Chat loaded')
   loadTickets()
   initWebSocket()
+  setupAutoRefresh()
 })
 
 onUnmounted(() => {
@@ -538,6 +621,7 @@ onUnmounted(() => {
   if (typingTimeout.value) {
     clearTimeout(typingTimeout.value)
   }
+  stopAutoRefresh()
 })
 </script>
 
