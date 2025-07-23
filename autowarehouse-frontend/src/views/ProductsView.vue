@@ -199,7 +199,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
@@ -212,6 +212,7 @@ import { debounce } from '@/utils/debounce'
 import Footer from '../components/Footer.vue'
 
 const router = useRouter()
+const route = useRoute()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
@@ -407,6 +408,16 @@ const debouncedSearch = debounce(() => {
 // Initialize on mount
 onMounted(async () => {
   await loadCategories()
+  
+  // Check for category parameter in URL and set filter
+  const categoryParam = route.query.category
+  if (categoryParam) {
+    const categoryId = parseInt(categoryParam as string)
+    if (!isNaN(categoryId)) {
+      filters.categories = [categoryId]
+    }
+  }
+  
   await loadProducts()
   await wishlistStore.loadWishlist()
 })
@@ -424,6 +435,19 @@ watch(searchQuery, () => {
 // Watch for view mode changes and save to localStorage
 watch(viewMode, (newMode) => {
   localStorage.setItem('products-view-mode', newMode)
+})
+
+// Watch for route changes to handle category parameter updates
+watch(() => route.query.category, (newCategoryParam) => {
+  if (newCategoryParam) {
+    const categoryId = parseInt(newCategoryParam as string)
+    if (!isNaN(categoryId)) {
+      filters.categories = [categoryId]
+    }
+  } else {
+    // Clear category filter if no category parameter
+    filters.categories = []
+  }
 })
 
 // Computed

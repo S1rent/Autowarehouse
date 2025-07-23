@@ -302,6 +302,11 @@ public class OrderService {
 
     @Transactional
     public void updateOrderStatus(Long orderId, Order.OrderStatus newStatus, String changedBy, String notes) {
+        updateOrderStatus(orderId, newStatus, changedBy, notes, null);
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, Order.OrderStatus newStatus, String changedBy, String notes, User processedByAdmin) {
         Order order = Order.findById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found");
@@ -321,23 +326,23 @@ public class OrderService {
                 case CONFIRMED:
                     // Send Kafka notification for admin (new order confirmed)
                     notificationProducer.sendOrderConfirmedNotification(order.id, order.user.id);
-                    // Also send traditional notification
-                    notificationService.notifyOrderConfirmed(order.user, order);
+                    // Also send traditional notification with admin context
+                    notificationService.notifyOrderConfirmed(order.user, order, processedByAdmin);
                     break;
                 case SHIPPED:
                     // Send Kafka notification for customer (order shipped)
                     notificationProducer.sendOrderShippedNotification(order.id, order.user.id);
-                    notificationService.notifyOrderShipped(order.user, order);
+                    notificationService.notifyOrderShipped(order.user, order, processedByAdmin);
                     break;
                 case DELIVERED:
                     // Send Kafka notification for customer (order delivered)
                     notificationProducer.sendOrderDeliveredNotification(order.id, order.user.id);
-                    notificationService.notifyOrderDelivered(order.user, order);
+                    notificationService.notifyOrderDelivered(order.user, order, processedByAdmin);
                     break;
                 case CANCELLED:
                     // Send Kafka notification for customer (order cancelled)
                     notificationProducer.sendOrderCancelledNotification(order.id, order.user.id);
-                    notificationService.notifyOrderCancelled(order.user, order);
+                    notificationService.notifyOrderCancelled(order.user, order, processedByAdmin);
                     // Restore product stock if order was cancelled
                     if (oldStatus == Order.OrderStatus.PENDING || oldStatus == Order.OrderStatus.CONFIRMED) {
                         restoreProductStock(order);
@@ -347,6 +352,12 @@ public class OrderService {
                     // Send Kafka notification for customer (order refunded)
                     notificationProducer.sendOrderRefundedNotification(order.id, order.user.id);
                     break;
+            }
+            
+            // Send general status change notification
+            if (processedByAdmin != null) {
+                notificationService.notifyOrderStatusChanged(order.user, order, 
+                    oldStatus.toString(), newStatus.toString(), processedByAdmin);
             }
             
             // Send order event to Kafka for analytics/tracking

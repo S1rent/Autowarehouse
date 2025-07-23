@@ -40,30 +40,71 @@ public class AdminNotificationResource {
                                       @QueryParam("size") @DefaultValue("50") int size,
                                       @QueryParam("type") String type) {
         try {
+            // First, get all admin user IDs
+            List<User> adminUsers = User.find("role = 'ADMIN'").list();
+            if (adminUsers.isEmpty()) {
+                LOG.warn("No admin users found in the system");
+                return Response.ok(new AdminNotificationListResponse(List.of(), 0, page, size)).build();
+            }
+
+            List<Long> adminUserIds = adminUsers.stream()
+                .map(user -> user.id)
+                .toList();
+
             List<Notification> notifications;
+            long totalCount;
             
             if (type != null && !type.trim().isEmpty()) {
                 try {
                     NotificationType notificationType = NotificationType.valueOf(type.toUpperCase());
-                    notifications = Notification.find("type = ?1 order by createdAt desc", notificationType)
-                        .page(page, size).list();
+                    // Query notifications for admin users with specific type
+                    notifications = Notification.find(
+                        "user.id in ?1 and type = ?2 order by createdAt desc", 
+                        adminUserIds, notificationType
+                    ).page(page, size).list();
+                    
+                    totalCount = Notification.count(
+                        "user.id in ?1 and type = ?2", 
+                        adminUserIds, notificationType
+                    );
                 } catch (IllegalArgumentException e) {
-                    notifications = Notification.find("order by createdAt desc")
-                        .page(page, size).list();
+                    LOG.warnf("Invalid notification type: %s, fetching all admin notifications", type);
+                    // Query all notifications for admin users
+                    notifications = Notification.find(
+                        "user.id in ?1 order by createdAt desc", 
+                        adminUserIds
+                    ).page(page, size).list();
+                    
+                    totalCount = Notification.count("user.id in ?1", adminUserIds);
                 }
             } else {
-                notifications = Notification.find("order by createdAt desc")
-                    .page(page, size).list();
+                // Query all notifications for admin users
+                notifications = Notification.find(
+                    "user.id in ?1 order by createdAt desc", 
+                    adminUserIds
+                ).page(page, size).list();
+                
+                totalCount = Notification.count("user.id in ?1", adminUserIds);
             }
 
-            // Convert to response DTOs
+            // Remove duplicates based on title and message combination
             List<AdminNotificationResponse> notificationResponses = notifications.stream()
                 .map(AdminNotificationResponse::new)
+                .collect(java.util.stream.Collectors.toMap(
+                    // Key: combination of title and message to identify duplicates
+                    notif -> notif.title + "|" + notif.message,
+                    // Value: the notification response
+                    notif -> notif,
+                    // Merge function: keep the most recent one (first in the sorted list)
+                    (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
+                .sorted((a, b) -> b.createdAt.compareTo(a.createdAt)) // Sort by creation time descending
                 .toList();
 
-            long totalCount = type != null && !type.trim().isEmpty() ? 
-                Notification.count("type = ?1", NotificationType.valueOf(type.toUpperCase())) : 
-                Notification.count();
+            LOG.infof("Found %d admin notifications (after removing duplicates: %d)", 
+                notifications.size(), notificationResponses.size());
 
             AdminNotificationListResponse response = new AdminNotificationListResponse(
                 notificationResponses, 
@@ -75,7 +116,7 @@ public class AdminNotificationResource {
             return Response.ok(response).build();
             
         } catch (Exception e) {
-            LOG.errorf(e, "Error fetching all notifications for admin");
+            LOG.errorf(e, "Error fetching admin notifications");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(new ErrorResponse("Error fetching notifications: " + e.getMessage())).build();
         }
@@ -85,17 +126,33 @@ public class AdminNotificationResource {
     @Path("/stats")
     public Response getNotificationStats(@Context SecurityContext ctx) {
         try {
-            long totalCount = Notification.count();
-            long readCount = Notification.count("isRead = true");
+            // First, get all admin user IDs
+            List<User> adminUsers = User.find("role = 'ADMIN'").list();
+            if (adminUsers.isEmpty()) {
+                LOG.warn("No admin users found in the system");
+                AdminNotificationStatsResponse stats = new AdminNotificationStatsResponse(0, 0, 0, 0, 0);
+                return Response.ok(stats).build();
+            }
+
+            List<Long> adminUserIds = adminUsers.stream()
+                .map(user -> user.id)
+                .toList();
+
+            // Count only notifications for admin users
+            long totalCount = Notification.count("user.id in ?1", adminUserIds);
+            long readCount = Notification.count("user.id in ?1 and isRead = true", adminUserIds);
             long unreadCount = totalCount - readCount;
             
-            // Get today's notifications
+            // Get today's notifications for admin users
             LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
-            long todayCount = Notification.count("createdAt >= ?1", startOfDay);
+            long todayCount = Notification.count("user.id in ?1 and createdAt >= ?2", adminUserIds, startOfDay);
             
-            // Get this week's notifications
+            // Get this week's notifications for admin users
             LocalDateTime startOfWeek = LocalDateTime.now().minusDays(7);
-            long weekCount = Notification.count("createdAt >= ?1", startOfWeek);
+            long weekCount = Notification.count("user.id in ?1 and createdAt >= ?2", adminUserIds, startOfWeek);
+
+            LOG.infof("Admin notification stats - Total: %d, Read: %d, Unread: %d, Today: %d, Week: %d", 
+                totalCount, readCount, unreadCount, todayCount, weekCount);
 
             AdminNotificationStatsResponse stats = new AdminNotificationStatsResponse(
                 totalCount, readCount, unreadCount, todayCount, weekCount

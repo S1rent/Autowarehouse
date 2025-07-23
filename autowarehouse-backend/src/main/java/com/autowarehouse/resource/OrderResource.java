@@ -198,7 +198,10 @@ public class OrderResource {
             String changedBy = statusUpdate.get("changedBy");
             String notes = statusUpdate.get("notes");
             
-            orderService.updateOrderStatus(id, status, changedBy != null ? changedBy : "ADMIN", notes);
+            // Get current admin user who is processing the order
+            User currentAdmin = getCurrentUser();
+            
+            orderService.updateOrderStatus(id, status, changedBy != null ? changedBy : "ADMIN", notes, currentAdmin);
 
             return Response.ok(Map.of("message", "Order status updated successfully")).build();
         } catch (IllegalArgumentException e) {

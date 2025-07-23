@@ -118,7 +118,7 @@
       </div>
       <div class="text-center mt-8">
         <router-link 
-          to="/categories" 
+          to="/products" 
           class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
         >
           <span class="mr-2">Lihat Semua Kategori</span>

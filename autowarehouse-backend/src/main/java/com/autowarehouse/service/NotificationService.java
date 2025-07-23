@@ -39,34 +39,112 @@ public class NotificationService {
         }
     }
 
-    public void notifyOrderCreated(User user, Order order) {
-        createNotification(user, "Order Created", 
+    public void notifyOrderCreated(User customer, Order order) {
+        // Notify customer
+        createNotification(customer, "Order Created", 
             "Your order #" + order.id + " has been created successfully.", 
             NotificationType.ORDER_CONFIRMED, order.id, "ORDER");
+        
+        // Notify all admins to process the order
+        notifyAdminsForOrderProcessing(order, "New Order", 
+            "Please process order #" + order.id + " from " + customer.getFullName());
     }
 
-    public void notifyOrderShipped(User user, Order order) {
-        createNotification(user, "Order Shipped", 
-            "Your order #" + order.id + " has been shipped.", 
-            NotificationType.ORDER_SHIPPED, order.id, "ORDER");
+    public void notifyOrderConfirmed(User customer, Order order) {
+        notifyOrderConfirmed(customer, order, null);
     }
 
-    public void notifyOrderDelivered(User user, Order order) {
-        createNotification(user, "Order Delivered", 
-            "Your order #" + order.id + " has been delivered.", 
-            NotificationType.ORDER_DELIVERED, order.id, "ORDER");
-    }
-
-    public void notifyOrderConfirmed(User user, Order order) {
-        createNotification(user, "Order Confirmed", 
-            "Your order #" + order.id + " has been confirmed.", 
+    public void notifyOrderConfirmed(User customer, Order order, User processedByAdmin) {
+        // Notify customer
+        createNotification(customer, "Order Confirmed", 
+            "Your order #" + order.id + " has been confirmed and is being processed.", 
             NotificationType.ORDER_CONFIRMED, order.id, "ORDER");
+        
+        // Don't notify admin if they processed it themselves
+        if (processedByAdmin == null) {
+            notifyAdminsForOrderProcessing(order, "Order Confirmed", 
+                "Order #" + order.id + " has been confirmed and needs processing");
+        }
     }
 
-    public void notifyOrderCancelled(User user, Order order) {
-        createNotification(user, "Order Cancelled", 
+    public void notifyOrderShipped(User customer, Order order) {
+        notifyOrderShipped(customer, order, null);
+    }
+
+    public void notifyOrderShipped(User customer, Order order, User processedByAdmin) {
+        // Notify customer
+        createNotification(customer, "Order Shipped", 
+            "Your order #" + order.id + " has been shipped and is on the way.", 
+            NotificationType.ORDER_SHIPPED, order.id, "ORDER");
+        
+        // Don't notify admin if they processed it themselves
+        if (processedByAdmin == null) {
+            notifyAdminsForOrderProcessing(order, "Order Shipped", 
+                "Order #" + order.id + " has been shipped");
+        }
+    }
+
+    public void notifyOrderDelivered(User customer, Order order) {
+        notifyOrderDelivered(customer, order, null);
+    }
+
+    public void notifyOrderDelivered(User customer, Order order, User processedByAdmin) {
+        // Notify customer
+        createNotification(customer, "Order Delivered", 
+            "Your order #" + order.id + " has been delivered successfully.", 
+            NotificationType.ORDER_DELIVERED, order.id, "ORDER");
+        
+        // Don't notify admin if they processed it themselves
+        if (processedByAdmin == null) {
+            notifyAdminsForOrderProcessing(order, "Order Delivered", 
+                "Order #" + order.id + " has been delivered");
+        }
+    }
+
+    public void notifyOrderCancelled(User customer, Order order) {
+        notifyOrderCancelled(customer, order, null);
+    }
+
+    public void notifyOrderCancelled(User customer, Order order, User processedByAdmin) {
+        // Notify customer
+        createNotification(customer, "Order Cancelled", 
             "Your order #" + order.id + " has been cancelled.", 
             NotificationType.ORDER_CANCELLED, order.id, "ORDER");
+        
+        // Don't notify admin if they processed it themselves
+        if (processedByAdmin == null) {
+            notifyAdminsForOrderProcessing(order, "Order Cancelled", 
+                "Order #" + order.id + " has been cancelled");
+        }
+    }
+
+    public void notifyOrderStatusChanged(User customer, Order order, String fromStatus, String toStatus, User processedByAdmin) {
+        // Notify customer about status change
+        createNotification(customer, "Order Status Updated", 
+            "Your order #" + order.id + " has been moved from " + fromStatus + " to " + toStatus + ".", 
+            NotificationType.ORDER_CONFIRMED, order.id, "ORDER");
+        
+        // Don't notify admin if they processed it themselves
+        if (processedByAdmin == null) {
+            notifyAdminsForOrderProcessing(order, "Order Status Changed", 
+                "Order #" + order.id + " status changed from " + fromStatus + " to " + toStatus);
+        }
+    }
+
+    private void notifyAdminsForOrderProcessing(Order order, String title, String message) {
+        try {
+            // Get all admin users
+            List<User> adminUsers = User.find("role = 'ADMIN'").list();
+            
+            for (User admin : adminUsers) {
+                createNotification(admin, title, message, 
+                    NotificationType.ORDER_CONFIRMED, order.id, "ORDER");
+            }
+            
+            LOG.infof("Notified %d admins about order %d", adminUsers.size(), order.id);
+        } catch (Exception e) {
+            LOG.errorf("Error notifying admins about order %d: %s", order.id, e.getMessage());
+        }
     }
 
     // Customer Service specific methods
