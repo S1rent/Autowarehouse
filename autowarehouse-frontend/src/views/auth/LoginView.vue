@@ -115,7 +115,7 @@
               <span v-else>Sign In</span>
             </button>
 
-            <div class="relative my-6">
+            <!-- <div class="relative my-6">
               <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-gray-300"></div>
               </div>
@@ -131,7 +131,7 @@
             >
               <i class="fa-brands fa-google text-red-500 mr-3"></i>
               <span class="font-medium">Sign in with Google</span>
-            </button>
+            </button> -->
 
           </form>
 
