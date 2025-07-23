@@ -29,12 +29,12 @@
                   <i class="fa-solid fa-inbox"></i>
                   <span class="text-sm font-medium">All</span>
                 </div>
-                <span 
+                <!-- <span 
                   :class="activeFilter === 'all' ? 'bg-white text-blue-600' : 'bg-gray-100 text-gray-600'"
                   class="text-xs px-2 py-1 rounded-full"
                 >
                   {{ totalCount }}
-                </span>
+                </span> -->
               </button>
             </div>
           </div>
@@ -170,7 +170,7 @@
               <p class="text-gray-500">Please wait while we fetch your notifications.</p>
             </div>
 
-            <!-- Empty State -->
+            <!-- Empty StRate -->
             <div v-else-if="filteredNotifications.length === 0" class="p-12 text-center">
               <i class="fa-solid fa-bell-slash text-4xl text-gray-300 mb-4"></i>
               <h3 class="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
@@ -267,15 +267,45 @@ const loadNotifications = async () => {
       return
     }
     
+    // Load more notifications to account for deduplication
     const response = await apiService.getNotifications({
-      page: currentPage.value - 1, // API uses 0-based pagination
-      size: itemsPerPage,
+      page: 0, // Always get from first page to ensure we have enough unique notifications
+      size: 50, // Get more notifications to ensure we have enough after deduplication
       type: activeFilter.value === 'all' ? undefined : activeFilter.value,
       unreadOnly: activeFilter.value === 'customerService'
     })
     
-    notifications.value = response.notifications
-    totalCount.value = response.totalCount
+    // Deduplicate all notifications first
+    const uniqueNotifications = new Map<string, NotificationResponse>()
+    const allDeduplicated: NotificationResponse[] = []
+    
+    for (const notification of response.notifications) {
+      const key = `${notification.title}|${notification.message}`
+      
+      if (!uniqueNotifications.has(key)) {
+        uniqueNotifications.set(key, notification)
+        allDeduplicated.push(notification)
+      } else {
+        // Keep the most recent one
+        const existing = uniqueNotifications.get(key)
+        if (existing && new Date(notification.createdAt) > new Date(existing.createdAt)) {
+          // Replace with newer notification
+          const index = allDeduplicated.findIndex(n => n.id === existing.id)
+          if (index !== -1) {
+            allDeduplicated[index] = notification
+            uniqueNotifications.set(key, notification)
+          }
+        }
+      }
+    }
+    
+    // Now apply pagination to deduplicated results
+    const startIndex = (currentPage.value - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    
+    notifications.value = allDeduplicated.slice(startIndex, endIndex)
+    totalCount.value = allDeduplicated.length
+    
   } catch (err: any) {
     console.error('Error loading notifications:', err)
     

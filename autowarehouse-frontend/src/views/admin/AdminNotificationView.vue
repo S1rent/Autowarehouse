@@ -73,14 +73,14 @@
               <option value="order">Pesanan</option>
               <option value="customerService">Customer Service</option>
             </select>
-            <select 
+            <!-- <select 
               v-model="statusFilter"
               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
             >
               <option value="">Semua Status</option>
               <option value="read">Dibaca</option>
               <option value="unread">Belum Dibaca</option>
-            </select>
+            </select> -->
           </div>
           <button @click="refreshNotifications" class="text-gray-400 hover:text-gray-600">
             <i class="fa-solid fa-arrows-rotate"></i>
