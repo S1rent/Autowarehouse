@@ -9,6 +9,7 @@ import com.autowarehouse.entity.User;
 import com.autowarehouse.service.UserService;
 import com.autowarehouse.service.JwtService;
 import com.autowarehouse.service.EmailService;
+import com.autowarehouse.service.PasswordResetService;
 import com.autowarehouse.security.SecurityConfig;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -37,6 +38,9 @@ public class AuthResource {
 
     @Inject
     SecurityConfig securityConfig;
+
+    @Inject
+    PasswordResetService passwordResetService;
 
     @POST
     @Path("/register")
@@ -164,7 +168,7 @@ public class AuthResource {
     @Operation(summary = "Request password reset", description = "Send password reset email to user")
     public Response forgotPassword(@Valid PasswordResetRequest request) {
         try {
-            userService.resetPassword(request.email);
+            passwordResetService.requestPasswordReset(request);
             
             return Response.ok(new AuthResponse(
                 "If an account with that email exists, we've sent password reset instructions.",
@@ -200,7 +204,7 @@ public class AuthResource {
     @Operation(summary = "Reset password", description = "Reset user password with reset token")
     public Response resetPassword(@Valid PasswordResetConfirmRequest request) {
         try {
-            userService.confirmPasswordReset(request.token, request.newPassword);
+            passwordResetService.resetPassword(request);
             
             return Response.ok(new AuthResponse(
                 "Password reset successful. You can now login with your new password.",
@@ -221,6 +225,45 @@ public class AuthResource {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(new AuthResponse("Password reset failed. Please try again.", null, null, null, null, null, null, null, false))
+                .build();
+        }
+    }
+
+    @GET
+    @Path("/validate-reset-token")
+    @PermitAll
+    @Operation(summary = "Validate password reset token", description = "Check if password reset token is valid")
+    public Response validateResetToken(@QueryParam("token") String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new AuthResponse("Token is required", null, null, null, null, null, null, null, false))
+                .build();
+        }
+
+        try {
+            boolean isValid = passwordResetService.validateResetToken(token);
+            
+            if (isValid) {
+                return Response.ok(new AuthResponse(
+                    "Token is valid",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false
+                )).build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new AuthResponse("Invalid or expired token", null, null, null, null, null, null, null, false))
+                    .build();
+            }
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new AuthResponse("Failed to validate token", null, null, null, null, null, null, null, false))
                 .build();
         }
     }

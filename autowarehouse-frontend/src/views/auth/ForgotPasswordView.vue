@@ -46,6 +46,15 @@
               <span v-else>Send Reset Link</span>
             </button>
 
+            <!-- Error message -->
+            <div v-if="errors.general" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i>
+                <p class="text-sm text-red-700">{{ errors.general }}</p>
+              </div>
+            </div>
+
+            <!-- Success message -->
             <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-lg p-4">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -83,6 +92,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiService } from '@/services/api'
 
 const router = useRouter()
 
@@ -126,15 +136,11 @@ const handleForgotPassword = async () => {
 
   isLoading.value = true
   successMessage.value = ''
+  errors.general = ''
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Mock forgot password logic
-    console.log('Forgot password request:', {
-      email: form.email
-    })
+    // Call backend API to send reset password email
+    await apiService.forgotPassword({ email: form.email })
 
     // Show success message
     successMessage.value = 'Password reset link has been sent to your email address. Please check your inbox and follow the instructions.'
@@ -147,8 +153,14 @@ const handleForgotPassword = async () => {
       router.push('/login')
     }, 4000)
     
-  } catch (error) {
-    errors.general = 'Failed to send reset link. Please try again.'
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      errors.general = 'No account found with this email address.'
+    } else if (error.response?.status === 400) {
+      errors.general = 'Invalid email address format.'
+    } else {
+      errors.general = 'Failed to send reset link. Please try again.'
+    }
   } finally {
     isLoading.value = false
   }

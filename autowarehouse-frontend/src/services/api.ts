@@ -527,6 +527,11 @@ class ApiService {
     return response.data
   }
 
+  async validateResetToken(token: string): Promise<{ valid: boolean }> {
+    const response = await api.get<{ valid: boolean }>(`/auth/validate-reset-token?token=${token}`)
+    return response.data
+  }
+
   async resendVerification(email: string): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>(`/auth/resend-verification?email=${email}`)
     return response.data

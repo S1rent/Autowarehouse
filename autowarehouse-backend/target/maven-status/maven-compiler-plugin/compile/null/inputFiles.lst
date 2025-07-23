@@ -34,6 +34,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\websocket\CustomerServiceWebSocket.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\AdminDashboardService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\CartService.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\PasswordResetToken.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\InvoiceResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\security\JwtAuthenticationRequest.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\LoginRequest.java
@@ -60,6 +61,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\RecentTransactionsResponse.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\ReviewResponse.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\NotificationPriority.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\repository\PasswordResetTokenRepository.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\ProductResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\CartResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\TopProductResponse.java
@@ -71,6 +73,7 @@ E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\SavedItem.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\resource\WishlistResource.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\controller\ChatController.java
+E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\service\PasswordResetService.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\controller\AdminDashboardController.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\entity\SupportTicket.java
 E:\Ecomindo\Autowarehouse\autowarehouse-backend\src\main\java\com\autowarehouse\dto\SendMessageRequest.java
