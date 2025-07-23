@@ -55,27 +55,67 @@ public class AdminNotificationResource {
             long totalCount;
             
             if (type != null && !type.trim().isEmpty()) {
-                try {
-                    NotificationType notificationType = NotificationType.valueOf(type.toUpperCase());
-                    // Query notifications for admin users with specific type
+                String filterType = type.toLowerCase();
+                
+                if ("order".equals(filterType)) {
+                    // Filter for all ORDER_ types
                     notifications = Notification.find(
-                        "user.id in ?1 and type = ?2 order by createdAt desc", 
-                        adminUserIds, notificationType
+                        "user.id in ?1 and (type = ?2 or type = ?3 or type = ?4 or type = ?5 or type = ?6) order by createdAt desc", 
+                        adminUserIds, 
+                        NotificationType.ORDER_CONFIRMED,
+                        NotificationType.ORDER_SHIPPED,
+                        NotificationType.ORDER_DELIVERED,
+                        NotificationType.ORDER_CANCELLED,
+                        NotificationType.ORDER_REFUNDED
                     ).page(page, size).list();
                     
                     totalCount = Notification.count(
-                        "user.id in ?1 and type = ?2", 
-                        adminUserIds, notificationType
+                        "user.id in ?1 and (type = ?2 or type = ?3 or type = ?4 or type = ?5 or type = ?6)", 
+                        adminUserIds,
+                        NotificationType.ORDER_CONFIRMED,
+                        NotificationType.ORDER_SHIPPED,
+                        NotificationType.ORDER_DELIVERED,
+                        NotificationType.ORDER_CANCELLED,
+                        NotificationType.ORDER_REFUNDED
                     );
-                } catch (IllegalArgumentException e) {
-                    LOG.warnf("Invalid notification type: %s, fetching all admin notifications", type);
-                    // Query all notifications for admin users
+                } else if ("customerservice".equals(filterType)) {
+                    // Filter for customer service types
                     notifications = Notification.find(
-                        "user.id in ?1 order by createdAt desc", 
-                        adminUserIds
+                        "user.id in ?1 and (type = ?2 or type = ?3) order by createdAt desc", 
+                        adminUserIds,
+                        NotificationType.CUSTOMER_SERVICE_MESSAGE,
+                        NotificationType.ADMIN_CUSTOMER_SERVICE_MESSAGE
                     ).page(page, size).list();
                     
-                    totalCount = Notification.count("user.id in ?1", adminUserIds);
+                    totalCount = Notification.count(
+                        "user.id in ?1 and (type = ?2 or type = ?3)", 
+                        adminUserIds,
+                        NotificationType.CUSTOMER_SERVICE_MESSAGE,
+                        NotificationType.ADMIN_CUSTOMER_SERVICE_MESSAGE
+                    );
+                } else {
+                    // Try to match exact type
+                    try {
+                        NotificationType notificationType = NotificationType.valueOf(type.toUpperCase());
+                        notifications = Notification.find(
+                            "user.id in ?1 and type = ?2 order by createdAt desc", 
+                            adminUserIds, notificationType
+                        ).page(page, size).list();
+                        
+                        totalCount = Notification.count(
+                            "user.id in ?1 and type = ?2", 
+                            adminUserIds, notificationType
+                        );
+                    } catch (IllegalArgumentException e) {
+                        LOG.warnf("Invalid notification type: %s, fetching all admin notifications", type);
+                        // Query all notifications for admin users
+                        notifications = Notification.find(
+                            "user.id in ?1 order by createdAt desc", 
+                            adminUserIds
+                        ).page(page, size).list();
+                        
+                        totalCount = Notification.count("user.id in ?1", adminUserIds);
+                    }
                 }
             } else {
                 // Query all notifications for admin users

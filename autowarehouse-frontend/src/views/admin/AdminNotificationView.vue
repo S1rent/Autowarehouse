@@ -278,7 +278,7 @@ interface NotificationAction {
 
 interface Notification {
   id: string
-  type: 'order' | 'system' | 'promotion' | 'security'
+  type: 'order' | 'system' | 'promotion' | 'security' | 'customerService'
   title: string
   message: string
   timestamp: string
@@ -436,15 +436,45 @@ const createNotification = async (notificationData: any) => {
 }
 
 // Helper functions to map API data to frontend types
-const mapNotificationType = (apiType: string): 'order' | 'system' | 'promotion' | 'security' => {
-  const typeMap: Record<string, 'order' | 'system' | 'promotion' | 'security'> = {
-    'ORDER': 'order',
-    'SYSTEM': 'system',
-    'MARKETING': 'promotion',
-    'SECURITY': 'security',
-    'CUSTOMER_SERVICE': 'system',
-    'AUCTION': 'system'
+const mapNotificationType = (apiType: string): 'order' | 'system' | 'promotion' | 'security' | 'customerService' => {
+  // Handle specific notification types from backend
+  if (apiType.startsWith('order_')) {
+    return 'order'
   }
+  
+  if (apiType === 'customer_service_message' || apiType === 'admin_customer_service_message') {
+    return 'customerService'
+  }
+  
+  const typeMap: Record<string, 'order' | 'system' | 'promotion' | 'security' | 'customerService'> = {
+    // Order types
+    'ORDER_CONFIRMED': 'order',
+    'ORDER_SHIPPED': 'order', 
+    'ORDER_DELIVERED': 'order',
+    'ORDER_CANCELLED': 'order',
+    'ORDER_REFUNDED': 'order',
+    
+    // Customer service types
+    'CUSTOMER_SERVICE_MESSAGE': 'customerService',
+    'ADMIN_CUSTOMER_SERVICE_MESSAGE': 'customerService',
+    
+    // Other types
+    'SYSTEM_MAINTENANCE': 'system',
+    'GENERAL': 'system',
+    'PROMOTIONAL': 'promotion',
+    'AUCTION_STARTED': 'system',
+    'AUCTION_ENDING_SOON': 'system',
+    'AUCTION_WON': 'system',
+    'AUCTION_LOST': 'system',
+    'AUCTION_OUTBID': 'system',
+    'PRODUCT_BACK_IN_STOCK': 'system',
+    'PRODUCT_PRICE_DROP': 'promotion',
+    'PAYMENT_SUCCESSFUL': 'system',
+    'PAYMENT_FAILED': 'security',
+    'REVIEW_APPROVED': 'system',
+    'REVIEW_REJECTED': 'system'
+  }
+  
   return typeMap[apiType] || 'system'
 }
 
@@ -519,7 +549,8 @@ const getTypeIcon = (type: string) => {
     order: 'fa-solid fa-shopping-cart text-white',
     system: 'fa-solid fa-cog text-white',
     promotion: 'fa-solid fa-tag text-white',
-    security: 'fa-solid fa-shield-alt text-white'
+    security: 'fa-solid fa-shield-alt text-white',
+    customerService: 'fa-solid fa-comments text-white'
   }
   return icons[type as keyof typeof icons] || 'fa-solid fa-bell text-white'
 }
@@ -529,7 +560,8 @@ const getTypeIconClass = (type: string) => {
     order: 'bg-blue-600',
     system: 'bg-gray-600',
     promotion: 'bg-green-600',
-    security: 'bg-red-600'
+    security: 'bg-red-600',
+    customerService: 'bg-purple-600'
   }
   return classes[type as keyof typeof classes] || 'bg-gray-600'
 }
@@ -539,7 +571,8 @@ const getTypeClass = (type: string) => {
     order: 'bg-blue-100 text-blue-800',
     system: 'bg-gray-100 text-gray-800',
     promotion: 'bg-green-100 text-green-800',
-    security: 'bg-red-100 text-red-800'
+    security: 'bg-red-100 text-red-800',
+    customerService: 'bg-purple-100 text-purple-800'
   }
   return classes[type as keyof typeof classes] || 'bg-gray-100 text-gray-800'
 }
@@ -549,7 +582,8 @@ const getTypeText = (type: string) => {
     order: 'Pesanan',
     system: 'Sistem',
     promotion: 'Promosi',
-    security: 'Keamanan'
+    security: 'Keamanan',
+    customerService: 'Customer Service'
   }
   return texts[type as keyof typeof texts] || type
 }
@@ -637,6 +671,15 @@ const nextPage = () => {
 const goToPage = (page: number) => {
   currentPage.value = page
 }
+
+// Watch for filter changes
+import { watch } from 'vue'
+
+watch(typeFilter, async () => {
+  console.log('Type filter changed to:', typeFilter.value)
+  currentPage.value = 1 // Reset to first page when filter changes
+  await fetchNotifications()
+})
 
 onMounted(async () => {
   console.log('Admin Notifications loaded')
